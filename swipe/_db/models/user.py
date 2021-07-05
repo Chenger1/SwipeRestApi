@@ -87,11 +87,11 @@ class UserFilter(models.Model):
         ('FREE', 'Свободен')
     )
     number_of_rooms_choices = (
-        ('ONE', '1 комната'),
-        ('TWO', '2 комнаты'),
-        ('THREE', '3 комнаты'),
-        ('FOUR', '4 комнаты'),
-        ('MORE', 'Больше 4-х комнат')
+        (1, '1 комната'),
+        (2, '2 комнаты'),
+        (3, '3 комнаты'),
+        (4, '4 комнаты'),
+        (5, 'Больше 4-х комнат')
     )
     role_choices = (
         ('FLAT', 'Квартира'),  # TODO: уточнить
@@ -115,8 +115,8 @@ class UserFilter(models.Model):
     district = models.CharField(max_length=100, blank=True, null=True)
     #  district stores as regular string because we get all locations from all houses
     microdistrict = models.CharField(max_length=100, blank=True, null=True)
-    number_of_rooms = models.CharField(choices=number_of_rooms_choices, default='ONE',
-                                       max_length=5, blank=True, null=True)
+    number_of_rooms = models.IntegerField(choices=number_of_rooms_choices, default=1,
+                                          blank=True, null=True)
     min_price = models.IntegerField(blank=True, null=True)
     max_price = models.IntegerField(blank=True, null=True)
     min_square = models.FloatField(blank=True, null=True)
