@@ -46,7 +46,7 @@ water_supply_choices = (
     ('PERSONAL', 'Индивидуальная')
 )
 communal_payments_choices = (
-    ('PAYMENTS', 'Платежи')  # TODO: уточнить
+    ('PAYMENTS', 'Платежи'),  # TODO: уточнить
 )
 completion_choices = (
     ('LAW', 'ЮСТИЦИЯ'),
