@@ -43,7 +43,7 @@ class User(CustomAbstractUser):
     notifications = models.CharField(choices=notification_choices,
                                      max_length=10, default='ME')
     subscribed = models.BooleanField(default=False)
-    end_date = models.DateTimeField()
+    end_date = models.DateTimeField(blank=True, null=True)
 
 
 class Contact(models.Model):

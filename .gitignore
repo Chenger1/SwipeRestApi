@@ -128,3 +128,4 @@ dmypy.json
 .pyre/
 .idea
 swipe/swipe/config.py
+swipe/_db/migrations
