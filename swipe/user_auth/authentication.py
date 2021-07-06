@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.authentication import BaseAuthentication
 
@@ -39,5 +40,8 @@ class FirebaseAuthentication(BaseAuthentication):
         except Exception:
             raise FirebaseError()
 
-        user, created = User.objects.get_or_create(username=uid)
-        return (user, None)
+        try:
+            user = User.objects.get(uid=uid)
+            return (user, user.uid)
+        except ObjectDoesNotExist:
+            raise FirebaseError()
