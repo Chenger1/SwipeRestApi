@@ -31,11 +31,11 @@ class LoginTests(APITestCase):
             ':signInWithCustomToken?key={api_key}'
         )
 
-    def _get_test_user(self):
-        return firebase_auth.get_user_by_email(self._test_user_email)
+    def _get_test_user_by_uid(self):
+        return firebase_auth.get_user(self._test_uid)
 
     def _generate_custom_token(self):
-        user = firebase_auth.get_user_by_email(self._test_user_email)
+        user = self._get_test_user_by_uid()
         return firebase_auth.create_custom_token(user.uid)
 
     def _generate_id_token(self):
@@ -56,7 +56,7 @@ class LoginTests(APITestCase):
             HTTP_AUTHORIZATION=f'JWT {self._generate_id_token()}'
         )
         response = self.client.get(self._url)
-        expected_user = self._get_test_user()
+        expected_user = self._get_test_user_by_uid()
         self.assertTrue('user' in response.data)
         self.assertEqual(response.data['auth'], expected_user.uid)
 
