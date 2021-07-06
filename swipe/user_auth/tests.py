@@ -80,7 +80,7 @@ class LoginTests(APITestCase):
     def test_register_new_user(self):
         """ensure we can add new users for our db"""
         try:
-            user = firebase_auth.get_user_by_email('test@mail.com') # find an delete test email from firebase db
+            user = firebase_auth.get_user_by_email('test@mail.com')  # find an delete test email from firebase db
             firebase_auth.delete_user(user.uid)
         except firebase_auth.UserNotFoundError:
             pass
