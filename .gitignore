@@ -129,3 +129,4 @@ dmypy.json
 .idea
 swipe/swipe/config.py
 swipe/_db/migrations
+swipe/credentials.json
