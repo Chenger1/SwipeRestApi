@@ -26,9 +26,7 @@ class LoginTests(APITestCase):
         self._test_uid = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
         User.objects.create(email=self._test_user_email,
                             uid=self._test_uid)
-        self._id_token_endpoint = (
-            'https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key={api_key}'
-        )
+        self._id_token_endpoint = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key={api_key}'
 
     def _get_test_user_by_uid(self):
         return firebase_auth.get_user(self._test_uid)
