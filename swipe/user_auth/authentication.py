@@ -37,11 +37,9 @@ class FirebaseAuthentication(BaseAuthentication):
 
         try:
             uid = decoded_token.get('uid')
+            email = decoded_token.get('email')
         except Exception:
             raise FirebaseError()
 
-        try:
-            user = User.objects.get(uid=uid)
-            return (user, user.uid)
-        except ObjectDoesNotExist:
-            raise FirebaseError()
+        user, created = User.objects.get_or_create(uid=uid, email=email)
+        return (user, user.uid)
