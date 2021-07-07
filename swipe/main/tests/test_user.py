@@ -6,8 +6,6 @@ from _db.models.user import User
 
 from main.tests.utils import get_id_token
 
-from requests.auth import HTTPBasicAuth
-
 
 class TestUser(APITestCase):
     def setUp(self):
