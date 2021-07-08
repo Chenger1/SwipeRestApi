@@ -41,23 +41,23 @@ class User(CustomAbstractUser):
         ('AGENT', 'Агенту'),
         ('OFF', 'Отключить')
     )
+    role_choices = (
+        ('USER', 'Клиент'),
+        ('AGENT', 'Агент'),
+        ('NOTARY', 'Нотариус'),
+        ('DEPART', 'Отдел продаж')
+    )
 
     notifications = models.CharField(choices=notification_choices,
                                      max_length=10, default='ME')
     subscribed = models.BooleanField(default=False)
     end_date = models.DateTimeField(blank=True, null=True)
+    role = models.CharField(choices=role_choices, max_length=8, default='USER')
 
 
 class Contact(models.Model):
-    role_choices = (
-        ('АГЕНТ', 'Агент'),
-        ('НОТАРИУС', 'Нотариус'),
-        ('ОТДЕЛ', 'Отдел продаж')
-    )
-
     user = models.ForeignKey(User, related_name='contacts', on_delete=models.CASCADE)
     contact = models.ForeignKey(User, related_name='users', on_delete=models.CASCADE)
-    role = models.CharField(choices=role_choices, max_length=8)
     ban = models.BooleanField(default=False)
 
 
