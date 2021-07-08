@@ -13,4 +13,5 @@ app_name = 'main'
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('users/<str:uid>/subscription/', user_views.UpdateSubscription.as_view(), name='update_subscription')
 ]

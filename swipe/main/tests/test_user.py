@@ -35,7 +35,7 @@ class TestUser(APITestCase):
     def test_change_user_info_with_another_user_uid(self):
         """ ensure user can access to only his info """
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {get_id_token("A07YwJEGeKORDzveFn27fn5k8BT2")}'  # test uid
+            HTTP_AUTHORIZATION=f'JWT {get_id_token("o5UEKNcjMHPMhwdhdXv7O5eBUP53")}'  # test uid
         )
         response = self.client.patch(self._url, data={'first_name': 'User first name',
                                                       'last_name': 'User last name'})
@@ -57,6 +57,12 @@ class TestUser(APITestCase):
 
     def test_renew_subscription(self):
         url = reverse('main:update_subscription', args=[self._test_user_uid])
-        response = self.client.patch(url, data={'subscribed': True})
+        response = self.client.patch(url, data={'subscribed': '1'})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.data['subscribed'])
+
+    def test_cancel_subscription(self):
+        url = reverse('main:update_subscription', args=[self._test_user_uid])
+        response = self.client.patch(url, data={'subscribed': '0'})  # if '0' - subscription has to be canceled
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.data['subscribed'])
