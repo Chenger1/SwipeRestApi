@@ -50,3 +50,7 @@ class TestUser(APITestCase):
         url = reverse('main:user-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_right_choice_field_name(self):
+        response = self.client.get(self._url)
+        self.assertNotEqual(response.data['role'], 'USER')
