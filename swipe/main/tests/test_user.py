@@ -54,3 +54,9 @@ class TestUser(APITestCase):
     def test_right_choice_field_name(self):
         response = self.client.get(self._url)
         self.assertNotEqual(response.data['role'], 'USER')
+
+    def test_renew_subscription(self):
+        url = reverse('main:update_subscription', args=[self._test_user_uid])
+        response = self.client.patch(url, data={'subscribed': True})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data['subscribed'])
