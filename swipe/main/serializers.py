@@ -5,8 +5,8 @@ from _db.models.user import User
 
 class UserSerializer(serializers.ModelSerializer):
     uid = serializers.ReadOnlyField()
-    notifications = serializers.CharField(source='get_notifications_display')
-    role = serializers.CharField(source='get_role_display')
+    notifications = serializers.CharField(source='get_notifications_display')  # to display beauty name instead of const
+    role = serializers.CharField(source='get_role_display')  # to display beauty name instead of const
 
     class Meta:
         model = User
