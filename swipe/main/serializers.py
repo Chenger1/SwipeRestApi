@@ -4,6 +4,8 @@ from _db.models.user import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    uid = serializers.ReadOnlyField()
+
     class Meta:
         model = User
         fields = ['uid', 'first_name', 'last_name', 'email',

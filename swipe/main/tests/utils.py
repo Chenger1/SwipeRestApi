@@ -10,8 +10,8 @@ _TEST_UID = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
 _ENDPOINT = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key={api_key}'
 
 
-def get_id_token():
-    user = firebase_auth.get_user(_TEST_UID)
+def get_id_token(test_uid=_TEST_UID):
+    user = firebase_auth.get_user(test_uid)
     custom_token = firebase_auth.create_custom_token(user.uid)
     url = _ENDPOINT.format(api_key=WEB_API_KEY)
     data = {
