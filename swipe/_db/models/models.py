@@ -153,3 +153,5 @@ class Promotion(models.Model):
     color = models.CharField(choices=color_choices, max_length=10)
     price = models.IntegerField()
     paid = models.BooleanField(default=True)
+    type = models.ForeignKey(PromotionType, related_name='promotions', on_delete=models.SET_NULL,
+                             blank=True, null=True)

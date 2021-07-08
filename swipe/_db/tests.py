@@ -5,6 +5,7 @@ from django.db.utils import IntegrityError
 import tempfile
 
 from _db.models.models import *
+from _db.models.user import User
 
 
 class TestHouse(TestCase):
@@ -81,3 +82,40 @@ class TestHouse(TestCase):
     def test_standpipe_raising_error(self):
         with self.assertRaises(IntegrityError):
             Standpipe.objects.create(name='1')
+
+
+class TestPost(TestCase):
+    def setUp(self):
+        self.house = House.objects.create(name='test_house', address='address', tech='MONO1',
+                             payment_options='PAYMENT', role='FLAT')
+        self.user = User.objects.create(email='example@mail.com')
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_create_post(self):
+        inst = Post.objects.create(address='1', foundation_doc='OWNER',
+                                   number_of_rooms=1, plan='FREE', square=12,
+                                   payment_options='PAYMENT', price=12,
+                                   house=self.house, user=self.user)
+        self.assertIn(inst, Post.objects.all())
+        self.assertEqual(inst.address, '1')
+
+        img = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
+        image = PostImage.objects.create(name='1', image=img, post=inst)
+        self.assertIn(image, inst.images.all())
+
+        complaint = Complaint.objects.create(post=inst, user=self.user, type='PRICE')
+        self.assertIn(complaint, inst.complaints.all())
+
+    def test_creating_promotion_type(self):
+        inst = PromotionType.objects.create(name='1', price=1, efficiency=10)
+        self.assertEqual(inst.price, 1)
+
+    def test_create_promotion(self):
+        post = Post.objects.create(address='1', foundation_doc='OWNER',
+                                   number_of_rooms=1, plan='FREE', square=12,
+                                   payment_options='PAYMENT', price=12,
+                                   house=self.house, user=self.user)
+        promotion_type = PromotionType.objects.create(name='first', price=1, efficiency=10)
+        promo = Promotion.objects.create(post=post, type=promotion_type,
+                                         phrase='GIFT', color='PINK', price=10)
+        self.assertIn(promo, post.promotions.all())
