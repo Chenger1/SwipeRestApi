@@ -9,7 +9,7 @@ from _db.models.choices import *
 class House(models.Model):
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=150)
-    image = models.ImageField(upload_to='media')
+    image = models.ImageField(upload_to='media', blank=True, null=True)
     status = models.CharField(choices=status_choices, default='FLAT', max_length=7)
     type = models.CharField(choices=type_choices, default='MANE', max_length=5)
     house_class = models.CharField(choices=house_class_choices, default='COMMON', max_length=6)
