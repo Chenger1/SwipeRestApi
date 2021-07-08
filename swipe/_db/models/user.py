@@ -7,7 +7,7 @@ from _db.models.manager import UserManager
 
 
 class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
-    uid = models.CharField(max_length=50)
+    uid = models.CharField(max_length=50, unique=True)
 
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     last_name = models.CharField(_('last_name'), max_length=150, blank=True)
@@ -27,7 +27,7 @@ class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     EMAIL_FIELD = 'email'
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'uid'
     REQUIRED_FIELDS = ['phone_number', ]
 
     def full_name(self):
