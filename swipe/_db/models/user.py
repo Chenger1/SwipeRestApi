@@ -51,7 +51,7 @@ class User(CustomAbstractUser):
     notifications = models.CharField(choices=notification_choices,
                                      max_length=10, default='ME')
     subscribed = models.BooleanField(default=False)
-    end_date = models.DateTimeField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
     role = models.CharField(choices=role_choices, max_length=8, default='USER')
 
 
