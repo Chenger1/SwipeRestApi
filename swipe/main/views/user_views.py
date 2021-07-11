@@ -122,7 +122,7 @@ class MessageApi(APIView):
 class AttachmentApi(APIView):
     permission_classes = (IsAuthenticated, )
 
-    def post(self, request, pk, format=None):
+    def post(self, request, format=None):
         serializer = serializers.AttachmentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

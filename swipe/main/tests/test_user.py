@@ -155,7 +155,7 @@ class TestUser(APITestCase):
                                                'text': 'Message with image'})
         self.assertEqual(response.status_code, 200)
 
-        url_attach = reverse('main:attachments', args=[response.data['pk']])
+        url_attach = reverse('main:attachments')
         response = self.client.post(url_attach, data={'message': response.data['pk'],
                                                       'file': file})
         self.assertEqual(response.status_code, 200)
