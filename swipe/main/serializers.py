@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.user import User
+from _db.models.user import User, Contact
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,3 +12,20 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['uid', 'first_name', 'last_name', 'email',
                   'phone_number', 'notifications', 'subscribed', 'end_date', 'role']
+
+
+class UserContactSerializer(serializers.ModelSerializer):
+    uid = serializers.ReadOnlyField()
+    role = serializers.CharField(source='get_role_display')
+
+    class Meta:
+        model = User
+        fields = ['uid', 'first_name', 'last_name', 'email', 'phone_number', 'role']
+
+
+class ContactSerializer(serializers.ModelSerializer):
+    contact = UserContactSerializer(read_only=True)
+
+    class Meta:
+        model = Contact
+        fields = ['pk', 'contact']

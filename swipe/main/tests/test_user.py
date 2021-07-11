@@ -83,6 +83,16 @@ class TestUser(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('contact_obj_id', response.data)
 
+        url_get = reverse('main:get_user_contacts', args=['USER'])  # test getting contacts by role
+        response_get = self.client.get(url_get)
+        self.assertEqual(response_get.status_code, 200)
+        self.assertGreater(len(response_get.data['contacts']), 0)
+
+        url_get_without_role = reverse('main:get_user_contacts', args=['ALL'])
+        response_get_without_role = self.client.get(url_get_without_role)
+        self.assertEqual(response_get_without_role.status_code, 200)
+        self.assertGreater(len(response_get_without_role.data['contacts']), 0)
+
         url_ban = reverse('main:change_banned_status', args=[response.data['contact_obj_id']])
         response_ban = self.client.patch(url_ban)
         self.assertEqual(response_ban.status_code, 200)

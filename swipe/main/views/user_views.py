@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from main.serializers import UserSerializer
+from main.serializers import UserSerializer, ContactSerializer
 from main.permissions import IsProfileOwner, IsOwner
 
 from _db.models.user import Contact
@@ -49,6 +49,13 @@ class UpdateSubscription(APIView):
 
 class ContactAPI(APIView):
     permission_classes = (IsAuthenticated, IsOwner)
+
+    def get(self, request, role=None, format=None):
+        contacts = Contact.objects.filter(user=request.user)
+        if role != 'ALL':
+            contacts = contacts.filter(contact__role=role)
+        serializer = ContactSerializer(contacts, many=True)
+        return Response({'contacts': serializer.data})
 
     def post(self, request, uid, format=None):
         user = get_object_or_404(User, uid=uid)
