@@ -13,6 +13,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['uid', 'first_name', 'last_name', 'email',
                   'phone_number', 'notifications', 'subscribed', 'end_date', 'role']
 
+    def update(self, instance, validated_data):
+        updated_instance = super().update(instance, validated_data)
+        if validated_data.get('get_notifications_display'):
+            updated_instance.notifications = validated_data.get('get_notifications_display')
+        updated_instance.save()
+        return updated_instance
+
 
 class UserContactSerializer(serializers.ModelSerializer):
     uid = serializers.ReadOnlyField()

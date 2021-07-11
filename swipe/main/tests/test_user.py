@@ -42,6 +42,13 @@ class TestUser(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['first_name'], 'User first name')
 
+    def test_switch_notifications_to_agent(self):
+        """ test that we can change notifications """
+        response = self.client.patch(self._url, data={'notifications': 'AGENT'})
+        user = User.objects.get(uid=self._test_user_uid)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(user.notifications, 'AGENT')
+
     def test_change_user_info_with_another_user_uid(self):
         self.client.credentials(
             HTTP_AUTHORIZATION=f'JWT {get_id_token("o5UEKNcjMHPMhwdhdXv7O5eBUP53")}'  # test uid
