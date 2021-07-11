@@ -4,15 +4,25 @@ from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token
 
+from _db.models.user import Contact, User
+
 
 class TestUser(APITestCase):
     def setUp(self):
         self._test_user_uid = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
+        self._test_user_uid_two = '6vO5mBRld2evvoEzDzZoMquRyIn1'
         self._url = reverse('main:user-detail', args=[self._test_user_uid])
         self._token = get_id_token()
         self.client.credentials(
             HTTP_AUTHORIZATION=f'JWT {self._token}'
         )
+
+    @classmethod
+    def setUpTestData(cls):
+        cls._test_user_uid = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
+        cls._test_user_uid_two = '6vO5mBRld2evvoEzDzZoMquRyIn1'
+        User.objects.create(uid=cls._test_user_uid, email='user@example.com')
+        User.objects.create(uid=cls._test_user_uid_two, email='test@mail.com')
 
     def test_get_user_info(self):
         """ensure we can get user info"""
@@ -33,7 +43,6 @@ class TestUser(APITestCase):
         self.assertEqual(response.data['first_name'], 'User first name')
 
     def test_change_user_info_with_another_user_uid(self):
-        """ ensure user can access to only his info """
         self.client.credentials(
             HTTP_AUTHORIZATION=f'JWT {get_id_token("o5UEKNcjMHPMhwdhdXv7O5eBUP53")}'  # test uid
         )
@@ -66,3 +75,17 @@ class TestUser(APITestCase):
         response = self.client.patch(url, data={'subscribed': '0'})  # if '0' - subscription has to be canceled
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.data['subscribed'])
+
+    def test_contacts(self):
+        """ensure we can add contact and delete it"""
+        url = reverse('main:add_contact', args=[self._test_user_uid])
+        response = self.client.post(url, data={'contact_id': '6vO5mBRld2evvoEzDzZoMquRyIn1'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('contact_obj_id', response.data)
+
+        url_delete = reverse('main:delete_contact', args=[response.data['contact_obj_id']])
+        response_delete = self.client.delete(url_delete, data={'contact_obj_id': response.data['contact_obj_id']})
+        self.assertEqual(response_delete.status_code, 200)
+
+        contacts = Contact.objects.filter(user__uid=self._test_user_uid)
+        self.assertEqual(contacts.count(), 0)
