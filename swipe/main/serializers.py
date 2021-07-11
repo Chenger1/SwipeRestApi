@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.user import User, Contact
+from _db.models.user import User, Contact, Message
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -36,3 +36,18 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = ['pk', 'contact']
+
+
+class WritableMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ('pk', 'sender', 'receiver', 'text', 'created')
+
+
+class ReadableMessageSerializer(serializers.ModelSerializer):
+    sender = UserContactSerializer(read_only=True)
+    receiver = UserContactSerializer(read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ('pk', 'sender', 'receiver', 'text', 'created')

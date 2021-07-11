@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     '_db',
     'user_auth',
     'main',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

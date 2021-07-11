@@ -7,10 +7,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from main.serializers import UserSerializer, ContactSerializer
+from main.serializers import UserSerializer, ContactSerializer, WritableMessageSerializer, ReadableMessageSerializer
 from main.permissions import IsProfileOwner, IsOwner
 
-from _db.models.user import Contact
+from _db.models.user import Contact, Message
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -80,4 +80,39 @@ class ContactAPI(APIView):
 
     def delete(self, request, pk, format=None):
         get_object_or_404(Contact, pk=pk).delete()
+        return Response(status=status.HTTP_200_OK)
+
+
+class MessageApi(APIView):
+    permission_classes = (IsAuthenticated, IsOwner)
+
+    def get(self, request, uid=None, format=None):
+        messages = Message.objects.filter(sender=request.user) | Message.objects.filter(receiver=request.user)
+        messages = messages.order_by()
+        serializer = ReadableMessageSerializer(messages, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, uid=None, format=None):
+        data = {
+            'sender': get_object_or_404(User, uid=request.data['sender']),
+            'receiver': get_object_or_404(User, uid=request.data['receiver']),
+            'text': request.data['text']
+        }
+        serializer = WritableMessageSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk, format=None):
+        message = get_object_or_404(Message, pk=pk)
+        serializer = WritableMessageSerializer(instance=message, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        message = get_object_or_404(Message, pk=pk)
+        message.delete()
         return Response(status=status.HTTP_200_OK)

@@ -1,8 +1,4 @@
-from django.shortcuts import get_object_or_404
-
 from rest_framework.permissions import BasePermission
-
-from _db.models.user import User
 
 
 class IsProfileOwner(BasePermission):
@@ -16,4 +12,6 @@ class IsProfileOwner(BasePermission):
 
 class IsOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
+        if hasattr(obj, 'sender') and hasattr(obj, 'receiver'):
+            return bool(obj.sender == request.user or obj.receiver == request.user)
         return obj.user.uid == request.user.uid

@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token
 
-from _db.models.user import Contact, User
+from _db.models.user import Contact, User, Message
 
 
 class TestUser(APITestCase):
@@ -110,3 +110,25 @@ class TestUser(APITestCase):
 
         contacts = Contact.objects.filter(user__uid=self._test_user_uid)
         self.assertEqual(contacts.count(), 0)
+
+    def test_add_message(self):
+        """Ensure we can add message, edit it, get it and delete it"""
+        url = reverse('main:user_messages', args=[self._test_user_uid])
+        response = self.client.post(url, data={'sender': self._test_user_uid,
+                                               'receiver': self._test_user_uid_two,
+                                               'text': 'First message'})
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        url_edit = reverse('main:edit_message', args=[response.data[0]['pk']])
+        response = self.client.patch(url_edit, data={'text': 'Edited text'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['text'], 'Edited text')
+
+        response = self.client.delete(url_edit)
+        self.assertEqual(response.status_code, 200)
+
+        messages = Message.objects.all()
+        self.assertEqual(messages.count(), 0)
