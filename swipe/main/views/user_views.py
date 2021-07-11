@@ -36,7 +36,7 @@ class UserViewSet(ModelViewSet):
         :param request: query_params['role']
         :param args:
         :param kwargs:
-        :return: queryset
+        :return: queryset -> serialize -> json
         """
         queryset = self.filter_queryset(self.get_queryset())
         if request.query_params.get('role'):
@@ -57,7 +57,7 @@ class UpdateSubscription(APIView):
     def patch(self, request, uid, format=None):
         user = get_object_or_404(User, uid=uid)
         if bool(int(request.data['subscribed'])):
-            current_date = datetime.date.today()
+            current_date = datetime.date.today()  # set new subscription end date in next month
             user.end_date = current_date + relativedelta(month=current_date.month+1)
             user.subscribed = True
         else:
@@ -72,6 +72,14 @@ class ContactAPI(APIView):
     permission_classes = (IsAuthenticated, IsOwner)
 
     def get(self, request, role=None, format=None):
+        """
+        If role is 'ALL' - return all contacts.
+        Otherwise, filter queryset by role.
+        :param request:
+        :param role: string: 'USER', 'AGENT', 'NOTARY', 'DEPART', 'ALL'
+        :param format:
+        :return: queryset -> serialize -> json
+        """
         contacts = Contact.objects.filter(user=request.user)
         if role != 'ALL':
             contacts = contacts.filter(contact__role=role)

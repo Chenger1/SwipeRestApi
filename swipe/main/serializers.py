@@ -43,12 +43,21 @@ class AttachmentSerializer(serializers.ModelSerializer):
 
 
 class WritableMessageSerializer(serializers.ModelSerializer):
+    """
+    This serializer for writing purposes.
+    'sender' and 'receiver' look like integer - 'pk'
+    """
     class Meta:
         model = Message
         fields = ('pk', 'sender', 'receiver', 'text', 'created')
 
 
 class ReadableMessageSerializer(serializers.ModelSerializer):
+    """
+    This serializer only to for reading purposes.
+    'sender' and 'receiver' look like nested dictionary.
+    """
+
     sender = UserContactSerializer(read_only=True)
     receiver = UserContactSerializer(read_only=True)
     attach = AttachmentSerializer(read_only=True, many=True)

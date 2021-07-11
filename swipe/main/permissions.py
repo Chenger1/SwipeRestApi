@@ -13,5 +13,6 @@ class IsProfileOwner(BasePermission):
 class IsOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         if hasattr(obj, 'sender') and hasattr(obj, 'receiver'):
+            #  This condition checks permissions to get list of messages
             return bool(obj.sender == request.user or obj.receiver == request.user)
         return obj.user.uid == request.user.uid
