@@ -53,6 +53,7 @@ class User(CustomAbstractUser):
     subscribed = models.BooleanField(default=False)
     end_date = models.DateField(blank=True, null=True)
     role = models.CharField(choices=role_choices, max_length=8, default='USER')
+    photo = models.ImageField(upload_to='media/users/', blank=True, null=True)
 
 
 class Contact(models.Model):

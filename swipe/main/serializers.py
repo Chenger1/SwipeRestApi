@@ -11,14 +11,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['uid', 'first_name', 'last_name', 'email',
-                  'phone_number', 'notifications', 'subscribed', 'end_date', 'role']
+                  'phone_number', 'notifications', 'subscribed', 'end_date', 'role', 'photo']
 
     def update(self, instance, validated_data):
-        updated_instance = super().update(instance, validated_data)
         if validated_data.get('get_notifications_display'):
-            updated_instance.notifications = validated_data.get('get_notifications_display')
-        updated_instance.save()
-        return updated_instance
+            instance.notifications = validated_data.get('get_notifications_display')
+        return super().update(instance, validated_data)
 
 
 class UserContactSerializer(serializers.ModelSerializer):
@@ -27,7 +25,7 @@ class UserContactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['uid', 'first_name', 'last_name', 'email', 'phone_number', 'role']
+        fields = ['uid', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'photo']
 
 
 class ContactSerializer(serializers.ModelSerializer):

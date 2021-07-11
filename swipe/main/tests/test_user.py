@@ -9,6 +9,15 @@ from main.tests.utils import get_id_token
 from _db.models.user import Contact, User, Message
 
 import tempfile
+from PIL import Image
+
+
+def get_temporary_image(temp_file):
+    size = (200, 200)
+    color = (255, 0, 0, 0)
+    image = Image.new('RGBA', size, color)
+    image.save(temp_file, 'png')
+    return temp_file
 
 
 class TestUser(APITestCase):
@@ -45,6 +54,14 @@ class TestUser(APITestCase):
                                                       'uid': self._test_user_uid})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['first_name'], 'User first name')
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_change_user_info_with_photo(self):
+        """Ensure we can set profile photo"""
+        file = get_temporary_image(tempfile.NamedTemporaryFile())
+        response = self.client.patch(self._url, data={'first_name': 'User with photo',
+                                                      'photo': file.read()})
+        self.assertEqual(response.status_code, 200)
 
     def test_switch_notifications_to_agent(self):
         """ test that we can change notifications """
