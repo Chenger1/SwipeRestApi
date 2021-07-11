@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from main.serializers import UserSerializer, ContactSerializer, WritableMessageSerializer, ReadableMessageSerializer
+from main import serializers
 from main.permissions import IsProfileOwner, IsOwner
 
 from _db.models.user import Contact, Message
@@ -22,7 +22,7 @@ User = get_user_model()
 class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsProfileOwner)
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = serializers.UserSerializer
 
     def get_object(self):
         obj = get_object_or_404(User, uid=self.kwargs.get('pk'))
@@ -54,7 +54,7 @@ class ContactAPI(APIView):
         contacts = Contact.objects.filter(user=request.user)
         if role != 'ALL':
             contacts = contacts.filter(contact__role=role)
-        serializer = ContactSerializer(contacts, many=True)
+        serializer = serializers.ContactSerializer(contacts, many=True)
         return Response({'contacts': serializer.data})
 
     def post(self, request, uid, format=None):
@@ -89,7 +89,7 @@ class MessageApi(APIView):
     def get(self, request, uid=None, format=None):
         messages = Message.objects.filter(sender=request.user) | Message.objects.filter(receiver=request.user)
         messages = messages.order_by()
-        serializer = ReadableMessageSerializer(messages, many=True)
+        serializer = serializers.ReadableMessageSerializer(messages, many=True)
         return Response(serializer.data)
 
     def post(self, request, uid=None, format=None):
@@ -98,7 +98,7 @@ class MessageApi(APIView):
             'receiver': get_object_or_404(User, uid=request.data['receiver']),
             'text': request.data['text']
         }
-        serializer = WritableMessageSerializer(data=data)
+        serializer = serializers.WritableMessageSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -106,7 +106,7 @@ class MessageApi(APIView):
 
     def patch(self, request, pk, format=None):
         message = get_object_or_404(Message, pk=pk)
-        serializer = WritableMessageSerializer(instance=message, data=request.data)
+        serializer = serializers.WritableMessageSerializer(instance=message, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
