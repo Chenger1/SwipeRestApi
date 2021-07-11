@@ -83,6 +83,10 @@ class TestUser(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('contact_obj_id', response.data)
 
+        url_ban = reverse('main:change_banned_status', args=[response.data['contact_obj_id']])
+        response_ban = self.client.patch(url_ban)
+        self.assertEqual(response_ban.status_code, 200)
+
         url_delete = reverse('main:delete_contact', args=[response.data['contact_obj_id']])
         response_delete = self.client.delete(url_delete, data={'contact_obj_id': response.data['contact_obj_id']})
         self.assertEqual(response_delete.status_code, 200)

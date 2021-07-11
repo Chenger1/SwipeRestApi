@@ -57,6 +57,20 @@ class ContactAPI(APIView):
         return Response({'contact_obj_id': contact_obj.pk,
                          'contact_user_id': contact.uid})
 
+    def patch(self, request, pk, format=None):
+        """
+        Uses patch for change contact banned status.
+        If it is True - sets False. Otherwise - True.
+        :param request:
+        :param pk:
+        :param format:
+        :return: response
+        """
+        contact = get_object_or_404(Contact, pk=pk)
+        contact.ban = not contact.ban  # reverse current banned status
+        contact.save()
+        return Response(status=status.HTTP_200_OK)
+
     def delete(self, request, pk, format=None):
         get_object_or_404(Contact, pk=pk).delete()
         return Response(status=status.HTTP_200_OK)
