@@ -88,6 +88,13 @@ class TestUser(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+    def test_user_list_with_filter(self):
+        """Ensure we can filter users by role"""
+        User.objects.create(uid=123, email='temp@mail.com', role='NOTARY')
+        url = reverse('main:user-list')
+        response = self.client.get(url, data={'role': 'NOTARY'})
+        self.assertEqual(response.status_code, 200)
+
     def test_right_choice_field_name(self):
         response = self.client.get(self._url)
         self.assertNotEqual(response.data['role'], 'USER')

@@ -29,6 +29,27 @@ class UserViewSet(ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
+    def list(self, request, *args, **kwargs):
+        """
+        Use 'GET' without params to get all users in system.
+        Set query param 'role' in request 'GET' to filter users by role.
+        :param request: query_params['role']
+        :param args:
+        :param kwargs:
+        :return: queryset
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        if request.query_params.get('role'):
+            queryset = queryset.filter(role=request.query_params.get('role'))
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class UpdateSubscription(APIView):
     permission_classes = (IsAuthenticated, IsProfileOwner)
