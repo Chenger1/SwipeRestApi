@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'user_auth',
     'main',
     'django_extensions',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

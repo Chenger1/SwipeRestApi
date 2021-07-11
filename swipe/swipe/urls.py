@@ -15,8 +15,30 @@ Including another URLconf
 """
 from django.urls import path, include
 
+from rest_framework import permissions
+from rest_framework import authentication
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title='SwipeApi',
+        default_version='v1',
+        description='An api for mobile app',
+        terms_of_service='"https://www.google.com/policies/terms/',
+        contact=openapi.Contact(email='exs2199@gmail.com'),
+        license=openapi.License(name='BSD License'),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny, ),
+    authentication_classes=(authentication.SessionAuthentication, )
+)
+
+
 urlpatterns = [
     #path('admin/', admin.site.urls),
     path('auth/', include('user_auth.urls')),
-    path('main/', include('main.urls', namespace='main'))
+    path('main/', include('main.urls', namespace='main')),
+    path('swagger/', schema_view.with_ui(
+        'swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
