@@ -72,6 +72,7 @@ class Message(models.Model):
 
 class Attachment(models.Model):
     message = models.ForeignKey(Message, related_name='attach', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='media/')
 
 
 class UserFilter(models.Model):
