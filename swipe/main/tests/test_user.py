@@ -48,7 +48,7 @@ class TestUser(APITestCase):
         )
         response = self.client.patch(self._url, data={'first_name': 'User first name',
                                                       'last_name': 'User last name'})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
     def test_uid_is_read_only_field(self):
         """ ensure we cant change uid. Because this is key field with firebase integration """

@@ -25,7 +25,9 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
 
     def get_object(self):
-        return get_object_or_404(User, uid=self.kwargs.get('pk'))
+        obj = get_object_or_404(User, uid=self.kwargs.get('pk'))
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
 class UpdateSubscription(APIView):
