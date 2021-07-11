@@ -84,7 +84,7 @@ class UserFilter(models.Model):
         ('ALL', 'Все'),
     )
     status_choices = (
-        ('LEASED', 'Сдан'),  # TODO: уточнить
+        ('LEASED', 'Сдан'),
         ('SOLD', 'Продан'),
         ('FREE', 'Свободен')
     )
@@ -96,7 +96,7 @@ class UserFilter(models.Model):
         (5, 'Больше 4-х комнат')
     )
     role_choices = (
-        ('FLAT', 'Квартира'),  # TODO: уточнить
+        ('FLAT', 'Квартира'),
         ('OFFICE', 'Офис')
     )
     payment_conditions_choices = (
