@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.user import User, Contact, Message
+from _db.models.user import User, Contact, Message, Attachment
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -38,6 +38,12 @@ class ContactSerializer(serializers.ModelSerializer):
         fields = ['pk', 'contact']
 
 
+class AttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attachment
+        fields = ('pk', 'message', 'file')
+
+
 class WritableMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
@@ -47,7 +53,8 @@ class WritableMessageSerializer(serializers.ModelSerializer):
 class ReadableMessageSerializer(serializers.ModelSerializer):
     sender = UserContactSerializer(read_only=True)
     receiver = UserContactSerializer(read_only=True)
+    attach = AttachmentSerializer(read_only=True, many=True)
 
     class Meta:
         model = Message
-        fields = ('pk', 'sender', 'receiver', 'text', 'created')
+        fields = ('pk', 'sender', 'receiver', 'text', 'created', 'attach')

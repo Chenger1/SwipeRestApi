@@ -1,10 +1,14 @@
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 
 from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token
 
 from _db.models.user import Contact, User, Message
+
+import tempfile
 
 
 class TestUser(APITestCase):
@@ -113,6 +117,10 @@ class TestUser(APITestCase):
 
     def test_add_message(self):
         """Ensure we can add message, edit it, get it and delete it"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'JWT {self._token}'
+        )
+
         url = reverse('main:user_messages', args=[self._test_user_uid])
         response = self.client.post(url, data={'sender': self._test_user_uid,
                                                'receiver': self._test_user_uid_two,
@@ -132,3 +140,23 @@ class TestUser(APITestCase):
 
         messages = Message.objects.all()
         self.assertEqual(messages.count(), 0)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_add_message_with_attachment(self):
+        """Ensure we can create message with media file"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'JWT {self._token}'
+        )
+
+        url = reverse('main:user_messages', args=[self._test_user_uid])
+        file = SimpleUploadedFile('photo.jpeg', b'file_content', content_type='image/jpeg')
+        response = self.client.post(url, data={'sender': self._test_user_uid,
+                                               'receiver': self._test_user_uid_two,
+                                               'text': 'Message with image'})
+        self.assertEqual(response.status_code, 200)
+
+        url_attach = reverse('main:attachments', args=[response.data['pk']])
+        response = self.client.post(url_attach, data={'message': response.data['pk'],
+                                                      'file': file})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(int(response.data['message']), Message.objects.first().attach.first().message.pk)
