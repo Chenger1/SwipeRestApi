@@ -71,7 +71,6 @@ class Message(models.Model):
 
 
 class Attachment(models.Model):
-    name = models.CharField(max_length=50)
     created = models.DateTimeField(auto_now_add=True)
     message = models.ForeignKey(Message, related_name='attach', on_delete=models.CASCADE)
 
