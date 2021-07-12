@@ -4,6 +4,8 @@ from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token
 
+from _db.models.models import House, NewsItem
+
 
 class TestHouse(APITestCase):
     def setUp(self):
@@ -72,3 +74,17 @@ class TestHouse(APITestCase):
         response_floor = self.client.post(url_floor, data={'name': 'One',
                                                            'section': response_section.data['id']})
         self.assertEqual(response_floor.status_code, 201)
+
+    def test_news_item(self):
+        url = reverse('main:houses-list')
+        response = self.client.post(url, data={'name': 'House', 'address': 'Street',
+                                               'tech': 'MONO1', 'territory': 'OPEN',
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+        self.assertEqual(response.status_code, 201)
+
+        url_news = reverse('main:news-list')
+        response_news = self.client.post(url_news, data={'title': 'News Title', 'text': 'Text',
+                                                    'house': response.data['id']})
+        self.assertEqual(response.status_code, 201)
+        self.assertIn(NewsItem.objects.get(pk=response_news.data['id']),
+                      House.objects.get(id=response.data['id']).news.all())

@@ -27,5 +27,7 @@ class IsOwner(BasePermission):
             return obj.user.uid == request.user.uid
         elif hasattr(obj, 'sales_department'):
             return obj.sales_department.uid == request.user.uid
+        elif obj.__name__ == 'NewsItem':
+            return obj.house.sales_department.uid == request.user.uid
         else:
             return False

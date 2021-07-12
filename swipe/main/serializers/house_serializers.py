@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.models import House, Building, Section, Floor
+from _db.models.models import House, Building, Section, Floor, NewsItem
 
 
 class HouseSerializer(serializers.ModelSerializer):
@@ -24,4 +24,12 @@ class SectionSerializer(serializers.ModelSerializer):
 class FloorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Floor
+        fields = '__all__'
+
+
+class NewsItemSerializer(serializers.ModelSerializer):
+    created = serializers.ReadOnlyField()
+
+    class Meta:
+        model = NewsItem
         fields = '__all__'

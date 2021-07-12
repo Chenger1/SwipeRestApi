@@ -11,8 +11,9 @@ router.register('users/notary/admin-access/', user_views.NotaryUsersApi, basenam
 
 router.register('houses/', house_views.HouseViewSet, basename='houses')
 router.register('houses/buildings/', house_views.BuildingViewSet, basename='buildings')
-router.register('houses/sections/', house_views.SectionViewSet, basename='sections'),
+router.register('houses/sections/', house_views.SectionViewSet, basename='sections')
 router.register('houses/floors/', house_views.FloorViewSet, basename='floors')
+router.register('houses/news/', house_views.NewsItemViewSet, basename='news')
 
 
 app_name = 'main'
