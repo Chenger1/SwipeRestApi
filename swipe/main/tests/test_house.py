@@ -52,6 +52,11 @@ class TestHouse(APITestCase):
                                                'payment_options': 'MORTGAGE', 'role': 'FLAT'})
         self.assertEqual(response.status_code, 201)
 
+        url_edit = reverse('main:houses-detail', args=[response.data['id']])
+        response_edit = self.client.patch(url_edit, data={'name': 'Edited House'})
+        self.assertEqual(response_edit.status_code, 200)
+        self.assertEqual(response_edit.data['name'], 'Edited House')
+
         url_building = reverse('main:buildings-list')
         response_building = self.client.post(url_building, data={'name': 'One',
                                                                  'house': response.data['id']})
