@@ -37,7 +37,8 @@ class House(models.Model):
     high_speed_elevator = models.BooleanField(default=False)
     security = models.BooleanField(default=False)
 
-    sales_department = models.ForeignKey(User, related_name='managed_houses', on_delete=models.CASCADE)
+    sales_department = models.ForeignKey(User, related_name='managed_houses', on_delete=models.CASCADE,
+                                         blank=True)
 
 
 class NewsItem(models.Model):
