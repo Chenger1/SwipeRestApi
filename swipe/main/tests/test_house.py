@@ -84,7 +84,7 @@ class TestHouse(APITestCase):
 
         url_news = reverse('main:news-list')
         response_news = self.client.post(url_news, data={'title': 'News Title', 'text': 'Text',
-                                                    'house': response.data['id']})
+                                                         'house': response.data['id']})
         self.assertEqual(response.status_code, 201)
         self.assertIn(NewsItem.objects.get(pk=response_news.data['id']),
                       House.objects.get(id=response.data['id']).news.all())
