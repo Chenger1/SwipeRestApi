@@ -31,7 +31,7 @@ class SectionViewSet(ModelViewSet):
     serializer_class = house_serializers.SectionSerializer
 
 
-class FloorSerializer(ModelViewSet):
+class FloorViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
     queryset = Floor.objects.all()
     serializer_class = house_serializers.FloorSerializer
