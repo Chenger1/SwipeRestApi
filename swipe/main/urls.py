@@ -14,6 +14,7 @@ app_name = 'main'
 urlpatterns = [
     path('', include(router.urls)),
     path('users/<str:uid>/subscription/', user_views.UpdateSubscription.as_view(), name='update_subscription'),
+    path('users/<str:uid>/change_ban_status/', user_views.ChangeBanStatus.as_view(), name='change_ban_status'),
 
     # CONTACT
     path('users/<str:uid>/contact/', user_views.ContactAPI.as_view(), name='add_contact'),

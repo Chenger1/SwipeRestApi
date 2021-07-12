@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -28,6 +28,9 @@ class UserViewSet(ModelViewSet):
         obj = get_object_or_404(User, uid=self.kwargs.get('pk'))
         self.check_object_permissions(self.request, obj)
         return obj
+
+    def get_queryset(self):
+        return User.objects.filter(ban=False)  # banned users not passed
 
     def list(self, request, *args, **kwargs):
         """
@@ -66,6 +69,24 @@ class UpdateSubscription(APIView):
         user.save()
         return Response({'uid': user.uid, 'subscribed': user.subscribed,
                          'end_date': user.end_date.strftime('%Y-%m-%d')})
+
+
+class ChangeBanStatus(APIView):
+    permission_classes = (IsAuthenticated, IsAdminUser)
+
+    def patch(self, request, uid, format=None):
+        """
+        Change user ban status to opposite
+        :param request:
+        :param uid:
+        :param format:
+        :return: Response
+        """
+        user = get_object_or_404(User, uid=uid)
+        user.ban = not user.ban
+        user.save()
+        return Response({'uid': user.uid,
+                         'ban': user.ban}, status=status.HTTP_200_OK)
 
 
 class ContactAPI(APIView):

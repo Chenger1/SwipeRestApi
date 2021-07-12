@@ -184,3 +184,20 @@ class TestUser(APITestCase):
                                                       'file': file})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(int(response.data['message']), Message.objects.first().attach.first().message.pk)
+
+    def test_changing_ban_status(self):
+        """Ensure we can change user ban status"""
+        admin_user = User.objects.get(uid=self._test_user_uid)
+        admin_user.is_staff = True
+        admin_user.save()
+        banned_user = User.objects.get(uid=self._test_user_uid_two)
+        url = reverse('main:change_ban_status', args=[self._test_user_uid_two])
+        response = self.client.patch(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(banned_user, User.objects.filter(ban=False))
+
+    def test_change_ban_status_by_not_admin(self):
+        """Ensure non admin cant change users ban status"""
+        url = reverse('main:change_ban_status', args=[self._test_user_uid])
+        response = self.client.patch(url)
+        self.assertEqual(response.status_code, 403)
