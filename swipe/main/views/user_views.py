@@ -177,3 +177,15 @@ class AttachmentApi(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NotaryUsersApi(ModelViewSet):
+    """
+    Api for work with users role 'Notary'. Get, edit, delete
+    NOTE: THIS API USES FOR ADMIN USER WITH 'is_staff' privileges.
+    If you want to get users with role 'Notary' for common users - use 'UserViewSet' with query params
+    """
+    permission_classes = (IsAuthenticated, IsAdminUser)
+    serializer_class = serializers.UserSerializer
+    queryset = User.objects.filter(role='NOTARY')
+    lookup_field = 'uid'

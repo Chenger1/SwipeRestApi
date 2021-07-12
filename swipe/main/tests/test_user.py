@@ -201,3 +201,28 @@ class TestUser(APITestCase):
         url = reverse('main:change_ban_status', args=[self._test_user_uid])
         response = self.client.patch(url)
         self.assertEqual(response.status_code, 403)
+
+    def test_admin_access_to_notary(self):
+        """Ensure we can get, change, delete notary info from admin profile"""
+        admin_user = User.objects.get(uid=self._test_user_uid)
+        admin_user.is_staff = True
+        admin_user.save()
+
+        notary = User.objects.get(uid=self._test_user_uid_two)
+        notary.role = 'NOTARY'
+        notary.save()
+
+        url = reverse('main:users_notary_admin-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        url_change = reverse('main:users_notary_admin-detail', args=[notary.uid])
+        response = self.client.patch(url_change, data={'first_name': 'Changed notary name'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(User.objects.get(uid=self._test_user_uid_two).first_name, 'Changed notary name')
+
+    def test_not_admin_access_to_notary(self):
+        """Ensure we cant get access to notaries info without admin account"""
+        url = reverse('main:users_notary_admin-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
