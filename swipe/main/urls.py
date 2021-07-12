@@ -6,10 +6,13 @@ from main.views import house_views
 from rest_framework.routers import SimpleRouter
 
 router = SimpleRouter()
-router.register('users', user_views.UserViewSet)
+router.register('users/', user_views.UserViewSet)
 router.register('users/notary/admin-access/', user_views.NotaryUsersApi, basename='users_notary_admin')
 
-router.register('houses', house_views.HouseViewSet, basename='houses')
+router.register('houses/', house_views.HouseViewSet, basename='houses')
+router.register('houses/buildings/', house_views.BuildingViewSet, basename='buildings')
+router.register('houses/sections/', house_views.SectionViewSet, basename='sections'),
+router.register('houses/floors/', house_views.FloorSerializer, basename='floors')
 
 
 app_name = 'main'

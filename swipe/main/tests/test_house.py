@@ -44,3 +44,26 @@ class TestHouse(APITestCase):
         url_list = reverse('main:houses-list')
         response_list = self.client.get(url_list)
         self.assertEqual(response_list.status_code, 200)
+
+    def test_house_building_section_floors(self):
+        url = reverse('main:houses-list')
+        response = self.client.post(url, data={'name': 'House', 'address': 'Street',
+                                               'tech': 'MONO1', 'territory': 'OPEN',
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+        self.assertEqual(response.status_code, 201)
+
+        url_building = reverse('main:buildings-list')
+        response_building = self.client.post(url_building, data={'name': 'One',
+                                                                 'house': response.data['id']})
+        self.assertEqual(response_building.status_code, 201)
+
+        url_section = reverse('main:sections-list')
+        response_section = self.client.post(url_section, data={'name': 'One',
+                                                               'building': response_building.data['id']})
+
+        self.assertEqual(response_section.status_code, 201)
+
+        url_floor = reverse('main:floors-list')
+        response_floor = self.client.post(url_floor, data={'name': 'One',
+                                                           'section': response_section.data['id']})
+        self.assertEqual(response_floor.status_code, 201)
