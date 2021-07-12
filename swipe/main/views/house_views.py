@@ -7,7 +7,7 @@ from main.serializers import house_serializers
 from _db.models.models import House
 
 
-class HouseOwnerViewSet(ModelViewSet):
+class HouseViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
     queryset = House.objects.all()
     serializer_class = house_serializers.HouseSerializer

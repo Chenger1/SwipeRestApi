@@ -2,8 +2,6 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
-from _db.models.models import House
-
 from main.tests.utils import get_id_token
 
 

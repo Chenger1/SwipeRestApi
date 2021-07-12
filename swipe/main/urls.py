@@ -9,7 +9,7 @@ router = SimpleRouter()
 router.register('users', user_views.UserViewSet)
 router.register('users/notary/admin-access/', user_views.NotaryUsersApi, basename='users_notary_admin')
 
-router.register('houses', house_views.HouseOwnerViewSet, basename='houses')
+router.register('houses', house_views.HouseViewSet, basename='houses')
 
 
 app_name = 'main'
