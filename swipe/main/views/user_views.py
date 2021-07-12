@@ -101,7 +101,7 @@ class ContactAPI(APIView):
         :param format:
         :return: queryset -> serialize -> json
         """
-        contacts = Contact.objects.filter(user=request.user)
+        contacts = Contact.objects.filter(user=request.user, user__ban=False)
         if role != 'ALL':
             contacts = contacts.filter(contact__role=role)
         serializer = serializers.ContactSerializer(contacts, many=True)
