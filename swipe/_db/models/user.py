@@ -54,6 +54,7 @@ class User(CustomAbstractUser):
     end_date = models.DateField(blank=True, null=True)
     role = models.CharField(choices=role_choices, max_length=8, default='USER')
     photo = models.ImageField(upload_to='media/users/', blank=True, null=True)
+    ban = models.BooleanField(default=False)
 
 
 class Contact(models.Model):
