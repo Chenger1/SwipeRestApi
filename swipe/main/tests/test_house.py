@@ -7,7 +7,8 @@ from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token
 
-from _db.models.models import House, NewsItem, Flat
+from _db.models.models import House, NewsItem, Flat, Building, Section, Floor
+from _db.models.user import User
 
 import tempfile
 import os
@@ -157,3 +158,45 @@ class TestHouse(APITestCase):
                                                        'house': response.data['id']})
         self.assertEqual(response_doc.status_code, 201)
         self.assertTrue(House.objects.first().documents.exists())
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_flat_filters(self):
+        url = reverse('main:houses-list')
+        response = self.client.post(url, data={'name': 'House', 'address': 'Street',
+                                               'tech': 'MONO1', 'territory': 'OPEN',
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+        self.assertEqual(response.status_code, 201)
+        house = House.objects.first()
+
+        building = Building.objects.create(name='One', house=house)
+        section = Section.objects.create(name='One', building=building)
+        floor = Floor.objects.create(name='One', section=section)
+        file1 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
+        file2 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
+        flat1 = Flat.objects.create(number=1, square=100, kitchen_square=1, price_per_metre=100, price=100,
+                                    number_of_rooms=2, state='BLANK', foundation_doc='OWNER', plan='FREE',
+                                    balcony='YES', floor=floor, schema=file1)
+        flat2 = Flat.objects.create(number=1, square=200, kitchen_square=1, price_per_metre=200, price=200,
+                                    number_of_rooms=2, state='EURO', foundation_doc='OWNER', plan='FREE',
+                                    balcony='YES', floor=floor, schema=file2)
+
+        url_filter_price = reverse('main:flats-list')
+        response = self.client.get(url_filter_price, data={'price__gt': 101})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data[0]['price'], 200)
+
+        url_filter_square = reverse('main:flats-list')
+        response_square = self.client.get(url_filter_square, data={'square__lt': 200})
+        self.assertEqual(response_square.status_code, 200)
+        self.assertEqual(response_square.data[0]['square'], 100)
+
+        url_filter_state = reverse('main:flats-list')
+        response_state = self.client.get(url_filter_state, data={'state': 'BLANK'})
+        self.assertEqual(response_state.status_code, 200)
+        self.assertEqual(response_state.data[0]['state'], 'BLANK')
+
+        url_filter_both = reverse('main:flats-list')
+        response_both = self.client.get(url_filter_both, data={'price__lt': 201,
+                                                               'price__gt': 99})
+        self.assertEqual(response_both.status_code, 200)
+        self.assertEqual(len(response_both.data), 2)

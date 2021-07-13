@@ -1,8 +1,11 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
+from django_filters import rest_framework as filters
+
 from main.permissions import IsOwner
 from main.serializers import house_serializers
+from main.filters import FlatFilter
 
 from _db.models.models import House, Building, Section, Floor, NewsItem, Document, Flat
 
@@ -53,3 +56,5 @@ class FlatViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
     queryset = Flat.objects.all()
     serializer_class = house_serializers.FlatSerializer
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = FlatFilter
