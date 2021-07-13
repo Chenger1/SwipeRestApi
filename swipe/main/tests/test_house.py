@@ -65,8 +65,14 @@ class TestHouse(APITestCase):
         self.assertEqual(response_building.status_code, 201)
 
         url_section = reverse('main:sections-list')
+        #  Test that we can add section and standpipes to it
         response_section = self.client.post(url_section, data={'name': 'One',
-                                                               'building': response_building.data['id']})
+                                                               'building': response_building.data['id'],
+                                                               'pipes': [
+                                                                   {'name': 'PipeOne'},
+                                                                   {'name': 'PipeTwo'}
+                                                               ]
+                                                               }, format='json')
 
         self.assertEqual(response_section.status_code, 201)
 
