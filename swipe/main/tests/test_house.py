@@ -26,6 +26,28 @@ class TestHouse(APITestCase):
         )
         self.temp_media_image_path = os.path.join(settings.BASE_DIR, 'main/tests/test_media/test_image.png')
 
+    def init_house_structure(self):
+        url = reverse('main:houses-list')
+        response = self.client.post(url, data={'name': 'House', 'address': 'Street',
+                                               'tech': 'MONO1', 'territory': 'OPEN',
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+        self.assertEqual(response.status_code, 201)
+        house = House.objects.first()
+
+        building = Building.objects.create(name='One', house=house)
+        section = Section.objects.create(name='One', building=building)
+        floor = Floor.objects.create(name='One', section=section)
+        file1 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
+        file2 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
+        flat1 = Flat.objects.create(number=1, square=100, kitchen_square=1, price_per_metre=100, price=100,
+                                    number_of_rooms=2, state='BLANK', foundation_doc='OWNER', plan='FREE',
+                                    balcony='YES', floor=floor, schema=file1)
+        flat2 = Flat.objects.create(number=1, square=200, kitchen_square=1, price_per_metre=200, price=200,
+                                    number_of_rooms=2, state='EURO', foundation_doc='OWNER', plan='FREE',
+                                    balcony='YES', floor=floor, schema=file2)
+
+        return house, building, section, floor, flat1, flat2
+
     def test_house_full_crud_operations(self):
         url = reverse('main:houses-list')
         response = self.client.post(url, data={'name': 'House', 'address': 'Street',
@@ -162,24 +184,7 @@ class TestHouse(APITestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_flat_filters(self):
-        url = reverse('main:houses-list')
-        response = self.client.post(url, data={'name': 'House', 'address': 'Street',
-                                               'tech': 'MONO1', 'territory': 'OPEN',
-                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
-        self.assertEqual(response.status_code, 201)
-        house = House.objects.first()
-
-        building = Building.objects.create(name='One', house=house)
-        section = Section.objects.create(name='One', building=building)
-        floor = Floor.objects.create(name='One', section=section)
-        file1 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
-        file2 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
-        flat1 = Flat.objects.create(number=1, square=100, kitchen_square=1, price_per_metre=100, price=100,
-                                    number_of_rooms=2, state='BLANK', foundation_doc='OWNER', plan='FREE',
-                                    balcony='YES', floor=floor, schema=file1)
-        flat2 = Flat.objects.create(number=1, square=200, kitchen_square=1, price_per_metre=200, price=200,
-                                    number_of_rooms=2, state='EURO', foundation_doc='OWNER', plan='FREE',
-                                    balcony='YES', floor=floor, schema=file2)
+        _ = self.init_house_structure()
 
         url_filter_price = reverse('main:flats-list')
         response = self.client.get(url_filter_price, data={'price__gt': 101})
@@ -201,3 +206,32 @@ class TestHouse(APITestCase):
                                                                'price__gt': 99})
         self.assertEqual(response_both.status_code, 200)
         self.assertEqual(len(response_both.data), 2)
+
+    def test_booking_flat(self):
+        """ Ensure we can change flat booked status """
+        *_, flat = self.init_house_structure()
+
+        url = reverse('main:booking_flat', args=[flat.pk])
+        response = self.client.patch(url, data={'booking': '1'})
+        self.assertEqual(response.status_code, 200)
+        updated_flat = Flat.objects.get(pk=flat.pk)
+        self.assertEqual(updated_flat.client.email, self._test_user_email)
+
+        # Ensure we can change booking status from another person (If this person is not a house owner)
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+        )
+        response_errors = self.client.patch(url, data={'booking': '0'})
+        self.assertEqual(response_errors.status_code, 400)
+        self.assertEqual(response_errors.data.get('Error'), 'You cannot remove current client from this flat')
+        updated_flat = Flat.objects.get(pk=flat.pk)
+        self.assertNotEqual(updated_flat.client, None)
+
+        # Ensure we can set flat client as None if we either house owner or current client
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'JWT {self._token}'
+        )
+        response_success = self.client.patch(url, data={'booking': '0'})
+        self.assertEqual(response_success.status_code, 200)
+        updated_flat = Flat.objects.get(pk=flat.pk)
+        self.assertEqual(updated_flat.client, None)

@@ -1,5 +1,10 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+from django.shortcuts import get_object_or_404
 
 from django_filters import rest_framework as filters
 
@@ -58,3 +63,35 @@ class FlatViewSet(ModelViewSet):
     serializer_class = house_serializers.FlatSerializer
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = FlatFilter
+
+
+class BookingFlat(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def patch(self, request, pk, format=None):
+        """
+        patch: If booking == '1' and not flat.client - set new one.
+               If booking == '0' checks condition. Sets client as None can only either current client or house owner
+               Otherwise it will return error message in response
+        :param request: {'booking': '1'} or {'booking': '0'}
+        :param pk: flat pk
+        :param format:
+        :return: Response
+        """
+        flat = get_object_or_404(Flat, pk=pk)
+        is_house_owner = (flat.floor.section.building.house.sales_department == request.user)
+        if request.data.get('booking') == '1' and not flat.client:
+            flat.client = request.user
+            flat.booked = True
+        elif request.data.get('booking') == '0':
+            if flat.client == request.user or is_house_owner:
+                flat.client = None
+                flat.booked = False
+            else:
+                return Response({'Error': 'You cannot remove current client from this flat'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'Error': 'You can book this flat'}, status=status.HTTP_400_BAD_REQUEST)
+        flat.save()
+        return Response({'pk': flat.pk,
+                         'user_uid': request.user.uid}, status=status.HTTP_200_OK)
