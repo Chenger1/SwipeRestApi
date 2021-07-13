@@ -81,7 +81,7 @@ class Flat(models.Model):
     price_per_metre = models.FloatField()
     price = models.FloatField()
     schema = models.ImageField(upload_to='media/flats/schema')
-    schema_in_house = models.ImageField(upload_to='media/flats/schema_in_house')
+    schema_in_house = models.ImageField(upload_to='media/flats/schema_in_house', blank=True, null=True)
     number_of_rooms = models.IntegerField()
     state = models.CharField(choices=state_choices, max_length=5)
     foundation_doc = models.CharField(choices=foundation_doc_choices, max_length=5)

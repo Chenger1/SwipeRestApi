@@ -15,6 +15,7 @@ router.register('houses/sections/', house_views.SectionViewSet, basename='sectio
 router.register('houses/floors/', house_views.FloorViewSet, basename='floors')
 router.register('houses/news/', house_views.NewsItemViewSet, basename='news')
 router.register('houses/documents/', house_views.DocumentViewSet, basename='documents')
+router.register('houses/floors/flats/', house_views.FlatViewSet, basename='flats')
 
 
 app_name = 'main'

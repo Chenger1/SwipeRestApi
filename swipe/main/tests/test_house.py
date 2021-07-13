@@ -1,14 +1,16 @@
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
+from django.conf import settings
 
 from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token
 
-from _db.models.models import House, NewsItem
+from _db.models.models import House, NewsItem, Flat
 
 import tempfile
+import os
 
 
 class TestHouse(APITestCase):
@@ -20,6 +22,7 @@ class TestHouse(APITestCase):
         self.client.credentials(
             HTTP_AUTHORIZATION=f'JWT {self._token}'
         )
+        self.temp_media_image_path = os.path.join(settings.BASE_DIR, 'main/tests/test_media/test_image.png')
 
     def test_house_full_crud_operations(self):
         url = reverse('main:houses-list')
@@ -51,23 +54,28 @@ class TestHouse(APITestCase):
         response_list = self.client.get(url_list)
         self.assertEqual(response_list.status_code, 200)
 
-    def test_house_building_section_floors(self):
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_house_building_section_floors_flat(self):
+        #  Test creating house
         url = reverse('main:houses-list')
         response = self.client.post(url, data={'name': 'House', 'address': 'Street',
                                                'tech': 'MONO1', 'territory': 'OPEN',
                                                'payment_options': 'MORTGAGE', 'role': 'FLAT'})
         self.assertEqual(response.status_code, 201)
 
+        # Test editing house
         url_edit = reverse('main:houses-detail', args=[response.data['id']])
         response_edit = self.client.patch(url_edit, data={'name': 'Edited House'})
         self.assertEqual(response_edit.status_code, 200)
         self.assertEqual(response_edit.data['name'], 'Edited House')
 
+        # Test creating building
         url_building = reverse('main:buildings-list')
         response_building = self.client.post(url_building, data={'name': 'One',
                                                                  'house': response.data['id']})
         self.assertEqual(response_building.status_code, 201)
 
+        # Test create section
         url_section = reverse('main:sections-list')
         #  Test that we can add section and standpipes to it
         response_section = self.client.post(url_section, data={'name': 'One',
@@ -80,10 +88,33 @@ class TestHouse(APITestCase):
 
         self.assertEqual(response_section.status_code, 201)
 
+        # Test creating floors
         url_floor = reverse('main:floors-list')
         response_floor = self.client.post(url_floor, data={'name': 'One',
                                                            'section': response_section.data['id']})
         self.assertEqual(response_floor.status_code, 201)
+
+        # Test creating flats
+        url_flat = reverse('main:flats-list')
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_flat = self.client.post(url_flat, data={'number': 1, 'square': 1,
+                                                             'kitchen_square': 1, 'price_per_metre': 1,
+                                                             'price': 1, 'number_of_rooms': 2, 'state': 'BLANK',
+                                                             'foundation_doc': 'OWNER', 'plan': 'FREE',
+                                                             'balcony': 'YES', 'floor': response_floor.data['id'],
+                                                             'schema': file})
+        self.assertEqual(response_flat.status_code, 201)
+        self.assertTrue(Flat.objects.exists())
+
+        url_flat_edit = reverse('main:flats-detail', args=[response_flat.data['id']])
+        response_flat_edit = self.client.patch(url_flat_edit, data={'number': 2})
+        self.assertEqual(response_flat_edit.status_code, 200)
+        self.assertEqual(response_flat_edit.data['number'], 2)
+        self.assertEqual(Flat.objects.first().number, 2)
+
+        url_flat_delete = reverse('main:flats-detail', args=[response_flat.data['id']])
+        response_flat_delete = self.client.delete(url_flat_delete)
+        self.assertEqual(response_flat_delete.status_code, 204)
 
     def test_news_item(self):
         url = reverse('main:houses-list')

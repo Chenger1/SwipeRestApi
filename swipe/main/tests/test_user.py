@@ -4,20 +4,11 @@ from django.test import override_settings
 
 from rest_framework.test import APITestCase
 
-from main.tests.utils import get_id_token
+from main.tests.utils import get_id_token, get_temporary_image
 
 from _db.models.user import Contact, User, Message
 
 import tempfile
-from PIL import Image
-
-
-def get_temporary_image(temp_file):
-    size = (200, 200)
-    color = (255, 0, 0, 0)
-    image = Image.new('RGBA', size, color)
-    image.save(temp_file, 'png')
-    return temp_file
 
 
 class TestUser(APITestCase):

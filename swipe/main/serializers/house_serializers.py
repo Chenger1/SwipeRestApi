@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.models import House, Building, Section, Floor, NewsItem, Standpipe, Document
+from _db.models.models import House, Building, Section, Floor, NewsItem, Standpipe, Document, Flat
 
 
 class HouseSerializer(serializers.ModelSerializer):
@@ -54,3 +54,9 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
         fields = ('id', 'file', 'house')
+
+
+class FlatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Flat
+        fields = '__all__'
