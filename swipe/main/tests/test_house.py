@@ -8,7 +8,6 @@ from rest_framework.test import APITestCase
 from main.tests.utils import get_id_token
 
 from _db.models.models import House, NewsItem, Flat, Building, Section, Floor
-from _db.models.user import User
 
 import tempfile
 import os
@@ -17,7 +16,7 @@ import os
 class TestHouse(APITestCase):
     def setUp(self):
         self._test_user_uid = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
-        self._test_user_uid_two = 'KzlTbTHMEhbkCD9pzOhNLF9Ypxa2'
+        self._test_user_uid_two = 'ifqnanQlUiOSSVBDrHHGbRvwSiw2'
         self._url = reverse('main:user-detail', args=[self._test_user_uid])
         self._token = get_id_token()
         self.client.credentials(
