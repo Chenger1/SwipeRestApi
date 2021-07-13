@@ -29,12 +29,18 @@ class IsOwner(BasePermission):
             return obj.sales_department.uid == request.user.uid
         elif obj.__class__.__name__ in ('NewsItem', 'Document'):
             return obj.house.sales_department.uid == request.user.uid
-        elif obj.__class__.__name__ in ('Flat', ):
+        elif obj.__class__.__name__ == 'Flat':
             if obj.floor.section.building.house.sales_department.uid == request.user.uid:
                 return True
             elif obj.client == request.user.uid:
                 return True
             else:
                 return False
+        elif obj.__class__.__name__ == 'Floor':
+            return obj.section.building.house.sales_department.uid == request.user.uid
+        elif obj.__class__.__name__ == 'Section':
+            return obj.building.house.sales_department.uid == request.user.uid
+        elif obj.__class__.__name__ == 'Building':
+            return obj.house.sales_department.uid == request.user.uid
         else:
             return False

@@ -75,6 +75,10 @@ class TestHouse(APITestCase):
                                                                  'house': response.data['id']})
         self.assertEqual(response_building.status_code, 201)
 
+        url_building_edit = reverse('main:buildings-detail', args=[response_building.data['id']])
+        response_building_edit = self.client.patch(url_building_edit, data={'name': 'Two'})
+        self.assertEqual(response_building_edit.status_code, 200)
+
         # Test create section
         url_section = reverse('main:sections-list')
         #  Test that we can add section and standpipes to it
@@ -88,11 +92,19 @@ class TestHouse(APITestCase):
 
         self.assertEqual(response_section.status_code, 201)
 
+        url_section_edit = reverse('main:sections-detail', args=[response_section.data['id']])
+        response_section_edit = self.client.patch(url_section_edit, data={'name': 'Two'})
+        self.assertEqual(response_section_edit.status_code, 200)
+
         # Test creating floors
         url_floor = reverse('main:floors-list')
         response_floor = self.client.post(url_floor, data={'name': 'One',
                                                            'section': response_section.data['id']})
         self.assertEqual(response_floor.status_code, 201)
+
+        url_floor_edit = reverse('main:floors-detail', args=[response_floor.data['id']])
+        response_floor_edit = self.client.patch(url_floor_edit, data={'name': 'Two'})
+        self.assertEqual(response_floor_edit.status_code, 200)
 
         # Test creating flats
         url_flat = reverse('main:flats-list')
