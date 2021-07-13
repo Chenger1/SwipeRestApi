@@ -91,6 +91,7 @@ class Flat(models.Model):
 
     floor = models.ForeignKey(Floor, related_name='flats', on_delete=models.CASCADE)
     client = models.ForeignKey(User, related_name='flats', on_delete=models.SET_NULL, blank=True, null=True)
+    booked = models.BooleanField(default=False)
 
 
 class RequestToChest(models.Model):
