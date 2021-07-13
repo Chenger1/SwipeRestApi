@@ -16,7 +16,9 @@ import os
 class TestHouse(APITestCase):
     def setUp(self):
         self._test_user_uid = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
+        self._test_user_email = 'user@example.com'
         self._test_user_uid_two = 'ifqnanQlUiOSSVBDrHHGbRvwSiw2'
+        self._test_user_email_two = 'test@mail.com'
         self._url = reverse('main:user-detail', args=[self._test_user_uid])
         self._token = get_id_token()
         self.client.credentials(
@@ -48,7 +50,7 @@ class TestHouse(APITestCase):
     def test_house_get_list(self):
         """Ensure we can get list of houses non-creator"""
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_uid_two)}'
+            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
         )
         url_list = reverse('main:houses-list')
         response_list = self.client.get(url_list)

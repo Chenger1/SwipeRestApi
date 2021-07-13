@@ -40,5 +40,8 @@ class FirebaseAuthentication(BaseAuthentication):
         except Exception:
             raise FirebaseError()
 
-        user, created = User.objects.get_or_create(uid=uid, email=email)
+        user, created = User.objects.get_or_create(email=email)
+        if user.uid != uid:
+            user.uid = uid
+            user.save()
         return (user, user.uid)

@@ -13,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['uid', 'first_name', 'last_name', 'email',
                   'phone_number', 'notifications', 'subscribed', 'end_date', 'role', 'photo', 'is_staff',
                   'is_superuser']
+        read_only = ('email', )
 
     def update(self, instance, validated_data):
         if validated_data.get('get_notifications_display'):
