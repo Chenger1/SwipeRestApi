@@ -1,10 +1,14 @@
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 
 from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token
 
 from _db.models.models import House, NewsItem
+
+import tempfile
 
 
 class TestHouse(APITestCase):
@@ -94,3 +98,19 @@ class TestHouse(APITestCase):
         self.assertEqual(response.status_code, 201)
         self.assertIn(NewsItem.objects.get(pk=response_news.data['id']),
                       House.objects.get(id=response.data['id']).news.all())
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_documents_in_house(self):
+        url = reverse('main:houses-list')
+        file = SimpleUploadedFile('doc.docx', b'file_content', content_type='application/msword')
+        response = self.client.post(url, data={'name': 'House', 'address': 'Street',
+                                               'tech': 'MONO1', 'territory': 'OPEN',
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+        self.assertEqual(response.status_code, 201)
+
+        url_doc = reverse('main:documents-list')
+        response_doc = self.client.post(url_doc, data={'name': 'documment',
+                                                       'file': file,
+                                                       'house': response.data['id']})
+        self.assertEqual(response_doc.status_code, 201)
+        self.assertTrue(House.objects.first().documents.exists())

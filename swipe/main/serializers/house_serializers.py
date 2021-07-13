@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.models import House, Building, Section, Floor, NewsItem, Standpipe
+from _db.models.models import House, Building, Section, Floor, NewsItem, Standpipe, Document
 
 
 class HouseSerializer(serializers.ModelSerializer):
@@ -18,7 +18,7 @@ class BuildingSerializer(serializers.ModelSerializer):
 class StandpipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Standpipe
-        fields = ('name', )
+        fields = ('id', 'name', )
 
 
 class SectionSerializer(serializers.ModelSerializer):
@@ -48,3 +48,9 @@ class NewsItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = NewsItem
         fields = '__all__'
+
+
+class DocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Document
+        fields = ('id', 'file', 'house')

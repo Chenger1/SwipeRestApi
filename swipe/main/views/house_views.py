@@ -4,7 +4,7 @@ from rest_framework.viewsets import ModelViewSet
 from main.permissions import IsOwner
 from main.serializers import house_serializers
 
-from _db.models.models import House, Building, Section, Floor, NewsItem
+from _db.models.models import House, Building, Section, Floor, NewsItem, Document
 
 
 class HouseViewSet(ModelViewSet):
@@ -41,3 +41,9 @@ class NewsItemViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
     queryset = NewsItem.objects.all()
     serializer_class = house_serializers.NewsItemSerializer
+
+
+class DocumentViewSet(ModelViewSet):
+    permission_classes = (IsAuthenticated, IsOwner)
+    queryset = Document.objects.all()
+    serializer_class = house_serializers.DocumentSerializer
