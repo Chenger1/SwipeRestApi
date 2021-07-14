@@ -137,7 +137,9 @@ class MessageApi(APIView):
     permission_classes = (IsAuthenticated, IsOwner)
 
     def get(self, request, uid=None, format=None):
-        messages = Message.objects.filter(sender=request.user) | Message.objects.filter(receiver=request.user)
+        if request.user.uid != uid:
+            return Response({'Error': 'You can`t access this messages'})
+        messages = Message.objects.filter(sender__uid=uid) | Message.objects.filter(receiver__uid=uid)
         messages = messages.order_by()
         serializer = user_serializers.ReadableMessageSerializer(messages, many=True)
         return Response(serializer.data)
@@ -156,6 +158,7 @@ class MessageApi(APIView):
 
     def patch(self, request, pk, format=None):
         message = get_object_or_404(Message, pk=pk)
+        self.check_object_permissions(request, message)
         serializer = user_serializers.WritableMessageSerializer(instance=message, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -164,6 +167,7 @@ class MessageApi(APIView):
 
     def delete(self, request, pk, format=None):
         message = get_object_or_404(Message, pk=pk)
+        self.check_object_permissions(request, message)
         message.delete()
         return Response(status=status.HTTP_200_OK)
 
