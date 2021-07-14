@@ -38,5 +38,5 @@ urlpatterns = [
     path('users/message/attachment/', user_views.AttachmentApi.as_view(), name='attachments'),
 
     # HOUSE
-    path('houses/floors/flats/<int:pk>/booking/', house_views.BookingFlat.as_view(), name='booking_flat'),
+    path('flats/<int:pk>/booking/', house_views.BookingFlat.as_view(), name='booking_flat'),
 ]

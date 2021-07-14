@@ -93,6 +93,10 @@ class Flat(models.Model):
     client = models.ForeignKey(User, related_name='flats', on_delete=models.SET_NULL, blank=True, null=True)
     booked = models.BooleanField(default=False)
 
+    @property
+    def booking_status(self):
+        return 'Booked' if self.booked else 'Free'
+
 
 class RequestToChest(models.Model):
     house = models.ForeignKey(House, related_name='requests', on_delete=models.CASCADE)
