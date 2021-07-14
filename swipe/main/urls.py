@@ -7,15 +7,15 @@ from rest_framework.routers import SimpleRouter
 
 router = SimpleRouter()
 router.register('users', user_views.UserViewSet)
-router.register('users/notary/admin-access/', user_views.NotaryUsersApi, basename='users_notary_admin')
+router.register('users/notary/admin-access', user_views.NotaryUsersApi, basename='users_notary_admin')
 
-router.register('houses/', house_views.HouseViewSet, basename='houses')
-router.register('houses/buildings/', house_views.BuildingViewSet, basename='buildings')
-router.register('houses/sections/', house_views.SectionViewSet, basename='sections')
-router.register('houses/floors/', house_views.FloorViewSet, basename='floors')
-router.register('houses/news/', house_views.NewsItemViewSet, basename='news')
-router.register('houses/documents/', house_views.DocumentViewSet, basename='documents')
-router.register('houses/floors/flats/', house_views.FlatViewSet, basename='flats')
+router.register('houses', house_views.HouseViewSet, basename='houses')
+router.register('houses/buildings', house_views.BuildingViewSet, basename='buildings')
+router.register('houses/sections', house_views.SectionViewSet, basename='sections')
+router.register('houses/floors', house_views.FloorViewSet, basename='floors')
+router.register('houses/news', house_views.NewsItemViewSet, basename='news')
+router.register('houses/documents', house_views.DocumentViewSet, basename='documents')
+router.register('houses/floors/flats', house_views.FlatViewSet, basename='flats')
 
 
 app_name = 'main'
