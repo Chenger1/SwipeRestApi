@@ -29,10 +29,13 @@ class SectionSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'building', 'pipes')
 
     def create(self, validated_data):
-        pipes_data = validated_data.pop('pipes')
-        section = Section.objects.create(**validated_data)
-        for pipe_data in pipes_data:
-            Standpipe.objects.create(section=section, **pipe_data)
+        if validated_data.get('pipes'):
+            pipes_data = validated_data.pop('pipes')
+            section = Section.objects.create(**validated_data)
+            for pipe_data in pipes_data:
+                Standpipe.objects.create(section=section, **pipe_data)
+        else:
+            section = Section.objects.create(**validated_data)
         return section
 
 
