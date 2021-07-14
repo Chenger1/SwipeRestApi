@@ -1,6 +1,7 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -25,6 +26,15 @@ class HouseViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(sales_department=self.request.user)
+
+
+class HouseList(ListAPIView):
+    """
+    Api is available for any users
+    """
+    permission_classes = (IsAuthenticated, )
+    queryset = House.objects.all()
+    serializer_class = house_serializers.HouseSerializer
 
 
 class BuildingViewSet(ModelViewSet):
