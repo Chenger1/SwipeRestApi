@@ -236,7 +236,7 @@ class TestHouse(APITestCase):
         updated_flat = Flat.objects.get(pk=flat.pk)
         self.assertEqual(updated_flat.client, None)
 
-    def test_all_houses(self):
+    def test_all_houses_public(self):
         """Ensure we can get all house even if we are not authenticated"""
         self.init_house_structure()
 
@@ -244,9 +244,20 @@ class TestHouse(APITestCase):
             HTTP_AUTHORIZATION=''
         )
 
-        url = reverse('main:all_houses_list')
+        url = reverse('main:all_houses_list_public')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
         response_404 = self.client.post(url)
         self.assertEqual(response_404.status_code, 405)
+
+    def test_retrieve_house_public(self):
+        self.init_house_structure()
+        self.client.credentials(
+            HTTP_AUTHORIZATION=''
+        )
+
+        url = reverse('main:retrieve_house_public', args=[1])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['id'], 1)

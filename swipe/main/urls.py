@@ -39,5 +39,6 @@ urlpatterns = [
 
     # HOUSE
     path('flats/<int:pk>/booking/', house_views.BookingFlat.as_view(), name='booking_flat'),
-    path('all/houses/', house_views.HouseList.as_view(), name='all_houses_list',),
+    path('all/houses/', house_views.HouseList.as_view(), name='all_houses_list_public',),
+    path('house/<int:pk>/', house_views.HouseRetrieve.as_view(), name='retrieve_house_public'),
 ]
