@@ -137,6 +137,11 @@ class RequestToChest(models.Model):
     house = models.ForeignKey(House, related_name='requests', on_delete=models.CASCADE)
     flat = models.ForeignKey(Flat, related_name='requests', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)
+
+    @property
+    def user(self):
+        return self.house.user
 
 
 class Post(models.Model):
