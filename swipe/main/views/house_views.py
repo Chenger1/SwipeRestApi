@@ -11,7 +11,7 @@ from django_filters import rest_framework as filters
 
 from main.permissions import IsOwnerOrReadOnly
 from main.serializers import house_serializers
-from main.filters import FlatFilter
+from main.filters import FlatFilter, HouseFilter
 
 from _db.models.models import House, Building, Section, Floor, NewsItem, Document, Flat
 
@@ -20,6 +20,8 @@ class HouseViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = House.objects.all()
     serializer_class = house_serializers.HouseSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = HouseFilter
 
     def get_queryset(self):
         return House.objects.filter(sales_department=self.request.user)

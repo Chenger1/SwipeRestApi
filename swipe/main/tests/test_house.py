@@ -282,3 +282,25 @@ class TestHouse(APITestCase):
 
         response_error = self.client.patch(url_flat, data={'number': 10})
         self.assertEqual(response_error.status_code, 405)
+
+    def test_house_filters(self):
+        self.init_house_structure()
+        url_houses_create = reverse('main:houses-list')
+        response = self.client.post(url_houses_create, data={'name': 'House', 'address': 'Two street',
+                                                             'tech': 'MONO1', 'territory': 'CLOSE',
+                                                             'payment_options': 'MORTGAGE', 'role': 'OFFICE',
+                                                             'city': 'Kiev', 'distance_to_sea': 12})
+        self.assertEqual(response.status_code, 201)
+
+        url = reverse('main:houses-list')
+        response_filter_by_city = self.client.get(url, data={'city': 'Kiev'})
+        self.assertEqual(response_filter_by_city.status_code, 200)
+        self.assertEqual(response_filter_by_city.data[0]['city'], 'Kiev')
+
+        response_filter_by_role = self.client.get(url, data={'role': 'FLAT'})
+        self.assertEqual(response_filter_by_role.status_code, 200)
+        self.assertEqual(response_filter_by_role.data[0]['role_display'], 'Жилое помещение')
+
+        response_filter_by_distance = self.client.get(url, data={'distance_to_sea__gt': 10})
+        self.assertEqual(response_filter_by_distance.status_code, 200)
+        self.assertEqual(response_filter_by_distance.data[0]['distance_to_sea'], 12)
