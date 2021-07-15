@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -28,17 +28,9 @@ class HouseViewSet(ModelViewSet):
         serializer.save(sales_department=self.request.user)
 
 
-class HouseList(ListAPIView):
-    """
-    Api is available for any users even if they are not authenticated
-    """
-    permission_classes = (AllowAny, )
-    authentication_classes = []
-    queryset = House.objects.all()
-    serializer_class = house_serializers.HouseSerializer
-
-
-class HouseRetrieve(RetrieveAPIView):
+class HousePublic(ListModelMixin,
+                  RetrieveModelMixin,
+                  GenericViewSet):
     """
     Api is available for any users even if they are not authenticated
     """
@@ -84,6 +76,18 @@ class FlatViewSet(ModelViewSet):
     serializer_class = house_serializers.FlatSerializer
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = FlatFilter
+
+
+class FlatPublic(ListModelMixin,
+                 RetrieveModelMixin,
+                 GenericViewSet):
+    """
+    This api is available for anu users. Even if the are not authenticated
+    """
+    permission_classes = (AllowAny, )
+    authentication_classes = []
+    queryset = Flat.objects.all()
+    serializer_class = house_serializers.FlatSerializer
 
 
 class BookingFlat(APIView):

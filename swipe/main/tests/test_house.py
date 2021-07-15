@@ -244,20 +244,36 @@ class TestHouse(APITestCase):
             HTTP_AUTHORIZATION=''
         )
 
-        url = reverse('main:all_houses_list_public')
+        url = reverse('main:houses_public-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
         response_404 = self.client.post(url)
         self.assertEqual(response_404.status_code, 405)
 
-    def test_retrieve_house_public(self):
+        url = reverse('main:houses_public-detail', args=[1])
+        response_house = self.client.get(url)
+        self.assertEqual(response_house.status_code, 200)
+        self.assertEqual(response_house.data['id'], 1)
+
+        response_error = self.client.patch(url, data={'name': 10})
+        self.assertEqual(response_error.status_code, 405)
+
+    def test_get_flat_list_for_non_authenticated_users(self):
+        """ Ensure we can get flats information without authentication """
         self.init_house_structure()
         self.client.credentials(
             HTTP_AUTHORIZATION=''
         )
-
-        url = reverse('main:retrieve_house_public', args=[1])
+        url = reverse('main:flats_public-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['id'], 1)
+        self.assertGreater(len(response.data), 0)
+
+        url_flat = reverse('main:flats_public-detail', args=[1])
+        response_flat = self.client.get(url_flat)
+        self.assertEqual(response_flat.status_code, 200)
+        self.assertEqual(response_flat.data['id'], 1)
+
+        response_error = self.client.patch(url_flat, data={'number': 10})
+        self.assertEqual(response_error.status_code, 405)

@@ -17,6 +17,10 @@ router.register('news', house_views.NewsItemViewSet, basename='news')
 router.register('documents', house_views.DocumentViewSet, basename='documents')
 router.register('flats', house_views.FlatViewSet, basename='flats')
 
+# public routers
+router.register('houses_public', house_views.HousePublic, basename='houses_public')
+router.register('flats_public', house_views.FlatPublic, basename='flats_public')
+
 
 app_name = 'main'
 
@@ -39,6 +43,4 @@ urlpatterns = [
 
     # HOUSE
     path('flats/<int:pk>/booking/', house_views.BookingFlat.as_view(), name='booking_flat'),
-    path('all/houses/', house_views.HouseList.as_view(), name='all_houses_list_public',),
-    path('house/<int:pk>/', house_views.HouseRetrieve.as_view(), name='retrieve_house_public'),
 ]
