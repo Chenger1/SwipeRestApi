@@ -1,4 +1,4 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 
 from django_filters import rest_framework as filters
 
-from main.permissions import IsOwner
+from main.permissions import IsOwnerOrReadOnly
 from main.serializers import house_serializers
 from main.filters import FlatFilter
 
@@ -17,7 +17,7 @@ from _db.models.models import House, Building, Section, Floor, NewsItem, Documen
 
 
 class HouseViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = House.objects.all()
     serializer_class = house_serializers.HouseSerializer
 
@@ -30,45 +30,46 @@ class HouseViewSet(ModelViewSet):
 
 class HouseList(ListAPIView):
     """
-    Api is available for any users
+    Api is available for any users even if they are not authenticated
     """
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (AllowAny, )
+    authentication_classes = []
     queryset = House.objects.all()
     serializer_class = house_serializers.HouseSerializer
 
 
 class BuildingViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Building.objects.all()
     serializer_class = house_serializers.BuildingSerializer
 
 
 class SectionViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Section.objects.all()
     serializer_class = house_serializers.SectionSerializer
 
 
 class FloorViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Floor.objects.all()
     serializer_class = house_serializers.FloorSerializer
 
 
 class NewsItemViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = NewsItem.objects.all()
     serializer_class = house_serializers.NewsItemSerializer
 
 
 class DocumentViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Document.objects.all()
     serializer_class = house_serializers.DocumentSerializer
 
 
 class FlatViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Flat.objects.all()
     serializer_class = house_serializers.FlatSerializer
     filter_backends = (filters.DjangoFilterBackend, )
