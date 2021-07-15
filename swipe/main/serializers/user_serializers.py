@@ -5,15 +5,16 @@ from _db.models.user import User, Contact, Message, Attachment
 
 class UserSerializer(serializers.ModelSerializer):
     uid = serializers.ReadOnlyField()
-    notifications = serializers.CharField(source='get_notifications_display')  # to display beauty name instead of const
-    role = serializers.CharField(source='get_role_display')  # to display beauty name instead of const
+    notifications_display = serializers.CharField(source='get_notifications_display', read_only=True)  # to display beauty name instead of const
+    role_display = serializers.CharField(source='get_role_display', read_only=True)  # to display beauty name instead of const
 
     class Meta:
         model = User
         fields = ['uid', 'first_name', 'last_name', 'email',
                   'phone_number', 'notifications', 'subscribed', 'end_date', 'role', 'photo', 'is_staff',
-                  'is_superuser']
+                  'is_superuser', 'notifications_display', 'role_display']
         read_only = ('email', )
+        write_only = ('notifications', 'role')
 
     def update(self, instance, validated_data):
         if validated_data.get('get_notifications_display'):
@@ -23,11 +24,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserContactSerializer(serializers.ModelSerializer):
     uid = serializers.ReadOnlyField()
-    role = serializers.CharField(source='get_role_display')
+    role_display = serializers.CharField(source='get_role_display', read_only=True)
 
     class Meta:
         model = User
-        fields = ['uid', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'photo']
+        fields = ['uid', 'first_name', 'last_name', 'email', 'phone_number', 'role', 'photo', 'role_display']
+        write_only = ('role', )
 
 
 class ContactSerializer(serializers.ModelSerializer):

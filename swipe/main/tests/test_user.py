@@ -90,7 +90,7 @@ class TestUser(APITestCase):
 
     def test_right_choice_field_name(self):
         response = self.client.get(self._url)
-        self.assertNotEqual(response.data['role'], 'USER')
+        self.assertNotEqual(response.data['role_display'], 'USER')
 
     def test_renew_subscription(self):
         url = reverse('main:update_subscription', args=[self._test_user_uid])

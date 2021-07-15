@@ -199,7 +199,7 @@ class TestHouse(APITestCase):
         url_filter_state = reverse('main:flats-list')
         response_state = self.client.get(url_filter_state, data={'state': 'BLANK'})
         self.assertEqual(response_state.status_code, 200)
-        self.assertEqual(response_state.data[0]['state'], 'BLANK')
+        self.assertEqual(response_state.data[0]['state_display'], 'После ремонта')
 
         url_filter_both = reverse('main:flats-list')
         response_both = self.client.get(url_filter_both, data={'price__lt': 201,
