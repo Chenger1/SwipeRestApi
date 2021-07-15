@@ -30,7 +30,8 @@ class TestHouse(APITestCase):
         url = reverse('main:houses-list')
         response = self.client.post(url, data={'name': 'House', 'address': 'Street',
                                                'tech': 'MONO1', 'territory': 'OPEN',
-                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT',
+                                               'city': 'Odessa'})
         self.assertEqual(response.status_code, 201)
         house = House.objects.first()
 
@@ -52,7 +53,8 @@ class TestHouse(APITestCase):
         url = reverse('main:houses-list')
         response = self.client.post(url, data={'name': 'House', 'address': 'Street',
                                                'tech': 'MONO1', 'territory': 'OPEN',
-                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT',
+                                               'city': 'Odessa'})
         self.assertEqual(response.status_code, 201)
 
         url_list = reverse('main:houses-list')
@@ -84,7 +86,8 @@ class TestHouse(APITestCase):
         url = reverse('main:houses-list')
         response = self.client.post(url, data={'name': 'House', 'address': 'Street',
                                                'tech': 'MONO1', 'territory': 'OPEN',
-                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT',
+                                               'city': 'Odessa'})
         self.assertEqual(response.status_code, 201)
 
         # Test editing house
@@ -156,7 +159,8 @@ class TestHouse(APITestCase):
         url = reverse('main:houses-list')
         response = self.client.post(url, data={'name': 'House', 'address': 'Street',
                                                'tech': 'MONO1', 'territory': 'OPEN',
-                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT',
+                                               'city': 'Odessa'})
         self.assertEqual(response.status_code, 201)
 
         url_news = reverse('main:news-list')
@@ -172,7 +176,8 @@ class TestHouse(APITestCase):
         file = SimpleUploadedFile('doc.docx', b'file_content', content_type='application/msword')
         response = self.client.post(url, data={'name': 'House', 'address': 'Street',
                                                'tech': 'MONO1', 'territory': 'OPEN',
-                                               'payment_options': 'MORTGAGE', 'role': 'FLAT'})
+                                               'payment_options': 'MORTGAGE', 'role': 'FLAT',
+                                               'city': 'Odessa'})
         self.assertEqual(response.status_code, 201)
 
         url_doc = reverse('main:documents-list')
