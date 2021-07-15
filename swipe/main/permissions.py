@@ -1,7 +1,7 @@
-from rest_framework.permissions import BasePermission
+from rest_framework import permissions
 
 
-class IsProfileOwner(BasePermission):
+class IsProfileOwner(permissions.BasePermission):
     """ Only profile owner can change his own info """
     def has_object_permission(self, request, view, obj):
         if request.user.is_staff:
@@ -12,35 +12,15 @@ class IsProfileOwner(BasePermission):
         return request.user and request.user.is_authenticated
 
 
-class IsOwner(BasePermission):
-    """
-    User can get access only for his personal info.
-    Trying to get another user info will be restricted
-    """
+class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.user.is_staff:
+        if request.user.is_superuser or request.user.is_staff:
             return True
-        if hasattr(obj, 'sender') and hasattr(obj, 'receiver'):
-            #  This condition checks permissions to get list of messages
-            return bool(obj.sender == request.user or obj.receiver == request.user)
-        elif hasattr(obj, 'user'):
-            return obj.user.uid == request.user.uid
-        elif hasattr(obj, 'sales_department'):
-            return obj.sales_department.uid == request.user.uid
-        elif obj.__class__.__name__ in ('NewsItem', 'Document'):
-            return obj.house.sales_department.uid == request.user.uid
-        elif obj.__class__.__name__ == 'Flat':
-            if obj.floor.section.building.house.sales_department.uid == request.user.uid:
-                return True
-            elif obj.client == request.user.uid:
-                return True
-            else:
-                return False
-        elif obj.__class__.__name__ == 'Floor':
-            return obj.section.building.house.sales_department.uid == request.user.uid
-        elif obj.__class__.__name__ == 'Section':
-            return obj.building.house.sales_department.uid == request.user.uid
-        elif obj.__class__.__name__ == 'Building':
-            return obj.house.sales_department.uid == request.user.uid
-        else:
-            return False
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.user == request.user
+
+
+class IsMessageSenderOrReceiver(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return bool(obj.sender == request.user or obj.receiver == request.user)

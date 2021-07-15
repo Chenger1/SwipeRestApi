@@ -40,6 +40,10 @@ class House(models.Model):
     sales_department = models.ForeignKey(User, related_name='managed_houses', on_delete=models.CASCADE,
                                          blank=True)
 
+    @property
+    def user(self):
+        return self.sales_department
+
 
 class NewsItem(models.Model):
     title = models.CharField(max_length=100)
@@ -47,31 +51,55 @@ class NewsItem(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     house = models.ForeignKey(House, related_name='news', on_delete=models.CASCADE)
 
+    @property
+    def user(self):
+        return self.house.user
+
 
 class Document(models.Model):
     name = models.CharField(max_length=100)
     file = models.FileField(upload_to='media/documents')
     house = models.ForeignKey(House, related_name='documents', on_delete=models.CASCADE)
 
+    @property
+    def user(self):
+        return self.house.user
+
 
 class Building(models.Model):
     name = models.CharField(max_length=50)
     house = models.ForeignKey(House, related_name='buildings', on_delete=models.CASCADE)
+
+    @property
+    def user(self):
+        return self.house.user
 
 
 class Section(models.Model):
     name = models.CharField(max_length=50)
     building = models.ForeignKey(Building, related_name='sections', on_delete=models.CASCADE)
 
+    @property
+    def user(self):
+        return self.building.user
+
 
 class Floor(models.Model):
     name = models.CharField(max_length=50)
     section = models.ForeignKey(Section, related_name='floors', on_delete=models.CASCADE)
 
+    @property
+    def user(self):
+        return self.section.user
+
 
 class Standpipe(models.Model):
     name = models.CharField(max_length=50)
     section = models.ForeignKey(Section, related_name='pipes', on_delete=models.CASCADE)
+
+    @property
+    def user(self):
+        return self.section.user
 
 
 class Flat(models.Model):
@@ -96,6 +124,10 @@ class Flat(models.Model):
     @property
     def booking_status(self):
         return 'Booked' if self.booked else 'Free'
+
+    @property
+    def user(self):
+        return self.floor.user
 
 
 class RequestToChest(models.Model):

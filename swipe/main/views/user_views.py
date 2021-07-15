@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from main.serializers import user_serializers
-from main.permissions import IsProfileOwner, IsOwner
+from main.permissions import IsProfileOwner, IsMessageSenderOrReceiver, IsOwnerOrReadOnly
 
 from _db.models.user import Contact, Message
 
@@ -90,7 +90,7 @@ class ChangeBanStatus(APIView):
 
 
 class ContactAPI(APIView):
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
 
     def get(self, request, role=None, format=None):
         """
@@ -134,7 +134,7 @@ class ContactAPI(APIView):
 
 
 class MessageApi(APIView):
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsMessageSenderOrReceiver)
 
     def get(self, request, uid=None, format=None):
         if request.user.uid != uid:
