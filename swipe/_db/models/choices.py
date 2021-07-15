@@ -4,7 +4,7 @@ status_choices = (
 )
 type_choices = (
     ('MANY', 'Многоквартирный'),
-    ('ONE', 'Индивидуальный')  # TODO: уточнить
+    ('ONE', 'Частный')
 )
 house_class_choices = (
     ('COMMON', 'Обычный'),
