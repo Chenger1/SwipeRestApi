@@ -145,6 +145,9 @@ class MessageApi(APIView):
         return Response(serializer.data)
 
     def post(self, request, uid=None, format=None):
+        if request.user.uid != request.data.get('sender'):
+            #  User can send message only from himself
+            return Response({'Error': 'You try send message from another person'})
         data = {
             'sender': get_object_or_404(User, uid=request.data['sender']),
             'receiver': get_object_or_404(User, uid=request.data['receiver']),
