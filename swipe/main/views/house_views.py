@@ -1,4 +1,4 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
@@ -30,9 +30,10 @@ class HouseViewSet(ModelViewSet):
 
 class HouseList(ListAPIView):
     """
-    Api is available for any users
+    Api is available for any users even if they are not authenticated
     """
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (AllowAny, )
+    authentication_classes = []
     queryset = House.objects.all()
     serializer_class = house_serializers.HouseSerializer
 

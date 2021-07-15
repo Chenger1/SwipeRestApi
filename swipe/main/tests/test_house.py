@@ -237,11 +237,11 @@ class TestHouse(APITestCase):
         self.assertEqual(updated_flat.client, None)
 
     def test_all_houses(self):
-        """Ensure we can get all house"""
+        """Ensure we can get all house even if we are not authenticated"""
         self.init_house_structure()
 
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+            HTTP_AUTHORIZATION=''
         )
 
         url = reverse('main:all_houses_list')
