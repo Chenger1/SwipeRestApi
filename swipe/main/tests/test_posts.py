@@ -33,21 +33,34 @@ class TestPost(APITestCase):
                                                'payment_options': 'MORTGAGE', 'role': 'FLAT',
                                                'city': 'Odessa'})
         self.assertEqual(response.status_code, 201)
+
+        response = self.client.post(url, data={'name': 'House', 'address': 'Street',
+                                               'tech': 'MONO1', 'territory': 'CLOSE',
+                                               'payment_options': 'PAYMENT', 'role': 'FLAT',
+                                               'city': 'Kiev'})
+        self.assertEqual(response.status_code, 201)
+        house2 = House.objects.last()
         house = House.objects.first()
 
         building = Building.objects.create(name='One', house=house)
+        building2 = Building.objects.create(name='Two', house=house2)
+
         section = Section.objects.create(name='One', building=building)
+        section2 = Section.objects.create(name='Two', building=building2)
+
         floor = Floor.objects.create(name='One', section=section)
+        floor2 = Floor.objects.create(name='Twi', section=section2)
+
         file1 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         file2 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         flat1 = Flat.objects.create(number=1, square=100, kitchen_square=1, price_per_metre=100, price=100,
                                     number_of_rooms=2, state='BLANK', foundation_doc='OWNER', plan='FREE',
                                     balcony='YES', floor=floor, schema=file1)
         flat2 = Flat.objects.create(number=1, square=200, kitchen_square=1, price_per_metre=200, price=200,
-                                    number_of_rooms=2, state='EURO', foundation_doc='OWNER', plan='FREE',
-                                    balcony='YES', floor=floor, schema=file2)
+                                    number_of_rooms=2, state='EURO', foundation_doc='OWNER', plan='STUDIO',
+                                    balcony='YES', floor=floor2, schema=file2)
 
-        return house, building, section, floor, flat1, flat2
+        return house, house2, building, section, floor, flat1, flat2
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_crud_operations_for_post(self):
@@ -108,7 +121,8 @@ class TestPost(APITestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_filters(self):
-        house, *_, flat1, flat2 = self.init_house_structure()
+        house, house2, *_, flat1, flat2 = self.init_house_structure()
+
         url_create = reverse('main:posts-list')
         with open(self.temp_media_image_path, 'rb') as file:
             response_create = self.client.post(url_create, data={'flat': flat1.pk,
@@ -119,7 +133,7 @@ class TestPost(APITestCase):
         self.assertEqual(response_create.status_code, 201)
         with open(self.temp_media_image_path, 'rb') as file:
             response_create = self.client.post(url_create, data={'flat': flat2.pk,
-                                                                 'house': house.pk,
+                                                                 'house': house2.pk,
                                                                  'price': 1000,
                                                                  'payment_options': 'PAYMENT',
                                                                  'main_image': file})
@@ -130,3 +144,14 @@ class TestPost(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['flat_info']['square'], 200)
+
+        response2 = self.client.get(url, data={'flat__plan': 'FREE',
+                                               'price__gt': 1000})
+        self.assertEqual(response2.status_code, 200)
+        self.assertEqual(response2.data[0]['price'], 100000)
+        self.assertEqual(response2.data[0]['flat_info']['plan'], 'Свободная планировка')
+
+        response3 = self.client.get(url, data={'house__city': 'Kiev',
+                                               'payment_options': 'PAYMENT'})
+        self.assertEqual(response3.status_code, 200)
+        self.assertEqual(response3.data[0]['flat_info']['city'], 'Kiev')

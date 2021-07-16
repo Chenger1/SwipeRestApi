@@ -33,8 +33,20 @@ class PostFilter(filters.FilterSet):
     class Meta:
         model = Post
         fields = {
-            'type': ['exact'],
+            'living_type': ['exact'],
             'payment_options': ['exact'],
-            'price': ['gt', 'lt'],
-            'flat__square': ['gt', 'lt']
+            'price': ['gt', 'lt', 'exact'],
+            'flat__square': ['gt', 'lt'],
+            'flat__price_per_metre': ['gt', 'lt'],
+            'flat__number_of_rooms': ['exact', 'gt', 'lt'],
+            'flat__state': ['exact'],
+            'flat__foundation_doc': ['exact'],
+            'flat__type': ['exact'],
+            'flat__plan': ['exact'],
+            'flat__balcony': ['exact'],
+            'flat__heating': ['exact'],
+            'house__city': ['exact'],
+            'house__status': ['exact'],
+            'house__territory': ['exact'],
+            'house__house_class': ['exact']
         }
