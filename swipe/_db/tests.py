@@ -114,9 +114,9 @@ class TestPost(TestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_create_post(self):
-        *_, flat = self.init_house_structure()
+        house, *_, flat = self.init_house_structure()
         inst = Post.objects.create(payment_options='PAYMENT', price=12,
-                                   flat=flat, user=self.user)
+                                   flat=flat, user=self.user, house=house)
         self.assertIn(inst, Post.objects.all())
         self.assertEqual(inst.price, 12)
 
@@ -132,9 +132,9 @@ class TestPost(TestCase):
         self.assertEqual(inst.price, 1)
 
     def test_create_promotion(self):
-        *_, flat = self.init_house_structure()
+        house, *_, flat = self.init_house_structure()
         post = Post.objects.create(payment_options='PAYMENT', price=12,
-                                   flat=flat, user=self.user)
+                                   flat=flat, user=self.user, house=house)
         promotion_type = PromotionType.objects.create(name='first', price=1, efficiency=10)
         promo = Promotion.objects.create(post=post, type=promotion_type,
                                          phrase='GIFT', color='PINK', price=10)
