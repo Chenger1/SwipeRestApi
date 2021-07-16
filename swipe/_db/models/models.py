@@ -119,6 +119,7 @@ class Flat(models.Model):
     type = models.CharField(choices=flat_type_choices, default='FLAT', max_length=6)
     plan = models.CharField(choices=plan_choices, max_length=8)
     balcony = models.CharField(choices=balcony_choices, max_length=3)
+    heating = models.CharField(choices=heating_choices, default='NO', max_length=8)
 
     floor = models.ForeignKey(Floor, related_name='flats', on_delete=models.CASCADE)
     client = models.ForeignKey(User, related_name='flats', on_delete=models.SET_NULL, blank=True, null=True)
@@ -146,23 +147,14 @@ class RequestToChest(models.Model):
 
 
 class Post(models.Model):
-    address = models.CharField(max_length=100)
-    foundation_doc = models.CharField(choices=foundation_doc_choices, max_length=5, blank=True, null=True)
     type = models.CharField(choices=type_choices, default='FLAT', max_length=6, blank=True, null=True)
-    number_of_rooms = models.IntegerField()
-    plan = models.CharField(choices=plan_choices, max_length=8)
-    state = models.CharField(choices=state_choices, max_length=5, blank=True, null=True)
-    square = models.FloatField()
-    kitchen_square = models.FloatField(blank=True, null=True)
-    balcony = models.CharField(choices=balcony_choices, max_length=3, default='NO')
-    heating = models.CharField(choices=heating_choices, default='NO', max_length=8)
     payment_options = models.CharField(choices=payment_options_choices, max_length=8)
     agent_coms = models.CharField(choices=agent_coms_choices, max_length=7, blank=True, null=True)
     communications = models.CharField(choices=communication_choices, max_length=7,
                                       default='BOTH')
     description = models.TextField(blank=True, null=True)
     price = models.IntegerField()
-    house = models.ForeignKey(House, related_name='posts', on_delete=models.CASCADE)
+    flat = models.ForeignKey(Flat, related_name='posts', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE)
     likes = models.IntegerField(default=0)
     views = models.IntegerField(default=0)
@@ -170,12 +162,16 @@ class Post(models.Model):
     published = models.BooleanField(default=False)
     rejected = models.BooleanField(default=False)
     reject_message = models.CharField(choices=reject_message_choices, max_length=5, blank=True, null=True)
+    main_image = models.ImageField(upload_to='posts/')
 
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, related_name='images', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
     image = models.ImageField(upload_to='media/posts')
+
+    @property
+    def user(self):
+        return self.post.user
 
 
 class Complaint(models.Model):
