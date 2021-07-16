@@ -27,6 +27,7 @@ router.register('post_images', post_views.PostImageViewSet, basename='post_image
 # public routers
 router.register('houses_public', house_views.HousePublic, basename='houses_public')
 router.register('flats_public', house_views.FlatPublic, basename='flats_public')
+router.register('posts_public', post_views.PostViewSetPublic, basename='posts_public')
 
 
 app_name = 'main'

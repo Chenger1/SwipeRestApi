@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from _db.models.models import Flat, House
+from _db.models.models import Flat, House, Post
 
 
 class FlatFilter(filters.FilterSet):
@@ -26,4 +26,15 @@ class HouseFilter(filters.FilterSet):
             'car_park': ['exact'],
             'child_playground': ['exact'],
             'security': ['exact']
+        }
+
+
+class PostFilter(filters.FilterSet):
+    class Meta:
+        model = Post
+        fields = {
+            'type': ['exact'],
+            'payment_options': ['exact'],
+            'price': ['gt', 'lt'],
+            'flat__square': ['gt', 'lt']
         }

@@ -103,3 +103,26 @@ class TestPost(APITestCase):
         response_delete = self.client.delete(url_edit)
         self.assertEqual(response_delete.status_code, 204)
         self.assertEqual(PostImage.objects.count(), 0)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_post_filters(self):
+        *_, flat1, flat2 = self.init_house_structure()
+        url_create = reverse('main:posts-list')
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_create = self.client.post(url_create, data={'flat': flat1.pk,
+                                                                 'price': 100000,
+                                                                 'payment_options': 'PAYMENT',
+                                                                 'main_image': file})
+        self.assertEqual(response_create.status_code, 201)
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_create = self.client.post(url_create, data={'flat': flat2.pk,
+                                                                 'price': 1000,
+                                                                 'payment_options': 'PAYMENT',
+                                                                 'main_image': file})
+        self.assertEqual(response_create.status_code, 201)
+
+        url = reverse('main:posts_public-list')
+        response = self.client.get(url, data={'flat__square__gt': 100})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['flat_info']['square'], 200)
