@@ -22,6 +22,7 @@ router.register('requests', house_views.RequestToChestApi, basename='requests')
 
 # POST
 router.register('posts', post_views.PostViewSet, basename='posts')
+router.register('post_images', post_views.PostImageViewSet, basename='post_images')
 
 # public routers
 router.register('houses_public', house_views.HousePublic, basename='houses_public')

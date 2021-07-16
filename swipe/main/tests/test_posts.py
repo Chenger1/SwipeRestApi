@@ -75,3 +75,31 @@ class TestPost(APITestCase):
         response_delete = self.client.delete(url_detail)
         self.assertEqual(response_delete.status_code, 204)
         self.assertEqual(Post.objects.count(), 0)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_crud_for_post_images(self):
+        *_, flat = self.init_house_structure()
+
+        url_create = reverse('main:posts-list')
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_create = self.client.post(url_create, data={'flat': flat.pk,
+                                                                 'price': 100000,
+                                                                 'payment_options': 'PAYMENT',
+                                                                 'main_image': file})
+        self.assertEqual(response_create.status_code, 201)
+
+        url_create_image = reverse('main:post_images-list')
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_images = self.client.post(url_create_image, data={'post': response_create.data['id'],
+                                                                       'image': file})
+        self.assertEqual(response_images.status_code, 201)
+        self.assertEqual(PostImage.objects.count(), 1)
+
+        url_edit = reverse('main:post_images-detail', args=[PostImage.objects.first().pk])
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_edit = self.client.patch(url_edit, data={'image': file})
+        self.assertEqual(response_edit.status_code, 200)
+
+        response_delete = self.client.delete(url_edit)
+        self.assertEqual(response_delete.status_code, 204)
+        self.assertEqual(PostImage.objects.count(), 0)
