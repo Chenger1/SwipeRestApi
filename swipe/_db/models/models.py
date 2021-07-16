@@ -155,6 +155,7 @@ class Post(models.Model):
     description = models.TextField(blank=True, null=True)
     price = models.IntegerField()
     flat = models.ForeignKey(Flat, related_name='posts', on_delete=models.CASCADE)
+    house = models.ForeignKey(House, related_name='posts', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE)
     likes = models.IntegerField(default=0)
     views = models.IntegerField(default=0)

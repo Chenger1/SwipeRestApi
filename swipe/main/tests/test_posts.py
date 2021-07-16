@@ -51,11 +51,12 @@ class TestPost(APITestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_crud_operations_for_post(self):
-        *_, flat = self.init_house_structure()
+        house, *_, flat = self.init_house_structure()
 
         url_create = reverse('main:posts-list')
         with open(self.temp_media_image_path, 'rb') as file:
             response_create = self.client.post(url_create, data={'flat': flat.pk,
+                                                                 'house': house.pk,
                                                                  'price': 100000,
                                                                  'payment_options': 'PAYMENT',
                                                                  'main_image': file})
@@ -78,11 +79,12 @@ class TestPost(APITestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_crud_for_post_images(self):
-        *_, flat = self.init_house_structure()
+        house, *_, flat = self.init_house_structure()
 
         url_create = reverse('main:posts-list')
         with open(self.temp_media_image_path, 'rb') as file:
             response_create = self.client.post(url_create, data={'flat': flat.pk,
+                                                                 'house': house.pk,
                                                                  'price': 100000,
                                                                  'payment_options': 'PAYMENT',
                                                                  'main_image': file})
@@ -106,16 +108,18 @@ class TestPost(APITestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_filters(self):
-        *_, flat1, flat2 = self.init_house_structure()
+        house, *_, flat1, flat2 = self.init_house_structure()
         url_create = reverse('main:posts-list')
         with open(self.temp_media_image_path, 'rb') as file:
             response_create = self.client.post(url_create, data={'flat': flat1.pk,
+                                                                 'house': house.pk,
                                                                  'price': 100000,
                                                                  'payment_options': 'PAYMENT',
                                                                  'main_image': file})
         self.assertEqual(response_create.status_code, 201)
         with open(self.temp_media_image_path, 'rb') as file:
             response_create = self.client.post(url_create, data={'flat': flat2.pk,
+                                                                 'house': house.pk,
                                                                  'price': 1000,
                                                                  'payment_options': 'PAYMENT',
                                                                  'main_image': file})
