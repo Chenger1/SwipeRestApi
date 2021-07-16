@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token
 
-from _db.models.models import House, NewsItem, Flat, Building, Section, Floor
+from _db.models.models import House, NewsItem, Flat, Building, Section, Floor, RequestToChest
 
 import tempfile
 import os
@@ -304,3 +304,57 @@ class TestHouse(APITestCase):
         response_filter_by_distance = self.client.get(url, data={'distance_to_sea__gt': 10})
         self.assertEqual(response_filter_by_distance.status_code, 200)
         self.assertEqual(response_filter_by_distance.data[0]['distance_to_sea'], 12)
+
+    def test_request_to_chest(self):
+        *_, flat = self.init_house_structure()
+
+        url = reverse('main:booking_flat', args=[flat.pk])
+        response = self.client.patch(url, data={'booking': '1'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(RequestToChest.objects.count(), 1)  # Test that request has been created
+
+        # Test requests list
+        url_requests_list = reverse('main:requests-list')
+        response_list = self.client.get(url_requests_list)
+        self.assertEqual(response_list.status_code, 200)
+        self.assertGreater(len(response_list.data), 0)
+
+        # Test getting detail of concrete request
+        url_request_detail = reverse('main:requests-detail', args=[response_list.data[0]['id']])
+        response_detail = self.client.get(url_request_detail)
+        self.assertEqual(response_detail.status_code, 200)
+        self.assertEqual(response_detail.data['id'], response_list.data[0]['id'])
+
+        # Test approving request
+        url_request_approve = reverse('main:requests-detail', args=[response_detail.data['id']])
+        response_approve = self.client.patch(url_request_approve, data={'approved': True})
+        self.assertEqual(response_approve.status_code, 200)
+        self.assertTrue(RequestToChest.objects.first().approved)
+        self.assertTrue(Flat.objects.get(pk=response_approve.data['flat']).owned)
+
+        # Ensure we cant booked flat that has already been booked by another user
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+        )
+        url = reverse('main:booking_flat', args=[flat.pk])
+        response = self.client.patch(url, data={'booking': '1'})
+        self.assertEqual(response.status_code, 400)
+
+        # Test disapprove request
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'JWT {self._token}'
+        )
+        response_disapprove = self.client.patch(url_request_approve, data={'approved': False})
+        self.assertEqual(response_disapprove.status_code, 200)
+        self.assertFalse(RequestToChest.objects.first().approved)
+        self.assertFalse(Flat.objects.get(pk=response_disapprove.data['flat']).owned)
+        self.assertFalse(Flat.objects.get(pk=response_disapprove.data['flat']).booked)
+
+        # Ensure we can book flat if it is free
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+        )
+        url_two = reverse('main:booking_flat', args=[flat.pk])
+        response_two = self.client.patch(url_two, data={'booking': '1'})
+        self.assertEqual(response_two.status_code, 200)
+        self.assertEqual(RequestToChest.objects.count(), 2)

@@ -1,6 +1,17 @@
 from rest_framework import serializers
 
-from _db.models.models import House, Building, Section, Floor, NewsItem, Standpipe, Document, Flat
+from _db.models.models import House, Building, Section, Floor, NewsItem, Standpipe, Document, Flat, RequestToChest
+
+
+class HouseDetailFlatSerializer(serializers.ModelSerializer):
+    floor = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Flat
+        fields = ('number', 'square', 'floor', 'client', 'booked')
+
+    def get_floor(self, obj):
+        return obj.floor.name
 
 
 class HouseSerializer(serializers.ModelSerializer):
@@ -19,6 +30,8 @@ class HouseSerializer(serializers.ModelSerializer):
     payment_options_display = serializers.CharField(source='get_payment_options_display', read_only=True)
     role_display = serializers.CharField(source='get_role_display', read_only=True)
     sum_in_contract_display = serializers.CharField(source='get_sum_in_contract_display', read_only=True)
+
+    flats = HouseDetailFlatSerializer(read_only=True, many=True)
 
     class Meta:
         model = House
@@ -109,3 +122,33 @@ class FlatSerializer(serializers.ModelSerializer):
             'plan': {'write_only': True},
             'balcony': {'write_only': True}
         }
+
+
+class HouseInRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = House
+        fields = ('name', 'address', 'role', 'city')
+
+
+class FlatInRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Flat
+        fields = ('number', 'floor', 'booked', 'client')
+
+
+class RequestToChestSerializer(serializers.ModelSerializer):
+    house_display = HouseInRequestSerializer(read_only=True)
+    flat_display = FlatInRequestSerializer(read_only=True)
+
+    class Meta:
+        model = RequestToChest
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        flat = instance.flat
+        flat.owned = validated_data['approved']
+        flat.booked = validated_data['approved']
+        if not validated_data['approved']:
+            flat.client = None
+        flat.save()
+        return super().update(instance, validated_data)

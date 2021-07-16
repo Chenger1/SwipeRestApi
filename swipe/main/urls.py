@@ -16,6 +16,7 @@ router.register('floors', house_views.FloorViewSet, basename='floors')
 router.register('news', house_views.NewsItemViewSet, basename='news')
 router.register('documents', house_views.DocumentViewSet, basename='documents')
 router.register('flats', house_views.FlatViewSet, basename='flats')
+router.register('requests', house_views.RequestToChestApi, basename='requests')
 
 # public routers
 router.register('houses_public', house_views.HousePublic, basename='houses_public')

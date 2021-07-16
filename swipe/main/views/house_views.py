@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -9,11 +9,11 @@ from django.shortcuts import get_object_or_404
 
 from django_filters import rest_framework as filters
 
-from main.permissions import IsOwnerOrReadOnly
+from main.permissions import IsOwnerOrReadOnly, IsOwner
 from main.serializers import house_serializers
 from main.filters import FlatFilter, HouseFilter
 
-from _db.models.models import House, Building, Section, Floor, NewsItem, Document, Flat
+from _db.models.models import House, Building, Section, Floor, NewsItem, Document, Flat, RequestToChest
 
 
 class HouseViewSet(ModelViewSet):
@@ -110,16 +110,41 @@ class BookingFlat(APIView):
         if request.data.get('booking') == '1' and not flat.client:
             flat.client = request.user
             flat.booked = True
+
+            # After we booked flat - we have to send request to the house owner fro adding new info to house chest
+            data_for_request = {
+                'house': flat.floor.section.building.house.pk,
+                'flat': flat.pk
+            }
+            serializer = house_serializers.RequestToChestSerializer(data=data_for_request)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response({'Error': 'Error while creating request to chest. Connect to administration'})
         elif request.data.get('booking') == '0':
             if flat.client == request.user or is_house_owner:
                 flat.client = None
                 flat.booked = False
+                flat.owned = False
             else:
                 return Response({'Error': 'You cannot remove current client from this flat'},
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'Error': 'You can book this flat'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Error': 'You cant book this flat'}, status=status.HTTP_400_BAD_REQUEST)
         flat.save()
         return Response({'pk': flat.pk,
                          'user_uid': request.user.uid,
                          'status': flat.booking_status}, status=status.HTTP_200_OK,)
+
+
+class RequestToChestApi(ListModelMixin,
+                        RetrieveModelMixin,
+                        UpdateModelMixin,
+                        GenericViewSet):
+    """ Manage requests to chest. Only house`s sales department can get its requests """
+    permission_classes = (IsAuthenticated, IsOwner)
+    queryset = RequestToChest.objects.all()
+    serializer_class = house_serializers.RequestToChestSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(house__sales_department=self.request.user)

@@ -122,7 +122,8 @@ class Flat(models.Model):
 
     floor = models.ForeignKey(Floor, related_name='flats', on_delete=models.CASCADE)
     client = models.ForeignKey(User, related_name='flats', on_delete=models.SET_NULL, blank=True, null=True)
-    booked = models.BooleanField(default=False)
+    booked = models.BooleanField(default=False)  # If client booked flat - no one else can do it. BUT he does`t own it
+    owned = models.BooleanField(default=False)  # If owned is True = client is displaying in house list.
 
     @property
     def booking_status(self):
