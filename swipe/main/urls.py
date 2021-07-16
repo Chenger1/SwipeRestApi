@@ -2,6 +2,7 @@ from django.urls import path, include
 
 from main.views import user_views
 from main.views import house_views
+from main.views import post_views
 
 from rest_framework.routers import SimpleRouter
 
@@ -9,6 +10,7 @@ router = SimpleRouter()
 router.register('users', user_views.UserViewSet)
 router.register('users/notary/admin-access', user_views.NotaryUsersApi, basename='users_notary_admin')
 
+# HOUSE
 router.register('houses', house_views.HouseViewSet, basename='houses')
 router.register('buildings', house_views.BuildingViewSet, basename='buildings')
 router.register('sections', house_views.SectionViewSet, basename='sections')
@@ -17,6 +19,9 @@ router.register('news', house_views.NewsItemViewSet, basename='news')
 router.register('documents', house_views.DocumentViewSet, basename='documents')
 router.register('flats', house_views.FlatViewSet, basename='flats')
 router.register('requests', house_views.RequestToChestApi, basename='requests')
+
+# POST
+router.register('posts', post_views.PostViewSet, basename='posts')
 
 # public routers
 router.register('houses_public', house_views.HousePublic, basename='houses_public')

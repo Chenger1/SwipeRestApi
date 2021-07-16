@@ -12,7 +12,8 @@ class TestHouse(TestCase):
     def setUp(self) -> None:
         self.user = User.objects.create(uid='123', email='user@mail.com')
         self.inst = House.objects.create(name='test_house', address='address', tech='MONO1',
-                                         payment_options='PAYMENT', role='FLAT', sales_department=self.user)
+                                         payment_options='PAYMENT', role='FLAT', sales_department=self.user,
+                                         city='Odessa')
 
     def test_create_house(self):
         inst = House.objects.create(name='house', address='address', tech='MONO1',
@@ -91,17 +92,36 @@ class TestPost(TestCase):
         self.house = House.objects.create(name='test_house', address='address', tech='MONO1',
                                           payment_options='PAYMENT', role='FLAT', sales_department=self.user)
 
+    def init_house_structure(self):
+        self.inst = House.objects.create(name='test_house', address='address', tech='MONO1',
+                                         payment_options='PAYMENT', role='FLAT', sales_department=self.user,
+                                         city='Odessa')
+        house = House.objects.first()
+
+        building = Building.objects.create(name='One', house=house)
+        section = Section.objects.create(name='One', building=building)
+        floor = Floor.objects.create(name='One', section=section)
+        file1 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
+        file2 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
+        flat1 = Flat.objects.create(number=1, square=100, kitchen_square=1, price_per_metre=100, price=100,
+                                    number_of_rooms=2, state='BLANK', foundation_doc='OWNER', plan='FREE',
+                                    balcony='YES', floor=floor, schema=file1)
+        flat2 = Flat.objects.create(number=1, square=200, kitchen_square=1, price_per_metre=200, price=200,
+                                    number_of_rooms=2, state='EURO', foundation_doc='OWNER', plan='FREE',
+                                    balcony='YES', floor=floor, schema=file2)
+
+        return house, building, section, floor, flat1, flat2
+
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_create_post(self):
-        inst = Post.objects.create(address='1', foundation_doc='OWNER',
-                                   number_of_rooms=1, plan='FREE', square=12,
-                                   payment_options='PAYMENT', price=12,
-                                   house=self.house, user=self.user)
+        *_, flat = self.init_house_structure()
+        inst = Post.objects.create(payment_options='PAYMENT', price=12,
+                                   flat=flat, user=self.user)
         self.assertIn(inst, Post.objects.all())
-        self.assertEqual(inst.address, '1')
+        self.assertEqual(inst.price, 12)
 
         img = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
-        image = PostImage.objects.create(name='1', image=img, post=inst)
+        image = PostImage.objects.create(image=img, post=inst)
         self.assertIn(image, inst.images.all())
 
         complaint = Complaint.objects.create(post=inst, user=self.user, type='PRICE')
@@ -112,10 +132,9 @@ class TestPost(TestCase):
         self.assertEqual(inst.price, 1)
 
     def test_create_promotion(self):
-        post = Post.objects.create(address='1', foundation_doc='OWNER',
-                                   number_of_rooms=1, plan='FREE', square=12,
-                                   payment_options='PAYMENT', price=12,
-                                   house=self.house, user=self.user)
+        *_, flat = self.init_house_structure()
+        post = Post.objects.create(payment_options='PAYMENT', price=12,
+                                   flat=flat, user=self.user)
         promotion_type = PromotionType.objects.create(name='first', price=1, efficiency=10)
         promo = Promotion.objects.create(post=post, type=promotion_type,
                                          phrase='GIFT', color='PINK', price=10)
