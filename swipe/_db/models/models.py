@@ -147,7 +147,7 @@ class RequestToChest(models.Model):
 
 
 class Post(models.Model):
-    type = models.CharField(choices=type_choices, default='FLAT', max_length=6, blank=True, null=True)
+    living_type = models.CharField(choices=type_choices, default='FLAT', max_length=6, blank=True, null=True)
     payment_options = models.CharField(choices=payment_options_choices, max_length=8)
     agent_coms = models.CharField(choices=agent_coms_choices, max_length=7, blank=True, null=True)
     communications = models.CharField(choices=communication_choices, max_length=7,
