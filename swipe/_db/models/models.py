@@ -14,7 +14,7 @@ class House(models.Model):
     lat = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     image = models.ImageField(upload_to='media/houses', blank=True, null=True)
     status = models.CharField(choices=status_choices, default='FLAT', max_length=7)
-    type = models.CharField(choices=type_choices, default='MANE', max_length=5)
+    type = models.CharField(choices=type_choices, default='MANE', max_length=9)
     house_class = models.CharField(choices=house_class_choices, default='COMMON', max_length=6)
     tech = models.CharField(choices=tech_choices, max_length=10)  # TODO: Maybe we can dynamically add new tech
     territory = models.CharField(choices=territory_choices, max_length=5)
@@ -153,7 +153,7 @@ class RequestToChest(models.Model):
 
 
 class Post(models.Model):
-    living_type = models.CharField(choices=type_choices, default='FLAT', max_length=6, blank=True, null=True)
+    living_type = models.CharField(choices=type_choices, default='MANY', max_length=9, blank=True, null=True)
     payment_options = models.CharField(choices=payment_options_choices, max_length=8)
     agent_coms = models.CharField(choices=agent_coms_choices, max_length=7, blank=True, null=True)
     communications = models.CharField(choices=communication_choices, max_length=7,

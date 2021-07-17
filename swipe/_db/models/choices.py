@@ -4,7 +4,10 @@ status_choices = (
 )
 type_choices = (
     ('MANY', 'Многоквартирный'),
-    ('ONE', 'Частный')
+    ('ONE', 'Частный'),
+    ('NOVOSTROY', 'Новострой'),
+    ('SECONDARY', 'Вторичный рынок'),
+    ('COTTAGES', 'Коттеджи'),
 )
 house_class_choices = (
     ('COMMON', 'Обычный'),
@@ -46,7 +49,7 @@ water_supply_choices = (
     ('PERSONAL', 'Индивидуальная')
 )
 communal_payments_choices = (
-    ('PAYMENTS', 'Платежи'),  # TODO: уточнить
+    ('PAYMENTS', 'Платежи'),
 )
 completion_choices = (
     ('LAW', 'ЮСТИЦИЯ'),
