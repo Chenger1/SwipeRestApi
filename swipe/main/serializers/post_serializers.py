@@ -2,6 +2,9 @@ from rest_framework import serializers
 
 from _db.models.models import Post, PostImage, UserFavorites
 
+import datetime
+import pytz
+
 
 class PostImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,6 +15,9 @@ class PostImageSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     images = PostImageSerializer(many=True, read_only=True)
     flat_info = serializers.SerializerMethodField()
+
+    created_display = serializers.DateTimeField(source='created')
+    created = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
         model = Post
@@ -42,6 +48,9 @@ class PostSerializer(serializers.ModelSerializer):
         if validated_data.get('likes'):
             likes = validated_data.pop('likes')
             instance.likes += int(likes)
+        if validated_data.get('created'):
+            validated_data.pop('created')
+            instance.created = datetime.datetime.now(tz=pytz.UTC)
         return super().update(instance, validated_data)
 
 

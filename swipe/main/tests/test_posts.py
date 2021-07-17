@@ -11,6 +11,7 @@ from _db.models.models import *
 
 import os
 import tempfile
+import datetime
 
 
 class TestPost(APITestCase):
@@ -209,6 +210,7 @@ class TestPost(APITestCase):
         self.client.get(url_get)
         self.assertEqual(Post.objects.first().views, 3)
 
+        # Ensure we can like and dislike post
         url_like = reverse('main:posts-detail', args=[response_create.data['id']])
         response_increment_like = self.client.patch(url_like, data={'likes': 1})
         self.assertEqual(response_increment_like.status_code, 200)
@@ -217,3 +219,28 @@ class TestPost(APITestCase):
         response_decrement_like = self.client.patch(url_like, data={'likes': -1})
         self.assertEqual(response_decrement_like.status_code, 200)
         self.assertEqual(Post.objects.first().likes, 0)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_post_confirm_relevance(self):
+        """Ensure views counter is incremented for post"""
+        house, *_, flat = self.init_house_structure()
+
+        url_create = reverse('main:posts-list')
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_create = self.client.post(url_create, data={'flat': flat.pk,
+                                                                 'house': house.pk,
+                                                                 'price': 100000,
+                                                                 'payment_options': 'PAYMENT',
+                                                                 'main_image': file})
+        self.assertEqual(response_create.status_code, 201)
+        post = Post.objects.first()
+        post.created = datetime.date(year=2021, month=6, day=10)
+        post.save()
+        self.assertEqual(Post.objects.first().created.month, 6)
+
+        url = reverse('main:posts-detail', args=[response_create.data['id']])
+        response = self.client.patch(url, data={'created': True})
+        self.assertEqual(response.status_code, 200)
+        post = Post.objects.first()
+        self.assertEqual(post.created.month, 7)
+        self.assertEqual(post.created.day, 17)
