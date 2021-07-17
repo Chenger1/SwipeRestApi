@@ -1,7 +1,8 @@
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 
+from django.db.models import Count
 from django_filters import rest_framework as filters
 
 from main.permissions import IsOwner, IsOwnerOrReadOnly
@@ -32,7 +33,7 @@ class PostViewSetPublic(ListModelMixin,
     """ Allow all users to see publications"""
     permission_classes = (AllowAny, )
     authentication_classes = []
-    queryset = Post.objects.all()
+    queryset = Post.objects.filter(rejected=False)
     serializer_class = post_serializers.PostSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PostFilter
@@ -57,7 +58,7 @@ class UserFavoritesViewSet(ModelViewSet):
     serializer_class = post_serializers.UserFavoritesWritableSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        return self.queryset.filter(user=self.request.user, post__rejected=False)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -106,3 +107,20 @@ class ComplaintsAdmin(ListModelMixin,
         if self.request.data.get('post'):
             return self.request.filter(post__pk=self.request.data.get('post'))
         return self.queryset
+
+
+class PostModerationAdmin(RetrieveModelMixin,
+                          UpdateModelMixin,
+                          ListModelMixin,
+                          GenericViewSet):
+    permission_classes = (IsAuthenticated, IsAdminUser)
+    queryset = Post.objects.annotate(comp_count=Count('complaints')).filter(comp_count__gt=0)
+    # Filter only posts with complaints
+    serializer_class = post_serializers.PostSerializer
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return self.serializer_class
+        if self.action in ('update', ):
+            return post_serializers.RejectPostSerializer
+        return self.serializer_class

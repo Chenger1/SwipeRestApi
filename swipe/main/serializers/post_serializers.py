@@ -72,3 +72,9 @@ class ComplaintSerializer(serializers.ModelSerializer):
     class Meta:
         model = Complaint
         fields = ('id', 'post', 'type')
+
+
+class RejectPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ('id', 'rejected', 'reject_message')

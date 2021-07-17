@@ -278,7 +278,6 @@ class TestPost(APITestCase):
         self.assertEqual(response_delete.status_code, 204)
         self.assertEqual(Complaint.objects.count(), 1)
 
-
         # Ensure non admin cant get access to this view
         user.is_staff = False
         user.save()
@@ -286,3 +285,48 @@ class TestPost(APITestCase):
         url_error = reverse('main:complaints_admin-list')
         response_error = self.client.get(url_error)
         self.assertEqual(response_error.status_code, 403)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_post_moderation_by_admin(self):
+        """Ensure admin can moderate posts"""
+        house, *_, flat = self.init_house_structure()
+        post = self.init_post(house, flat)
+
+        user = User.objects.get(uid=self._test_user_uid)
+        user.is_staff = True
+        user.save()  # Ensure test user has required permissions
+
+        url_list = reverse('main:posts_moderation-list')
+        response_list_empty = self.client.get(url_list)
+        self.assertEqual(response_list_empty.status_code, 200)
+        self.assertEqual(len(response_list_empty.data), 0)
+
+        # Add complaint
+        url_add = reverse('main:complaints-list')
+        self.client.post(url_add, data={'post': post.pk,
+                                        'type': 'PRICE'})
+
+        # Ensure we can filter posts by complaints
+        response_list = self.client.get(url_list)
+        self.assertEqual(response_list.status_code, 200)
+        self.assertGreater(len(response_list.data), 0)
+
+        url_detail = reverse('main:posts_moderation-detail', args=[post.pk])
+        response_reject = self.client.patch(url_detail, data={'rejected': True,
+                                                              'reject_message': 'PRICE'})
+        self.assertEqual(response_reject.status_code, 200)
+        self.assertTrue(Post.objects.first().rejected)
+
+        user.is_staff = False
+        user.save()
+
+        # Ensure rejected post wont be displaying in public list
+        url_public_list = reverse('main:posts_public-list')
+        response_public = self.client.get(url_public_list)
+        self.assertEqual(response_public.status_code, 200)
+        self.assertEqual(len(response_public.data), 0)
+
+        # Ensure non admin cant get access to this view
+        url_list = reverse('main:posts_moderation-list')
+        response_list_empty = self.client.get(url_list)
+        self.assertEqual(response_list_empty.status_code, 403)
