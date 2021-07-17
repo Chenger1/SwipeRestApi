@@ -160,7 +160,6 @@ class Post(models.Model):
     likes = models.IntegerField(default=0)
     views = models.IntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
-    published = models.BooleanField(default=False)
     rejected = models.BooleanField(default=False)
     reject_message = models.CharField(choices=reject_message_choices, max_length=5, blank=True, null=True)
     main_image = models.ImageField(upload_to='media/posts/')
