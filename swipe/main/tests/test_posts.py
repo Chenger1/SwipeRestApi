@@ -63,6 +63,13 @@ class TestPost(APITestCase):
 
         return house, house2, building, section, floor, flat1, flat2
 
+    def init_post(self, house, flat):
+        user = User.objects.get(uid=self._test_user_uid)
+        file = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
+        post = Post.objects.create(flat=flat, house=house, price=10000, payment_options='PAYMENT',
+                                   main_image=file, user=user)
+        return post
+
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_crud_operations_for_post(self):
         house, *_, flat = self.init_house_structure()
@@ -94,19 +101,11 @@ class TestPost(APITestCase):
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_crud_for_post_images(self):
         house, *_, flat = self.init_house_structure()
-
-        url_create = reverse('main:posts-list')
-        with open(self.temp_media_image_path, 'rb') as file:
-            response_create = self.client.post(url_create, data={'flat': flat.pk,
-                                                                 'house': house.pk,
-                                                                 'price': 100000,
-                                                                 'payment_options': 'PAYMENT',
-                                                                 'main_image': file})
-        self.assertEqual(response_create.status_code, 201)
+        post = self.init_post(house, flat)
 
         url_create_image = reverse('main:post_images-list')
         with open(self.temp_media_image_path, 'rb') as file:
-            response_images = self.client.post(url_create_image, data={'post': response_create.data['id'],
+            response_images = self.client.post(url_create_image, data={'post': post.pk,
                                                                        'image': file})
         self.assertEqual(response_images.status_code, 201)
         self.assertEqual(PostImage.objects.count(), 1)
@@ -161,18 +160,10 @@ class TestPost(APITestCase):
     def test_post_favorites(self):
         """Ensure we can make CRUD operations with user`s favorites list"""
         house, *_, flat = self.init_house_structure()
-
-        url_create = reverse('main:posts-list')
-        with open(self.temp_media_image_path, 'rb') as file:
-            response_create = self.client.post(url_create, data={'flat': flat.pk,
-                                                                 'house': house.pk,
-                                                                 'price': 100000,
-                                                                 'payment_options': 'PAYMENT',
-                                                                 'main_image': file})
-        self.assertEqual(response_create.status_code, 201)
+        post = self.init_post(house, flat)
 
         url_add = reverse('main:favorites_posts-list')
-        response_add = self.client.post(url_add, data={'post': response_create.data['id']})
+        response_add = self.client.post(url_add, data={'post': post.pk})
         self.assertEqual(response_add.status_code, 201)
         self.assertEqual(UserFavorites.objects.count(), 1)
 
@@ -194,24 +185,16 @@ class TestPost(APITestCase):
     def test_post_increment_views_and_likes(self):
         """Ensure views counter is incremented for post"""
         house, *_, flat = self.init_house_structure()
+        post = self.init_post(house, flat)
 
-        url_create = reverse('main:posts-list')
-        with open(self.temp_media_image_path, 'rb') as file:
-            response_create = self.client.post(url_create, data={'flat': flat.pk,
-                                                                 'house': house.pk,
-                                                                 'price': 100000,
-                                                                 'payment_options': 'PAYMENT',
-                                                                 'main_image': file})
-        self.assertEqual(response_create.status_code, 201)
-
-        url_get = reverse('main:posts_public-detail', args=[response_create.data['id']])
+        url_get = reverse('main:posts_public-detail', args=[post.pk])
         self.client.get(url_get)
         self.client.get(url_get)
         self.client.get(url_get)
         self.assertEqual(Post.objects.first().views, 3)
 
         # Ensure we can like and dislike post
-        url_like = reverse('main:posts-detail', args=[response_create.data['id']])
+        url_like = reverse('main:posts-detail', args=[post.pk])
         response_increment_like = self.client.patch(url_like, data={'likes': 1})
         self.assertEqual(response_increment_like.status_code, 200)
         self.assertEqual(Post.objects.first().likes, 1)
@@ -224,21 +207,14 @@ class TestPost(APITestCase):
     def test_post_confirm_relevance(self):
         """Ensure views counter is incremented for post"""
         house, *_, flat = self.init_house_structure()
+        post = self.init_post(house, flat)
 
-        url_create = reverse('main:posts-list')
-        with open(self.temp_media_image_path, 'rb') as file:
-            response_create = self.client.post(url_create, data={'flat': flat.pk,
-                                                                 'house': house.pk,
-                                                                 'price': 100000,
-                                                                 'payment_options': 'PAYMENT',
-                                                                 'main_image': file})
-        self.assertEqual(response_create.status_code, 201)
         post = Post.objects.first()
         post.created = datetime.date(year=2021, month=6, day=10)
         post.save()
         self.assertEqual(Post.objects.first().created.month, 6)
 
-        url = reverse('main:posts-detail', args=[response_create.data['id']])
+        url = reverse('main:posts-detail', args=[post.pk])
         response = self.client.patch(url, data={'created': True})
         self.assertEqual(response.status_code, 200)
         post = Post.objects.first()
@@ -249,18 +225,10 @@ class TestPost(APITestCase):
     def test_post_complaints(self):
         """Ensure views counter is incremented for post"""
         house, *_, flat = self.init_house_structure()
-
-        url_create = reverse('main:posts-list')
-        with open(self.temp_media_image_path, 'rb') as file:
-            response_create = self.client.post(url_create, data={'flat': flat.pk,
-                                                                 'house': house.pk,
-                                                                 'price': 100000,
-                                                                 'payment_options': 'PAYMENT',
-                                                                 'main_image': file})
-        self.assertEqual(response_create.status_code, 201)
+        post = self.init_post(house, flat)
 
         url_add = reverse('main:complaints-list')
-        response_create = self.client.post(url_add, data={'post': response_create.data['id'],
+        response_create = self.client.post(url_add, data={'post': post.pk,
                                                           'type': 'PRICE'})
         self.assertEqual(response_create.status_code, 201)
         self.assertEqual(Complaint.objects.count(), 1)
