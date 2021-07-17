@@ -16,7 +16,7 @@ class PostSerializer(serializers.ModelSerializer):
     images = PostImageSerializer(many=True, read_only=True)
     flat_info = serializers.SerializerMethodField()
 
-    created_display = serializers.DateTimeField(source='created')
+    created_display = serializers.DateTimeField(source='created', read_only=True)
     created = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
