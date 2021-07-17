@@ -25,7 +25,10 @@ router.register('posts', post_views.PostViewSet, basename='posts')
 router.register('post_images', post_views.PostImageViewSet, basename='post_images')
 router.register('favorites_posts', post_views.UserFavoritesViewSet, basename='favorites_posts')
 
-router.register('complaints', post_views.ComplaintViewSet, basename='complaints')
+# COMPLAINTS
+router.register('complaints', post_views.ComplaintViewSet, basename='complaints')  # only for user who created them
+router.register('complaints_admin', post_views.ComplaintsAdmin, basename='complaints_admin')
+# Admin can see list of all complaints and filter them by post or user
 
 # public routers
 router.register('houses_public', house_views.HousePublic, basename='houses_public')

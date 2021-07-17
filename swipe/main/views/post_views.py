@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin
 
 from django_filters import rest_framework as filters
 
@@ -86,3 +86,23 @@ class ComplaintViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class ComplaintsAdmin(ListModelMixin,
+                      RetrieveModelMixin,
+                      DestroyModelMixin,
+                      GenericViewSet):
+    """
+    Admin can get list of all complaints. Filter them by user and post.
+    Admin can only perform this actions: 'list', 'retrieve', 'destroy'
+    """
+    permission_classes = (IsAuthenticated, IsAdminUser)
+    queryset = Complaint.objects.all()
+    serializer_class = post_serializers.ComplaintSerializer
+
+    def get_queryset(self):
+        if self.request.data.get('user'):
+            return self.queryset.filter(user__pk=self.request.data.get('user'))
+        if self.request.data.get('post'):
+            return self.request.filter(post__pk=self.request.data.get('post'))
+        return self.queryset

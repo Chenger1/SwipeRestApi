@@ -240,3 +240,49 @@ class TestPost(APITestCase):
         response_detail = self.client.get(url_detail)
         self.assertEqual(response_detail.status_code, 200)
         self.assertEqual(response_detail.data['post'], 1)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_post_complaints_by_admin(self):
+        """Ensure admin can get complaints"""
+        house, *_, flat = self.init_house_structure()
+        post = self.init_post(house, flat)
+
+        user = User.objects.get(uid=self._test_user_uid)
+        user.is_staff = True
+        user.save()  # Ensure test user has required permissions
+
+        url_add = reverse('main:complaints-list')
+        self.client.post(url_add, data={'post': post.pk,
+                                        'type': 'PRICE'})
+        self.client.post(url_add, data={'post': post.pk,
+                                        'type': 'DESC'})
+        self.assertEqual(Complaint.objects.count(), 2)
+
+        url_list = reverse('main:complaints_admin-list')
+        response_list = self.client.get(url_list)
+        self.assertEqual(response_list.status_code, 200)
+        self.assertGreater(len(response_list.data), 0)
+        self.assertEqual(response_list.data[0]['post'], 1)
+
+        url_detail = reverse('main:complaints_admin-detail', args=[Complaint.objects.first().pk])
+        response_detail = self.client.get(url_detail)
+        self.assertEqual(response_detail.status_code, 200)
+        self.assertEqual(response_detail.data['type'], 'PRICE')
+
+        response_filter_by_post = self.client.get(url_list, data={'post': 1})
+        self.assertEqual(response_filter_by_post.status_code, 200)
+        self.assertGreater(len(response_filter_by_post.data), 0)
+        self.assertEqual(response_filter_by_post.data[0]['post'], 1)
+
+        response_delete = self.client.delete(url_detail)
+        self.assertEqual(response_delete.status_code, 204)
+        self.assertEqual(Complaint.objects.count(), 1)
+
+
+        # Ensure non admin cant get access to this view
+        user.is_staff = False
+        user.save()
+
+        url_error = reverse('main:complaints_admin-list')
+        response_error = self.client.get(url_error)
+        self.assertEqual(response_error.status_code, 403)
