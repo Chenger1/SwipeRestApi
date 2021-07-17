@@ -113,6 +113,9 @@ class PostModerationAdmin(RetrieveModelMixin,
                           UpdateModelMixin,
                           ListModelMixin,
                           GenericViewSet):
+    """
+    Admin can get list of posts with complains
+    """
     permission_classes = (IsAuthenticated, IsAdminUser)
     queryset = Post.objects.annotate(comp_count=Count('complaints')).filter(comp_count__gt=0)
     # Filter only posts with complaints
