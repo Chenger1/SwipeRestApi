@@ -8,9 +8,9 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from main.serializers import user_serializers
-from main.permissions import IsProfileOwner, IsMessageSenderOrReceiver, IsOwnerOrReadOnly
+from main.permissions import IsProfileOwner, IsMessageSenderOrReceiver, IsOwnerOrReadOnly, IsOwner
 
-from _db.models.user import Contact, Message
+from _db.models.user import Contact, Message, UserFilter
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -196,3 +196,18 @@ class NotaryUsersApi(ModelViewSet):
     serializer_class = user_serializers.UserSerializer
     queryset = User.objects.filter(role='NOTARY')
     lookup_field = 'uid'
+
+
+class UserFilterViewSet(ModelViewSet):
+    """
+     User can save 'Post' filters and get them from db
+     """
+    permission_classes = (IsAuthenticated, IsOwner)
+    serializer_class = user_serializers.UserFilterSerializer
+    queryset = UserFilter.objects.all()
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

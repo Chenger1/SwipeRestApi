@@ -90,11 +90,6 @@ class UserFilter(models.Model):
         ('COTTAGES', 'Коттеджи'),
         ('ALL', 'Все'),
     )
-    status_choices = (
-        ('LEASED', 'Сдан'),
-        ('SOLD', 'Продан'),
-        ('FREE', 'Свободен')
-    )
     number_of_rooms_choices = (
         (1, '1 комната'),
         (2, '2 комнаты'),
@@ -102,9 +97,9 @@ class UserFilter(models.Model):
         (4, '4 комнаты'),
         (5, 'Больше 4-х комнат')
     )
-    role_choices = (
-        ('FLAT', 'Квартира'),
-        ('OFFICE', 'Офис')
+    status_choices = (
+        ('FLATS', 'Квартиры'),
+        ('OFFICES', 'Офисы')
     )
     payment_conditions_choices = (
         ('MORTGAGE', 'Ипотека'),
@@ -120,16 +115,15 @@ class UserFilter(models.Model):
     user = models.ForeignKey(User, related_name='filters', on_delete=models.CASCADE)
     market = models.CharField(choices=market_choices, default='ALL', max_length=9, blank=True, null=True)
     type = models.CharField(max_length=10, blank=True, null=True)
-    status = models.CharField(choices=status_choices, default='FREE', max_length=6, blank=True, null=True)
-    district = models.CharField(max_length=100, blank=True, null=True)
-    #  district stores as regular string because we get all locations from all houses
-    microdistrict = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(choices=status_choices, default='FLATS', max_length=7, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    #  city stores as regular string because we get all locations from all houses
+    address = models.CharField(max_length=100, blank=True, null=True)
     number_of_rooms = models.IntegerField(choices=number_of_rooms_choices, default=1,
                                           blank=True, null=True)
     min_price = models.IntegerField(blank=True, null=True)
     max_price = models.IntegerField(blank=True, null=True)
     min_square = models.FloatField(blank=True, null=True)
     max_square = models.FloatField(blank=True, null=True)
-    role = models.CharField(choices=role_choices, default='FLAT', max_length=10, blank=True, null=True)
     payment_cond = models.CharField(choices=payment_conditions_choices, max_length=10, blank=True, null=True)
     state = models.CharField(choices=state_choices, max_length=10, blank=True, null=True)

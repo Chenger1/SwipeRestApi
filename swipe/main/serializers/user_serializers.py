@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from _db.models.user import User, Contact, Message, Attachment
+from _db.models.user import User, Contact, Message, Attachment, UserFilter
+from _db.models import choices
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -69,3 +70,79 @@ class ReadableMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ('pk', 'sender', 'receiver', 'text', 'created', 'attach')
+
+
+class UserFilterSerializer(serializers.Serializer):
+    living_type = serializers.ChoiceField(choices=choices.type_choices, required=False)
+    payment_options = serializers.ChoiceField(choices=choices.payment_options_choices, required=False)
+    price__gt = serializers.IntegerField(required=False)
+    price__lt = serializers.IntegerField(required=False)
+    flat__square__gt = serializers.IntegerField(required=False)
+    flat__square__lt = serializers.IntegerField(required=False)
+    flat__state = serializers.ChoiceField(choices=choices.state_choices, required=False)
+    house__status = serializers.ChoiceField(choices=choices.status_choices, required=False)
+    house__city = serializers.CharField(required=False)
+    house__address = serializers.CharField(required=False)
+
+    def create(self, validated_data):
+        user_filter = UserFilter.objects.create(market=validated_data.get('living_type'),
+                                                payment_cond=validated_data.get('payment_options'),
+                                                min_price=validated_data.get('price__gt'),
+                                                max_price=validated_data.get('price__lt'),
+                                                min_square=validated_data.get('flat__square__gt'),
+                                                max_square=validated_data.get('flat__square__lt'),
+                                                status=validated_data.get('house__status'),
+                                                city=validated_data.get('house__city'),
+                                                address=validated_data.get('house__address'),
+                                                number_of_rooms=validated_data.get('flat__number_of_rooms'),
+                                                state=validated_data.get('flat__state'),
+                                                user=validated_data.get('user'))
+        return user_filter
+
+    def update(self, instance, validated_data):
+        instance.market = validated_data.get('living_type', instance.market)
+        instance.payment_cond = validated_data.get('payment_options', instance.payment_cond)
+        instance.min_price = validated_data.get('price__gt', instance.min_price)
+        instance.max_price = validated_data.get('price__lt', instance.max_price)
+        instance.min_square = validated_data.get('flat__square__gt', instance.min_square)
+        instance.max_square = validated_data.get('flat__square__lt', instance.max_square)
+        instance.status = validated_data.get('house__status', instance.status)
+        instance.city = validated_data.get('house__city', instance.city)
+        instance.address = validated_data.get('house__address', instance.address)
+        instance.number_of_rooms = validated_data.get('flat__number_of_rooms', instance.number_of_rooms)
+        instance.state = validated_data.get('flat__state', instance.state)
+        return instance
+
+    def to_representation(self, instance):
+        """
+        We need to check if instance attribute empty or not. Because query params cant handle 'None' value
+        Also, Django`s filter lookups can take 'None' or empty string as a valid filter value.
+        So, we have to return dictionary only with valid values
+        :param instance:
+        :return: dict
+        """
+        data = {'saved_filter_pk': instance.pk}
+        if instance.market:
+            data['living_type'] = instance.market
+        if instance.payment_cond:
+            data['payment_options'] = instance.payment_cond
+        if instance.min_price:
+            data['price__gt'] = instance.min_price
+        if instance.max_price:
+            data['price__lt'] = instance.max_price
+        if instance.min_square:
+            data['flat__square__gt'] = instance.min_square
+        if instance.max_square:
+            data['flat__square__lt'] = instance.max_square
+        if instance.status:
+            data['house__status'] = instance.status
+        if instance.city:
+            data['house__city'] = instance.city
+        if instance.address:
+            data['house__address'] = instance.address
+        if instance.number_of_rooms:
+            data['flatt__number_of_rooms'] = instance.number_of_rooms
+        if instance.state:
+            data['flat__state'] = instance.state
+
+        return data

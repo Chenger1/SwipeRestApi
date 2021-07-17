@@ -8,6 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from main.tests.utils import get_id_token
 
 from _db.models.models import *
+from _db.models.user import UserFilter
 
 import os
 import tempfile
@@ -68,6 +69,8 @@ class TestPost(APITestCase):
         file = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         post = Post.objects.create(flat=flat, house=house, price=10000, payment_options='PAYMENT',
                                    main_image=file, user=user)
+        Post.objects.create(flat=flat, house=house, price=1000, payment_options='MORTGAGE',
+                            main_image=file, user=user)
         return post
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
@@ -324,9 +327,45 @@ class TestPost(APITestCase):
         url_public_list = reverse('main:posts_public-list')
         response_public = self.client.get(url_public_list)
         self.assertEqual(response_public.status_code, 200)
-        self.assertEqual(len(response_public.data), 0)
+        self.assertEqual(len(response_public.data), 1)
 
         # Ensure non admin cant get access to this view
         url_list = reverse('main:posts_moderation-list')
         response_list_empty = self.client.get(url_list)
         self.assertEqual(response_list_empty.status_code, 403)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_saving_filters(self):
+        """ Ensure we can save and get user`s saved filters """
+        house, *_, flat = self.init_house_structure()
+        post = self.init_post(house, flat)
+
+        filter_data = {
+            'price__gt': 5000,
+            'payment_options': 'PAYMENT'
+        }
+        # Ensure we can filter posts
+        url_filter = reverse('main:posts-list')
+        response_filter = self.client.get(url_filter, data=filter_data)
+        self.assertEqual(response_filter.status_code, 200)
+        self.assertGreater(len(response_filter.data), 0)
+        self.assertEqual(response_filter.data[0]['price'], 10000)
+
+        # Save current filter set
+        url_list = reverse('main:user_filters-list')
+        response_add = self.client.post(url_list, data=filter_data)
+        self.assertEqual(response_add.status_code, 201)
+        self.assertEqual(UserFilter.objects.count(), 1)
+        self.assertEqual(UserFilter.objects.first().min_price, 5000)
+
+        # Get saved filter set
+        url_detail = reverse('main:user_filters-detail', args=[response_add.data['saved_filter_pk']])
+        response_detail = self.client.get(url_detail)
+        self.assertEqual(response_detail.status_code, 200)
+        self.assertEqual(response_detail.data['price__gt'], 5000)
+
+        # Ensure we can filter by saved filters
+        response_filter_by_saved_filter = self.client.get(url_filter, data=response_detail.data)
+        self.assertEqual(response_filter_by_saved_filter.status_code, 200)
+        self.assertGreater(len(response_filter_by_saved_filter.data), 0)
+        self.assertEqual(response_filter_by_saved_filter.data[0]['price'], 10000)
