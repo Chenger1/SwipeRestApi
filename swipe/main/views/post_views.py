@@ -37,6 +37,13 @@ class PostViewSetPublic(ListModelMixin,
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PostFilter
 
+    def retrieve(self, request, *args, **kwargs):
+        """ Increment view counter """
+        obj = self.get_object()
+        obj.views += 1
+        obj.save(update_fields=('views', ))
+        return super().retrieve(request, *args, **kwargs)
+
 
 class PostImageViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
@@ -56,6 +63,11 @@ class UserFavoritesViewSet(ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_serializer_class(self):
+        """
+        UserFavoritesReadableSerializer contains nested serializer 'PostSerializer' to extend info about post
+        UserFavoritesWritable Serializer just a regular serializer to work with object
+        :return:
+        """
         if self.action in ('list', 'retrieve'):
             return post_serializers.UserFavoritesReadableSerializer
         if self.action in ('create', 'update', 'destroy'):

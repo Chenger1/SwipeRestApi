@@ -188,3 +188,23 @@ class TestPost(APITestCase):
         response_delete = self.client.delete(url_retrieve)
         self.assertEqual(response_delete.status_code, 204)
         self.assertEqual(UserFavorites.objects.count(), 0)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_post_increment_views(self):
+        """Ensure views counter is incremented for post"""
+        house, *_, flat = self.init_house_structure()
+
+        url_create = reverse('main:posts-list')
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_create = self.client.post(url_create, data={'flat': flat.pk,
+                                                                 'house': house.pk,
+                                                                 'price': 100000,
+                                                                 'payment_options': 'PAYMENT',
+                                                                 'main_image': file})
+        self.assertEqual(response_create.status_code, 201)
+
+        url_get = reverse('main:posts_public-detail', args=[response_create.data['id']])
+        self.client.get(url_get)
+        self.client.get(url_get)
+        self.client.get(url_get)
+        self.assertEqual(Post.objects.first().views, 3)
