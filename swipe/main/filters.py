@@ -38,7 +38,7 @@ class PostFilter(filters.FilterSet):
             'price': ['gt', 'lt', 'exact'],
             'flat__square': ['gt', 'lt'],
             'flat__price_per_metre': ['gt', 'lt'],
-            'flat__number_of_rooms': ['exact', 'gt', 'lt'],
+            'flat__number_of_rooms': ['exact'],
             'flat__state': ['exact'],
             'flat__foundation_doc': ['exact'],
             'flat__type': ['exact'],
@@ -48,5 +48,7 @@ class PostFilter(filters.FilterSet):
             'house__city': ['exact'],
             'house__status': ['exact'],
             'house__territory': ['exact'],
-            'house__house_class': ['exact']
+            'house__house_class': ['exact'],
+            'house__type': ['exact'],
+            'house__address': ['exact'],
         }
