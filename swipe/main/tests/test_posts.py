@@ -205,7 +205,7 @@ class TestPost(APITestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_confirm_relevance(self):
-        """Ensure views counter is incremented for post"""
+        """Ensure we can update post 'created' field """
         house, *_, flat = self.init_house_structure()
         post = self.init_post(house, flat)
 
@@ -223,7 +223,6 @@ class TestPost(APITestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_complaints(self):
-        """Ensure views counter is incremented for post"""
         house, *_, flat = self.init_house_structure()
         post = self.init_post(house, flat)
 
