@@ -16,6 +16,8 @@ class PostViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
     queryset = Post.objects.all()
     serializer_class = post_serializers.PostSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = PostFilter
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
