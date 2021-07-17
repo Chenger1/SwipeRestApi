@@ -56,6 +56,9 @@ class User(CustomAbstractUser):
     photo = models.ImageField(upload_to='media/users/', blank=True, null=True)
     ban = models.BooleanField(default=False)
 
+    def get_files(self):
+        return [self.photo]
+
 
 class Contact(models.Model):
     user = models.ForeignKey(User, related_name='contacts', on_delete=models.CASCADE)
@@ -75,6 +78,9 @@ class Message(models.Model):
 class Attachment(models.Model):
     message = models.ForeignKey(Message, related_name='attach', on_delete=models.CASCADE)
     file = models.FileField(upload_to='media/')
+
+    def get_files(self):
+        return [self.file]
 
 
 class UserFilter(models.Model):

@@ -47,6 +47,9 @@ class House(models.Model):
     def user(self):
         return self.sales_department
 
+    def get_files(self):
+        return [self.image]
+
 
 class NewsItem(models.Model):
     title = models.CharField(max_length=100)
@@ -134,6 +137,9 @@ class Flat(models.Model):
     def user(self):
         return self.floor.user
 
+    def get_files(self):
+        return [self.schema, self.schema_in_house]
+
 
 class RequestToChest(models.Model):
     house = models.ForeignKey(House, related_name='requests', on_delete=models.CASCADE)
@@ -164,6 +170,9 @@ class Post(models.Model):
     reject_message = models.CharField(choices=reject_message_choices, max_length=5, blank=True, null=True)
     main_image = models.ImageField(upload_to='media/posts/')
 
+    def get_files(self):
+        return [self.main_image]
+
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, related_name='images', on_delete=models.CASCADE)
@@ -172,6 +181,9 @@ class PostImage(models.Model):
     @property
     def user(self):
         return self.post.user
+
+    def get_files(self):
+        return [self.image]
 
 
 class UserFavorites(models.Model):

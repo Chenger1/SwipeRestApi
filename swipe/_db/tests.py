@@ -2,7 +2,10 @@ from django.test import TestCase, override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.utils import IntegrityError
 
+from django.conf import settings
+
 import tempfile
+import os
 
 from _db.models.models import *
 from _db.models.user import User
@@ -139,3 +142,24 @@ class TestPost(TestCase):
         promo = Promotion.objects.create(post=post, type=promotion_type,
                                          phrase='GIFT', color='PINK', price=10)
         self.assertIn(promo, post.promotions.all())
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_auto_files_deleting(self):
+        """ Ensure that after we delete instance or update file - old version will be deleted """
+        house, *_, flat = self.init_house_structure()
+        inst = Post.objects.create(payment_options='PAYMENT', price=12,
+                                   flat=flat, user=self.user, house=house)
+        MEDIA_ROOT = os.path.join(settings.MEDIA_ROOT, 'media\\posts')
+
+        img = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
+        img2 = SimpleUploadedFile('new.jpeg', b'file_content', content_type='image/jpeg')
+
+        image = PostImage.objects.create(image=img, post=inst)
+        first_image = image.image.path.split('\\')[-1]
+        self.assertIn(first_image, os.listdir(MEDIA_ROOT))
+
+        image.image = img2
+        image.save()
+
+        self.assertIn(image.image.path.split('\\')[-1], os.listdir(MEDIA_ROOT))
+        self.assertNotIn(first_image, os.listdir(MEDIA_ROOT))
