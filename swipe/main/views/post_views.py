@@ -8,7 +8,7 @@ from main.permissions import IsOwner, IsOwnerOrReadOnly
 from main.serializers import post_serializers
 from main.filters import PostFilter
 
-from _db.models.models import Post, PostImage, UserFavorites
+from _db.models.models import Post, PostImage, UserFavorites, Complaint
 
 
 class PostViewSet(ModelViewSet):
@@ -73,3 +73,16 @@ class UserFavoritesViewSet(ModelViewSet):
         if self.action in ('create', 'update', 'destroy'):
             return post_serializers.UserFavoritesWritableSerializer
         return post_serializers.UserFavoritesReadableSerializer
+
+
+class ComplaintViewSet(ModelViewSet):
+    """ CRUD operations for user`s complaints """
+    permission_classes = (IsAuthenticated, IsOwner)
+    queryset = Complaint.objects.all()
+    serializer_class = post_serializers.ComplaintSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

@@ -25,6 +25,8 @@ router.register('posts', post_views.PostViewSet, basename='posts')
 router.register('post_images', post_views.PostImageViewSet, basename='post_images')
 router.register('favorites_posts', post_views.UserFavoritesViewSet, basename='favorites_posts')
 
+router.register('complaints', post_views.ComplaintViewSet, basename='complaints')
+
 # public routers
 router.register('houses_public', house_views.HousePublic, basename='houses_public')
 router.register('flats_public', house_views.FlatPublic, basename='flats_public')

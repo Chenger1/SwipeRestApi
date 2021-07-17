@@ -244,3 +244,32 @@ class TestPost(APITestCase):
         post = Post.objects.first()
         self.assertEqual(post.created.month, 7)
         self.assertEqual(post.created.day, 17)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_post_complaints(self):
+        """Ensure views counter is incremented for post"""
+        house, *_, flat = self.init_house_structure()
+
+        url_create = reverse('main:posts-list')
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_create = self.client.post(url_create, data={'flat': flat.pk,
+                                                                 'house': house.pk,
+                                                                 'price': 100000,
+                                                                 'payment_options': 'PAYMENT',
+                                                                 'main_image': file})
+        self.assertEqual(response_create.status_code, 201)
+
+        url_add = reverse('main:complaints-list')
+        response_create = self.client.post(url_add, data={'post': response_create.data['id'],
+                                                          'type': 'PRICE'})
+        self.assertEqual(response_create.status_code, 201)
+        self.assertEqual(Complaint.objects.count(), 1)
+
+        response_list = self.client.get(url_add)
+        self.assertEqual(response_list.status_code, 200)
+        self.assertGreater(len(response_list.data), 0)
+
+        url_detail = reverse('main:complaints-detail', args=[response_create.data['id']])
+        response_detail = self.client.get(url_detail)
+        self.assertEqual(response_detail.status_code, 200)
+        self.assertEqual(response_detail.data['post'], 1)

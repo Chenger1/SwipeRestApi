@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.models import Post, PostImage, UserFavorites
+from _db.models.models import Post, PostImage, UserFavorites, Complaint
 
 import datetime
 import pytz
@@ -66,3 +66,9 @@ class UserFavoritesReadableSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFavorites
         fields = ('post', )
+
+
+class ComplaintSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Complaint
+        fields = ('id', 'post', 'type')
