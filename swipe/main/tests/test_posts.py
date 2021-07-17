@@ -190,7 +190,7 @@ class TestPost(APITestCase):
         self.assertEqual(UserFavorites.objects.count(), 0)
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
-    def test_post_increment_views(self):
+    def test_post_increment_views_and_likes(self):
         """Ensure views counter is incremented for post"""
         house, *_, flat = self.init_house_structure()
 
@@ -208,3 +208,12 @@ class TestPost(APITestCase):
         self.client.get(url_get)
         self.client.get(url_get)
         self.assertEqual(Post.objects.first().views, 3)
+
+        url_like = reverse('main:posts-detail', args=[response_create.data['id']])
+        response_increment_like = self.client.patch(url_like, data={'likes': 1})
+        self.assertEqual(response_increment_like.status_code, 200)
+        self.assertEqual(Post.objects.first().likes, 1)
+
+        response_decrement_like = self.client.patch(url_like, data={'likes': -1})
+        self.assertEqual(response_decrement_like.status_code, 200)
+        self.assertEqual(Post.objects.first().likes, 0)

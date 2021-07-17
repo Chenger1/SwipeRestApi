@@ -38,6 +38,12 @@ class PostSerializer(serializers.ModelSerializer):
                 'house_class': house.get_house_class_display()}
         return data
 
+    def update(self, instance, validated_data):
+        if validated_data.get('likes'):
+            likes = validated_data.pop('likes')
+            instance.likes += int(likes)
+        return super().update(instance, validated_data)
+
 
 class UserFavoritesWritableSerializer(serializers.ModelSerializer):
     class Meta:
