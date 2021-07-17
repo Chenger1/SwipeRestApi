@@ -155,3 +155,36 @@ class TestPost(APITestCase):
                                                'payment_options': 'PAYMENT'})
         self.assertEqual(response3.status_code, 200)
         self.assertEqual(response3.data[0]['flat_info']['city'], 'Kiev')
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_post_favorites(self):
+        """Ensure we can make CRUD operations with user`s favorites list"""
+        house, *_, flat = self.init_house_structure()
+
+        url_create = reverse('main:posts-list')
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_create = self.client.post(url_create, data={'flat': flat.pk,
+                                                                 'house': house.pk,
+                                                                 'price': 100000,
+                                                                 'payment_options': 'PAYMENT',
+                                                                 'main_image': file})
+        self.assertEqual(response_create.status_code, 201)
+
+        url_add = reverse('main:favorites_posts-list')
+        response_add = self.client.post(url_add, data={'post': response_create.data['id']})
+        self.assertEqual(response_add.status_code, 201)
+        self.assertEqual(UserFavorites.objects.count(), 1)
+
+        url_list = reverse('main:favorites_posts-list')
+        response_list = self.client.get(url_list)
+        self.assertEqual(response_list.status_code, 200)
+        self.assertIn('post', response_list.data[0].keys())
+
+        url_retrieve = reverse('main:favorites_posts-detail', args=[response_add.data['id']])
+        response_retrieve = self.client.get(url_retrieve)
+        self.assertEqual(response_retrieve.status_code, 200)
+        self.assertEqual(response_retrieve.data['post']['id'], 1)
+
+        response_delete = self.client.delete(url_retrieve)
+        self.assertEqual(response_delete.status_code, 204)
+        self.assertEqual(UserFavorites.objects.count(), 0)

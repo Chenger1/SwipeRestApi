@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.models import Post, PostImage
+from _db.models.models import Post, PostImage, UserFavorites
 
 
 class PostImageSerializer(serializers.ModelSerializer):
@@ -37,3 +37,17 @@ class PostSerializer(serializers.ModelSerializer):
                 'territory': house.get_territory_display(),
                 'house_class': house.get_house_class_display()}
         return data
+
+
+class UserFavoritesWritableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFavorites
+        fields = ('id', 'post', )
+
+
+class UserFavoritesReadableSerializer(serializers.ModelSerializer):
+    post = PostSerializer(read_only=True)
+
+    class Meta:
+        model = UserFavorites
+        fields = ('post', )

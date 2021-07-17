@@ -163,7 +163,7 @@ class Post(models.Model):
     published = models.BooleanField(default=False)
     rejected = models.BooleanField(default=False)
     reject_message = models.CharField(choices=reject_message_choices, max_length=5, blank=True, null=True)
-    main_image = models.ImageField(upload_to='posts/')
+    main_image = models.ImageField(upload_to='media/posts/')
 
 
 class PostImage(models.Model):
@@ -173,6 +173,11 @@ class PostImage(models.Model):
     @property
     def user(self):
         return self.post.user
+
+
+class UserFavorites(models.Model):
+    user = models.ForeignKey(User, related_name='favorites', on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name='users_favorite', on_delete=models.CASCADE)
 
 
 class Complaint(models.Model):
