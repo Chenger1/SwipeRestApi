@@ -222,7 +222,7 @@ class TestPost(APITestCase):
         self.assertEqual(response.status_code, 200)
         post = Post.objects.first()
         self.assertEqual(post.created.month, 7)
-        self.assertEqual(post.created.day, 17)
+        self.assertEqual(post.created.day, datetime.date.today().day)
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_complaints(self):
