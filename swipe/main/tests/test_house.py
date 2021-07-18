@@ -206,6 +206,12 @@ class TestHouse(APITestCase):
         self.assertEqual(response_doc.status_code, 201)
         self.assertTrue(House.objects.first().documents.exists())
 
+        # Ensure we can get document
+        url_detail = reverse('main:documents-detail', args=[response_doc.data['id']])
+        response_detail = self.client.get(url_detail)
+        self.assertEqual(response_detail.status_code, 200)
+        self.assertIn('attachment; filename=', response_detail.get('Content-Disposition'))
+
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_flat_filters(self):
         _ = self.init_house_structure()

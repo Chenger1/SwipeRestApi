@@ -12,6 +12,7 @@ from django_filters import rest_framework as filters
 from main.permissions import IsOwnerOrReadOnly, IsOwner
 from main.serializers import house_serializers
 from main.filters import FlatFilter, HouseFilter
+from main.services import generate_http_response_to_download
 
 from _db.models.models import House, Building, Section, Floor, NewsItem, Document, Flat, RequestToChest, Standpipe
 
@@ -70,6 +71,10 @@ class DocumentViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Document.objects.all()
     serializer_class = house_serializers.DocumentSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        return generate_http_response_to_download(instance)
 
 
 class FlatViewSet(ModelViewSet):

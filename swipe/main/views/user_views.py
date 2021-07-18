@@ -9,8 +9,9 @@ from rest_framework import status
 
 from main.serializers import user_serializers
 from main.permissions import IsProfileOwner, IsMessageSenderOrReceiver, IsOwnerOrReadOnly, IsOwner
+from main.services import generate_http_response_to_download
 
-from _db.models.user import Contact, Message, UserFilter
+from _db.models.user import Contact, Message, UserFilter, Attachment
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -184,6 +185,10 @@ class AttachmentApi(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, pk, format=None):
+        attach = get_object_or_404(Attachment, pk=pk)
+        return generate_http_response_to_download(attach)
 
 
 class NotaryUsersApi(ModelViewSet):

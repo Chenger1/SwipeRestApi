@@ -178,6 +178,12 @@ class TestUser(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(int(response.data['message']), Message.objects.first().attach.first().message.pk)
 
+        # Ensure we can download message attachment
+        url_attach_detail = reverse('main:download_attachment', args=[response.data['pk']])
+        response_attach_detail = self.client.get(url_attach_detail)
+        self.assertEqual(response_attach_detail.status_code, 200)
+        self.assertIn('attachment; filename=', response_attach_detail.get('Content-Disposition'))
+
     def test_changing_ban_status(self):
         """Ensure we can change user ban status"""
         admin_user = User.objects.get(uid=self._test_user_uid)
