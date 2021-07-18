@@ -3,9 +3,11 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 
 from django.db.models import Count
 from django_filters import rest_framework as filters
+from django.shortcuts import get_object_or_404
 
 from main.permissions import IsOwner, IsOwnerOrReadOnly
 from main.serializers import post_serializers
@@ -143,3 +145,52 @@ class PostModerationAdmin(RetrieveModelMixin,
         if self.action in ('update', ):
             return post_serializers.RejectPostSerializer
         return self.serializer_class
+
+
+class LikeAndDislikePost(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, pk, format=None):
+        post = get_object_or_404(Post, pk=pk)
+        action = None
+        if request.user in post.likers.all():
+            action = 'like'
+        if request.user in post.dislikers.all():
+            action = 'dislike'
+        return Response({'post': post.pk,
+                         'user': request.user.pk,
+                         'action': action if action else ''})
+
+    def patch(self, request, pk, format=None):
+        post = get_object_or_404(Post, pk=pk)
+        action = request.data.get('action')
+        if action == 'like':
+            # If user disliked post before, but now he liked it - we have to remove him from dislikers list
+            if request.user in post.dislikers.all():
+                post.dislikers.remove(request.user)
+                post.likes += 1
+            # If user liked post before, but now he wants to remove like - we have to remove him from likers list
+            if request.user in post.likers.all():
+                post.likers.remove(request.user)
+                post.likes -= 1
+            else:
+                # Add user to likers list and increment post likes counter
+                post.likers.add(request.user)
+                post.likes += 1
+        else:
+            # If user liked post before, but now he disliked it - we have to remove him from likers list
+            if request.user in post.likers.all():
+                post.likers.remove(request.user)
+                post.likes -= 1
+            # If user disliked post before, but now he wants to remove dislike - we have to remove from dislikers list
+            if request.user in post.dislikers.all():
+                post.dislikers.remove(request.user)
+                post.likes += 1
+            else:
+                # if user dislike post - add him to dislikers list and decrement likes counter
+                post.dislikers.add(request.user)
+                post.likes -= 1
+        post.save()
+        return Response({'post': post.pk,
+                         'user': request.user.pk,
+                         'action': action}, status=status.HTTP_200_OK)

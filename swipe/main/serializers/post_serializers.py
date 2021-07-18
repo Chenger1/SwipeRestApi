@@ -23,7 +23,9 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = '__all__'
         extra_kwargs = {
-            'user': {'read_only': True}
+            'user': {'read_only': True},
+            'likers': {'read_only': True},
+            'dislikers': {'read_only': True}
         }
 
     def get_flat_info(self, obj):
@@ -45,9 +47,6 @@ class PostSerializer(serializers.ModelSerializer):
         return data
 
     def update(self, instance, validated_data):
-        if validated_data.get('likes'):
-            likes = validated_data.pop('likes')
-            instance.likes += int(likes)
         if validated_data.get('created'):
             validated_data.pop('created')
             instance.created = datetime.datetime.now(tz=pytz.UTC)

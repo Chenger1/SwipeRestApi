@@ -61,4 +61,7 @@ urlpatterns = [
 
     # HOUSE
     path('flats/<int:pk>/booking/', house_views.BookingFlat.as_view(), name='booking_flat'),
+
+    # POST
+    path('like_dislike/<int:pk>/', post_views.LikeAndDislikePost.as_view(), name='like_dislike'),
 ]

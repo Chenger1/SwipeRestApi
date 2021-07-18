@@ -173,6 +173,9 @@ class Post(models.Model):
     reject_message = models.CharField(choices=reject_message_choices, max_length=5, blank=True, null=True)
     main_image = models.ImageField(upload_to='media/posts/')
 
+    likers = models.ManyToManyField(User, related_name='liked')
+    dislikers = models.ManyToManyField(User, related_name='disliked')
+
     def get_files(self):
         return [self.main_image]
 

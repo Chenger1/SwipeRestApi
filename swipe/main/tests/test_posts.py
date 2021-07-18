@@ -190,6 +190,7 @@ class TestPost(APITestCase):
         """Ensure views counter is incremented for post"""
         house, *_, flat = self.init_house_structure()
         post = self.init_post(house, flat)
+        user = User.objects.get(uid=self._test_user_uid)
 
         url_get = reverse('main:posts_public-detail', args=[post.pk])
         self.client.get(url_get)
@@ -198,14 +199,23 @@ class TestPost(APITestCase):
         self.assertEqual(Post.objects.first().views, 3)
 
         # Ensure we can like and dislike post
-        url_like = reverse('main:posts-detail', args=[post.pk])
-        response_increment_like = self.client.patch(url_like, data={'likes': 1})
+        url_like = reverse('main:like_dislike', args=[post.pk])
+        response_increment_like = self.client.patch(url_like, data={'action': 'like'})
         self.assertEqual(response_increment_like.status_code, 200)
         self.assertEqual(Post.objects.first().likes, 1)
+        self.assertIn(user, Post.objects.first().likers.all())
 
-        response_decrement_like = self.client.patch(url_like, data={'likes': -1})
+        response_decrement_like = self.client.patch(url_like, data={'action': 'dislike'})
         self.assertEqual(response_decrement_like.status_code, 200)
+        self.assertEqual(Post.objects.first().likes, -1)
+        self.assertIn(user, Post.objects.first().dislikers.all())
+        self.assertNotIn(user, Post.objects.first().likers.all())
+
+        # Remove dislike if user 'tap' buttons twice
+        response_remove_dislike = self.client.patch(url_like, data={'action': 'dislike'})
+        self.assertEqual(response_remove_dislike.status_code, 200)
         self.assertEqual(Post.objects.first().likes, 0)
+        self.assertNotIn(user, Post.objects.first().dislikers.all())
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_confirm_relevance(self):
