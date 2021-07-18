@@ -178,6 +178,13 @@ class TestUser(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(int(response.data['message']), Message.objects.first().attach.first().message.pk)
 
+        # Ensure we can upload on files with available formats
+        # ['.pdf', '.doc', '.docx', '.jpg', 'jpeg', '.png', '.xlxs', '.xls', '.pptx']
+        file1 = SimpleUploadedFile('script.js', b'file_content', content_type='application/msword')
+        response_error = self.client.post(url_attach, data={'message': response.data['pk'],
+                                                            'file': file1})
+        self.assertEqual(response_error.status_code, 400)
+
         # Ensure we can download message attachment
         url_attach_detail = reverse('main:download_attachment', args=[response.data['pk']])
         response_attach_detail = self.client.get(url_attach_detail)

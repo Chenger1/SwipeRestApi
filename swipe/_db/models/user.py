@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from _db.models.manager import UserManager
+from _db.models.validators import validate_file_extension
 
 
 class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
@@ -77,7 +78,7 @@ class Message(models.Model):
 
 class Attachment(models.Model):
     message = models.ForeignKey(Message, related_name='attach', on_delete=models.CASCADE)
-    file = models.FileField(upload_to='media/')
+    file = models.FileField(upload_to='media/', validators=[validate_file_extension])
 
     def get_files(self):
         return [self.file]

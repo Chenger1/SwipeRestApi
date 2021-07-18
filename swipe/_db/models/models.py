@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from _db.models.user import User
 
 from _db.models.choices import *
+from _db.models.validators import validate_file_extension
 
 
 class House(models.Model):
@@ -64,7 +65,7 @@ class NewsItem(models.Model):
 
 class Document(models.Model):
     name = models.CharField(max_length=100)
-    file = models.FileField(upload_to='media/documents')
+    file = models.FileField(upload_to='media/documents', validators=[validate_file_extension])
     house = models.ForeignKey(House, related_name='documents', on_delete=models.CASCADE)
 
     @property

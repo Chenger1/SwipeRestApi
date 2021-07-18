@@ -212,6 +212,15 @@ class TestHouse(APITestCase):
         self.assertEqual(response_detail.status_code, 200)
         self.assertIn('attachment; filename=', response_detail.get('Content-Disposition'))
 
+        # Ensure we can upload on files with available formats
+        # ['.pdf', '.doc', '.docx', '.jpg', 'jpeg', '.png', '.xlxs', '.xls', '.pptx']
+        file1 = SimpleUploadedFile('script.js', b'file_content', content_type='application/msword')
+        response_error = self.client.post(url_doc, data={'name': 'WrongType',
+                                                         'file': file1,
+                                                         'house': response.data['id']})
+        self.assertEqual(response_error.status_code, 400)
+        self.assertEqual(House.objects.first().documents.count(), 1)
+
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_flat_filters(self):
         _ = self.init_house_structure()
