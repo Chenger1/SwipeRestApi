@@ -154,6 +154,8 @@ class RequestToChest(models.Model):
 
 
 class Post(models.Model):
+    LIMIT = 5  # Max posts for unsubscribed users
+
     living_type = models.CharField(choices=type_choices, default='MANY', max_length=9, blank=True, null=True)
     payment_options = models.CharField(choices=payment_options_choices, max_length=8)
     agent_coms = models.CharField(choices=agent_coms_choices, max_length=7, blank=True, null=True)
@@ -173,6 +175,10 @@ class Post(models.Model):
 
     def get_files(self):
         return [self.main_image]
+
+    @classmethod
+    def set_limit(cls, value):
+        cls.LIMIT = value
 
 
 class PostImage(models.Model):

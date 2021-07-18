@@ -112,6 +112,7 @@ class UserFilter(models.Model):
         ('READY', 'В жилом состоянии'),
         ('RENOVATION', 'Требует ремонта')
     )
+    LIMIT = 3  # Max filters for unsubscribed users
 
     user = models.ForeignKey(User, related_name='filters', on_delete=models.CASCADE)
     market = models.CharField(choices=market_choices, default='ALL', max_length=9, blank=True, null=True)
@@ -128,3 +129,7 @@ class UserFilter(models.Model):
     max_square = models.FloatField(blank=True, null=True)
     payment_cond = models.CharField(choices=payment_conditions_choices, max_length=10, blank=True, null=True)
     state = models.CharField(choices=state_choices, max_length=10, blank=True, null=True)
+
+    @classmethod
+    def set_limit(cls, value):
+        cls.LIMIT = value

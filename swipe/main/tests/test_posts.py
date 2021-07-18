@@ -369,3 +369,109 @@ class TestPost(APITestCase):
         self.assertEqual(response_filter_by_saved_filter.status_code, 200)
         self.assertGreater(len(response_filter_by_saved_filter.data), 0)
         self.assertEqual(response_filter_by_saved_filter.data[0]['price'], 10000)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_subscription_limitations(self):
+        """ Ensure unsubscribed users have restrictions
+            And subscribed users do not have
+         """
+        house, *_, flat = self.init_house_structure()
+
+        # WARNING: For test purposes limitations are reduced
+        UserFilter.set_limit(2)
+        Post.set_limit(2)
+
+        user = User.objects.get(uid=self._test_user_uid)
+        self.assertFalse(user.subscribed)  # Ensure user is not subscribed
+
+        # Check filter limitations
+        filter_data = {
+            'price__gt': 5000,
+            'payment_options': 'PAYMENT'
+        }
+        url_list = reverse('main:user_filters-list')
+        response_add = self.client.post(url_list, data=filter_data)
+        self.assertEqual(response_add.status_code, 201)
+        response_add2 = self.client.post(url_list, data=filter_data)
+        self.assertEqual(response_add2.status_code, 201)
+        self.assertEqual(UserFilter.objects.count(), 2)
+        # Max available filter - 2
+        # Check limit
+        response_add3 = self.client.post(url_list, data=filter_data)
+        self.assertEqual(response_add3.status_code, 400)
+        self.assertEqual(response_add3.data['Error'],
+                         'You have reached limit. Please, delete another filter or subscribe')
+        self.assertEqual(UserFilter.objects.count(), 2)
+
+        # Check post limitations
+        post_data = {'flat': flat.pk,
+                     'house': house.pk,
+                     'price': 100000,
+                     'payment_options': 'PAYMENT'}
+
+        url_create = reverse('main:posts-list')
+
+        with open(self.temp_media_image_path, 'rb') as file:
+            post_data['main_image'] = file
+            response_create1 = self.client.post(url_create, data=post_data)
+        self.assertEqual(response_create1.status_code, 201)
+
+        with open(self.temp_media_image_path, 'rb') as file:
+            post_data['main_image'] = file
+            response_create2 = self.client.post(url_create, data=post_data)
+        self.assertEqual(response_create2.status_code, 201)
+        self.assertEqual(Post.objects.count(), 2)
+        # Max available posts - 2
+        # Check limit
+        with open(self.temp_media_image_path, 'rb') as file:
+            post_data['main_image'] = file
+            response_create3 = self.client.post(url_create, data=post_data)
+        self.assertEqual(response_create3.status_code, 400)
+        self.assertEqual(response_create3.data['Error'],
+                         'You have reached limit. Please, delete another post or subscribe')
+        self.assertEqual(Post.objects.count(), 2)
+
+        # Set subscription
+        user.subscribed = True
+        user.save()
+        self.assertTrue(user.subscribed)
+
+        # Check that we can add new filter
+        response_add3 = self.client.post(url_list, data=filter_data)
+        self.assertEqual(response_add3.status_code, 201)
+        self.assertEqual(UserFilter.objects.count(), 3)
+
+        # Check that we can add new post
+        with open(self.temp_media_image_path, 'rb') as file:
+            post_data['main_image'] = file
+            response_create3 = self.client.post(url_create, data=post_data)
+        self.assertEqual(response_create3.status_code, 201)
+        self.assertEqual(Post.objects.count(), 3)
+
+        # Unset subscription
+        user.subscribed = False
+        user.save()
+        self.assertFalse(user.subscribed)
+
+        # Ensure we cant add new filter or post
+        response_add4 = self.client.post(url_list, data=filter_data)
+        self.assertEqual(response_add4.status_code, 400)
+        self.assertEqual(response_add4.data['Error'],
+                         'You have reached limit. Please, delete another filter or subscribe')
+        self.assertEqual(UserFilter.objects.count(), 3)
+
+        # Delete two filters
+        filter_one = UserFilter.objects.filter(user__uid=self._test_user_uid).first()
+        filter_two = UserFilter.objects.filter(user__uid=self._test_user_uid).last()
+        url_filter_detail_one = reverse('main:user_filters-detail', args=[filter_one.pk])
+        response_delete_one = self.client.delete(url_filter_detail_one)
+        url_filter_detail_two = reverse('main:user_filters-detail', args=[filter_two.pk])
+        response_delete_two = self.client.delete(url_filter_detail_two)
+        self.assertEqual(response_delete_one.status_code, 204)
+        self.assertEqual(response_delete_two.status_code, 204)
+        self.assertEqual(UserFilter.objects.count(), 1)
+
+        # Ensure we can add filter because filter amount ==  1
+        response_add5 = self.client.post(url_list, data=filter_data)
+        self.assertEqual(response_add5.status_code, 201)
+        self.assertEqual(UserFilter.objects.count(), 2)

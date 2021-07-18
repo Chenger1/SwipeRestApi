@@ -1,6 +1,8 @@
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
+from rest_framework.response import Response
+from rest_framework import status
 
 from django.db.models import Count
 from django_filters import rest_framework as filters
@@ -25,6 +27,20 @@ class PostViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        """
+        If user is subscribed - he doesnt have any restrictions
+        If he doens`t - check for reaching limit.
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: Response
+        """
+        if request.user.subscribed or request.user.posts.count() < Post.LIMIT:
+            return super().create(request, *args, **kwargs)
+        return Response({'Error': 'You have reached limit. Please, delete another post or subscribe'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class PostViewSetPublic(ListModelMixin,

@@ -216,3 +216,17 @@ class UserFilterViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        """
+        If user is subscribed - he doesnt have any restrictions
+        If he doens`t - check for reaching limit.
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: Response
+        """
+        if request.user.subscribed or request.user.filters.count() < UserFilter.LIMIT:
+            return super().create(request, *args, **kwargs)
+        return Response({'Error': 'You have reached limit. Please, delete another filter or subscribe'},
+                        status=status.HTTP_400_BAD_REQUEST)
