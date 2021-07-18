@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token
 
-from _db.models.models import House, NewsItem, Flat, Building, Section, Floor, RequestToChest
+from _db.models.models import House, NewsItem, Flat, Building, Section, Floor, RequestToChest, Standpipe
 
 import tempfile
 import os
@@ -119,9 +119,28 @@ class TestHouse(APITestCase):
 
         self.assertEqual(response_section.status_code, 201)
 
+        # Ensure we can edit info about section
         url_section_edit = reverse('main:sections-detail', args=[response_section.data['id']])
-        response_section_edit = self.client.patch(url_section_edit, data={'name': 'Two'})
+        response_section_edit = self.client.patch(url_section_edit, data={'name': 'Two',
+                                                                          'pipes': [
+                                                                             {'id': 1, 'name': 'PipeThree'}
+                                                                          ]}, format='json')
         self.assertEqual(response_section_edit.status_code, 200)
+
+        # Ensure we can, also edit info about standpipes
+        response_section_edit_standpipe = self.client.patch(url_section_edit, data={'name': 'Three',
+                                                                                    'pipes': [
+                                                                                       {'id': 1, 'name': 'PipeThree'}
+                                                                                     ]}, format='json')
+        self.assertEqual(response_section_edit_standpipe.status_code, 200)
+        self.assertEqual(response_section_edit_standpipe.data['pipes'][0]['name'], 'PipeThree')
+        self.assertEqual(response_section_edit_standpipe.data['name'], 'Three')
+
+        # Ensure we can delete standpipe
+        url_delete_standpipe = reverse('main:delete_standpipes-detail', args=[response_section_edit_standpipe.data['pipes'][0]['id']])
+        response_delete_standpipe = self.client.delete(url_delete_standpipe)
+        self.assertEqual(response_delete_standpipe.status_code, 204)
+        self.assertEqual(Standpipe.objects.count(), 1)
 
         # Test creating floors
         url_floor = reverse('main:floors-list')

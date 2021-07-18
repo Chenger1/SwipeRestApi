@@ -15,6 +15,7 @@ router.register('user_filters', user_views.UserFilterViewSet, basename='user_fil
 router.register('houses', house_views.HouseViewSet, basename='houses')
 router.register('buildings', house_views.BuildingViewSet, basename='buildings')
 router.register('sections', house_views.SectionViewSet, basename='sections')
+router.register('delete_standpipe', house_views.DeleteStandpipe, basename='delete_standpipes')
 router.register('floors', house_views.FloorViewSet, basename='floors')
 router.register('news', house_views.NewsItemViewSet, basename='news')
 router.register('documents', house_views.DocumentViewSet, basename='documents')

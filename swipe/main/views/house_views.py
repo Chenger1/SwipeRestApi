@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.views import APIView
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -13,7 +13,7 @@ from main.permissions import IsOwnerOrReadOnly, IsOwner
 from main.serializers import house_serializers
 from main.filters import FlatFilter, HouseFilter
 
-from _db.models.models import House, Building, Section, Floor, NewsItem, Document, Flat, RequestToChest
+from _db.models.models import House, Building, Section, Floor, NewsItem, Document, Flat, RequestToChest, Standpipe
 
 
 class HouseViewSet(ModelViewSet):
@@ -148,3 +148,13 @@ class RequestToChestApi(ListModelMixin,
 
     def get_queryset(self):
         return self.queryset.filter(house__sales_department=self.request.user)
+
+
+class DeleteStandpipe(DestroyModelMixin,
+                      GenericViewSet):
+    """ Only for deleting standpipes.
+        For 'edit' action - user section view set and nested serializer
+     """
+    permission_classes = (IsAuthenticated, IsOwner)
+    queryset = Standpipe.objects.all()
+    serializer_class = house_serializers.StandpipeSerializer

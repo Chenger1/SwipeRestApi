@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from django.shortcuts import get_object_or_404
+
 from _db.models.models import House, Building, Section, Floor, NewsItem, Standpipe, Document, Flat, RequestToChest
 
 
@@ -62,6 +64,8 @@ class BuildingSerializer(serializers.ModelSerializer):
 
 
 class StandpipeSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = Standpipe
         fields = ('id', 'name', )
@@ -83,6 +87,18 @@ class SectionSerializer(serializers.ModelSerializer):
         else:
             section = Section.objects.create(**validated_data)
         return section
+
+    def update(self, instance, validated_data):
+        pipes_data = None
+        if validated_data.get('pipes'):
+            pipes_data = validated_data.pop('pipes')
+        instance = super().update(instance, validated_data)
+        if pipes_data:
+            for pipe_data in pipes_data:
+                pipe = get_object_or_404(Standpipe, pk=pipe_data.get('id'))
+                pipe.name = pipe_data.get('name')
+                pipe.save()
+        return instance
 
 
 class FloorSerializer(serializers.ModelSerializer):
