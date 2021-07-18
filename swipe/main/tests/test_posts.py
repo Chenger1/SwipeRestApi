@@ -13,6 +13,7 @@ from _db.models.user import UserFilter
 import os
 import tempfile
 import datetime
+import pytz
 
 
 class TestPost(APITestCase):
@@ -213,7 +214,7 @@ class TestPost(APITestCase):
         post = self.init_post(house, flat)
 
         post = Post.objects.first()
-        post.created = datetime.date(year=2021, month=6, day=10)
+        post.created = datetime.datetime(2021, 6, 10, tzinfo=pytz.UTC)
         post.save()
         self.assertEqual(Post.objects.first().created.month, 6)
 
