@@ -125,9 +125,11 @@ class FlatSerializer(serializers.ModelSerializer):
 
 
 class HouseInRequestSerializer(serializers.ModelSerializer):
+    role_display = serializers.CharField(source='get_role_display', read_only=True)
+
     class Meta:
         model = House
-        fields = ('name', 'address', 'role', 'city')
+        fields = ('name', 'address', 'role', 'city', 'role_display')
 
 
 class FlatInRequestSerializer(serializers.ModelSerializer):

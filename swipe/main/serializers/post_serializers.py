@@ -69,9 +69,11 @@ class UserFavoritesReadableSerializer(serializers.ModelSerializer):
 
 
 class ComplaintSerializer(serializers.ModelSerializer):
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
+
     class Meta:
         model = Complaint
-        fields = ('id', 'post', 'type')
+        fields = ('id', 'post', 'type', 'type_display')
 
 
 class RejectPostSerializer(serializers.ModelSerializer):
