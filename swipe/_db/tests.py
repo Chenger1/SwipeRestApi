@@ -163,3 +163,6 @@ class TestPost(TestCase):
 
         self.assertIn(image.image.path.split('\\')[-1], os.listdir(MEDIA_ROOT))
         self.assertNotIn(first_image, os.listdir(MEDIA_ROOT))
+
+    def test_post_migrate_signal(self):
+        self.assertEqual(PromotionType.objects.count(), 3)
