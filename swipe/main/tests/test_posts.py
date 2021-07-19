@@ -552,3 +552,15 @@ class TestPost(APITestCase):
                                                               'color': 'GREEN',
                                                               'type': low.pk})
         self.assertEqual(response_add4.status_code, 400)
+
+        # Test deleting promotion for post
+        url_promotion_detail = reverse('main:promotions-detail', args=[response_add3.data['id']])
+        response_promotion_delete = self.client.delete(url_promotion_detail)
+        self.assertEqual(response_promotion_delete.status_code, 204)
+
+        # Ensure post ordering has been changed. It should be now: post2, post1, post3
+        response_posts_list_with_new_ordering = self.client.get(url_post_list)
+        self.assertEqual(response_posts_list_with_new_ordering.status_code, 200)
+        self.assertEqual(response_posts_list_with_new_ordering.data[0]['weight'], 75)
+        self.assertEqual(response_posts_list_with_new_ordering.data[1]['weight'], 50)
+        self.assertEqual(response_posts_list_with_new_ordering.data[2]['weight'], 0)
