@@ -141,7 +141,7 @@ class TestPost(TestCase):
         promotion_type = PromotionType.objects.create(name='first', price=1, efficiency=10)
         promo = Promotion.objects.create(post=post, type=promotion_type,
                                          phrase='GIFT', color='PINK', price=10)
-        self.assertIn(promo, post.promotions.all())
+        self.assertEqual(promo, Post.promotion.get_queryset().first())
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_auto_files_deleting(self):
