@@ -12,9 +12,18 @@ class PostImageSerializer(serializers.ModelSerializer):
         fields = ('image', 'post')
 
 
+class PromotionReadableSerializer(serializers.ModelSerializer):
+    phrase = serializers.CharField(source='get_phrase_display')
+
+    class Meta:
+        model = Promotion
+        fields = ('phrase', 'color')
+
+
 class PostSerializer(serializers.ModelSerializer):
     images = PostImageSerializer(many=True, read_only=True)
     flat_info = serializers.SerializerMethodField()
+    promotion = PromotionReadableSerializer(read_only=True)
 
     created_display = serializers.DateTimeField(source='created', read_only=True)
     created = serializers.BooleanField(write_only=True, required=False)

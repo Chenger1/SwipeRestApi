@@ -564,3 +564,29 @@ class TestPost(APITestCase):
         self.assertEqual(response_posts_list_with_new_ordering.data[0]['weight'], 75)
         self.assertEqual(response_posts_list_with_new_ordering.data[1]['weight'], 50)
         self.assertEqual(response_posts_list_with_new_ordering.data[2]['weight'], 0)
+
+    def test_promotion_info_in_post_serializer(self):
+        """ Ensure we will get info about current promotion for post """
+        house, *_, flat = self.init_house_structure()
+        post, post2, *_ = self.init_post(house, flat)
+
+        high = PromotionType.objects.get(efficiency=100)
+
+        url_promotion = reverse('main:promotions-list')
+        response_add1 = self.client.post(url_promotion, data={'post': post.pk,
+                                                              'phrase': 'TRADE',
+                                                              'color': 'GREEN',
+                                                              'type': high.pk})
+        self.assertEqual(response_add1.status_code, 201)
+
+        url_post_detail = reverse('main:posts-detail', args=[post.pk])
+        response_post_detail = self.client.get(url_post_detail)
+        self.assertEqual(response_post_detail.status_code, 200)
+        self.assertEqual(response_post_detail.data['promotion']['color'], 'GREEN')
+        self.assertEqual(response_post_detail.data['promotion']['phrase'], 'Возможен торг')
+
+        # Ensure we still can get post without promotions
+        url_post_detail2 = reverse('main:posts-detail', args=[post2.pk])
+        response_post_detail2 = self.client.get(url_post_detail2)
+        self.assertEqual(response_post_detail2.status_code, 200)
+        self.assertEqual(response_post_detail2.data['promotion'], None)
