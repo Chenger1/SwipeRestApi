@@ -101,6 +101,8 @@ class PromotionSerializer(serializers.ModelSerializer):
     phrase_display = serializers.CharField(source='get_phrase_display', read_only=True)
     color_display = serializers.CharField(source='get_color_display', read_only=True)
 
+    paid = serializers.BooleanField(default=True)
+
     class Meta:
         model = Promotion
         exclude = ('price', )
@@ -108,9 +110,10 @@ class PromotionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['price'] = self.calculate_price(validated_data)
         instance = Promotion.objects.create(**validated_data)
-        post = instance.post
-        post.weight += instance.type.efficiency
-        post.save()
+        if validated_data.get('paid'):  # if promotion is not paid - it has no effect on post
+            post = instance.post
+            post.weight += instance.type.efficiency
+            post.save()
         return instance
 
     def calculate_price(self, validated_data) -> int:
@@ -126,3 +129,19 @@ class PromotionSerializer(serializers.ModelSerializer):
         total_price = (prices['phrase'] if validated_data.get('phrase') else 0) + \
                       (prices['color'] if validated_data.get('color') else 0) + promotion_type.price
         return total_price
+
+
+class PromotionUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Promotion
+        fields = ('paid',)
+
+    def update(self, instance, validated_data):
+        current_paid_status = instance.paid
+        instance.paid = validated_data.get('paid')
+        instance.save()
+        if not current_paid_status and instance.paid:
+            post = instance.post
+            post.weight += instance.type.efficiency
+            post.save()
+        return instance

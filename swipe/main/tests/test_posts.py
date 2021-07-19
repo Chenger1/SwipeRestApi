@@ -643,3 +643,38 @@ class TestPost(APITestCase):
         response_post_after_remove_dislike = self.client.get(url_post_list)
         self.assertEqual(response_post_after_remove_dislike.data[1]['id'], post2.pk)
         self.assertEqual(response_post_after_remove_dislike.data[1]['weight'], 0)
+
+    def test_add_promotion_without_pay(self):
+        """ Ensure unpaid promotion will have no effect on post
+            Also, test that change status from 'unpaid' to 'paid' will have effect on post
+         """
+        house, *_, flat = self.init_house_structure()
+        post, post2, post3 = self.init_post(house, flat)
+
+        high = PromotionType.objects.get(efficiency=100)
+
+        url_promotion = reverse('main:promotions-list')
+        response_add1 = self.client.post(url_promotion, data={'post': post.pk,
+                                                              'phrase': 'TRADE',
+                                                              'color': 'GREEN',
+                                                              'type': high.pk,
+                                                              'paid': False})
+        self.assertEqual(response_add1.status_code, 201)
+        post = Post.objects.get(pk=post.pk)
+        promotion = post.promotion
+        self.assertEqual(post.weight, 0)
+        self.assertFalse(promotion.paid)
+
+        promotion_detail = reverse('main:promotions-detail', args=[promotion.pk])
+        response_paid_promotion = self.client.patch(promotion_detail, data={'paid': True})
+        self.assertEqual(response_paid_promotion.status_code, 200)
+        post = Post.objects.get(pk=post.pk)
+        promotion = post.promotion
+        self.assertEqual(post.weight, 100)
+        self.assertTrue(promotion.paid)
+
+        url_post_list = reverse('main:posts-list')
+        response_list = self.client.get(url_post_list)
+        self.assertEqual(response_list.status_code, 200)
+        self.assertEqual(response_list.data[0]['id'], post.pk)
+        self.assertEqual(response_list.data[0]['weight'], post.weight)

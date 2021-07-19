@@ -204,6 +204,7 @@ class LikeAndDislikePost(APIView):
 
 class PromotionViewSet(mixins.ListModelMixin,
                        mixins.CreateModelMixin,
+                       mixins.UpdateModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.DestroyModelMixin,
                        GenericViewSet):
@@ -217,3 +218,9 @@ class PromotionViewSet(mixins.ListModelMixin,
         super().perform_destroy(instance)
         post.weight -= weight
         post.save()
+
+    def get_serializer_class(self):
+        if self.action in ('update', 'partial_update'):
+            return post_serializers.PromotionUpdateSerializer
+        else:
+            return self.serializer_class
