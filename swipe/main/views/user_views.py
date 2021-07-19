@@ -24,6 +24,7 @@ class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsProfileOwner)
     queryset = User.objects.all()
     serializer_class = user_serializers.UserSerializer
+    view_tags = ['User']
 
     def get_object(self):
         obj = get_object_or_404(User, uid=self.kwargs.get('pk'))
@@ -57,6 +58,7 @@ class UserViewSet(ModelViewSet):
 
 class UpdateSubscription(APIView):
     permission_classes = (IsAuthenticated, IsProfileOwner)
+    view_tags = ['User']
 
     def patch(self, request, uid, format=None):
         user = get_object_or_404(User, uid=uid)
@@ -74,6 +76,7 @@ class UpdateSubscription(APIView):
 
 class ChangeBanStatus(APIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
+    view_tags = ['User', 'Admin']
 
     def patch(self, request, uid, format=None):
         """
@@ -92,6 +95,7 @@ class ChangeBanStatus(APIView):
 
 class ContactAPI(APIView):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    view_tags = ['User']
 
     def get(self, request, role=None, format=None):
         """
@@ -136,6 +140,7 @@ class ContactAPI(APIView):
 
 class MessageApi(APIView):
     permission_classes = (IsAuthenticated, IsMessageSenderOrReceiver)
+    view_tags = ['User']
 
     def get(self, request, uid=None, format=None):
         if request.user.uid != uid:
@@ -178,6 +183,7 @@ class MessageApi(APIView):
 
 class AttachmentApi(APIView):
     permission_classes = (IsAuthenticated, )
+    view_tags = ['User']
 
     def post(self, request, format=None):
         serializer = user_serializers.AttachmentSerializer(data=request.data)
@@ -201,6 +207,7 @@ class NotaryUsersApi(ModelViewSet):
     serializer_class = user_serializers.UserSerializer
     queryset = User.objects.filter(role='NOTARY')
     lookup_field = 'uid'
+    view_tags = ['User', 'Admin']
 
 
 class UserFilterViewSet(ModelViewSet):
@@ -210,6 +217,7 @@ class UserFilterViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
     serializer_class = user_serializers.UserFilterSerializer
     queryset = UserFilter.objects.all()
+    view_tags = ['User']
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)

@@ -23,6 +23,7 @@ class HouseViewSet(ModelViewSet):
     serializer_class = house_serializers.HouseSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = HouseFilter
+    view_tags = ['Houses']
 
     def get_queryset(self):
         return House.objects.filter(sales_department=self.request.user)
@@ -41,36 +42,42 @@ class HousePublic(ListModelMixin,
     authentication_classes = []
     queryset = House.objects.all()
     serializer_class = house_serializers.HouseSerializer
+    view_tags = ['Houses', 'Public']
 
 
 class BuildingViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Building.objects.all()
     serializer_class = house_serializers.BuildingSerializer
+    view_tags = ['Buildings']
 
 
 class SectionViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Section.objects.all()
     serializer_class = house_serializers.SectionSerializer
+    view_tags = ['Sections']
 
 
 class FloorViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Floor.objects.all()
     serializer_class = house_serializers.FloorSerializer
+    view_tags = ['Floors']
 
 
 class NewsItemViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = NewsItem.objects.all()
     serializer_class = house_serializers.NewsItemSerializer
+    view_tags = ['NewsItems']
 
 
 class DocumentViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Document.objects.all()
     serializer_class = house_serializers.DocumentSerializer
+    view_tags = ['Documents']
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -83,6 +90,7 @@ class FlatViewSet(ModelViewSet):
     serializer_class = house_serializers.FlatSerializer
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = FlatFilter
+    view_tags = ['Flats']
 
 
 class FlatPublic(ListModelMixin,
@@ -95,10 +103,12 @@ class FlatPublic(ListModelMixin,
     authentication_classes = []
     queryset = Flat.objects.all()
     serializer_class = house_serializers.FlatSerializer
+    view_tags = ['Flats', 'Public']
 
 
 class BookingFlat(APIView):
     permission_classes = (IsAuthenticated, )
+    view_tags = ['Flats']
 
     def patch(self, request, pk, format=None):
         """
@@ -150,6 +160,7 @@ class RequestToChestApi(ListModelMixin,
     permission_classes = (IsAuthenticated, IsOwner)
     queryset = RequestToChest.objects.all()
     serializer_class = house_serializers.RequestToChestSerializer
+    view_tags = ['Flats']
 
     def get_queryset(self):
         return self.queryset.filter(house__sales_department=self.request.user)
@@ -163,3 +174,4 @@ class DeleteStandpipe(DestroyModelMixin,
     permission_classes = (IsAuthenticated, IsOwner)
     queryset = Standpipe.objects.all()
     serializer_class = house_serializers.StandpipeSerializer
+    view_tags = ['Sections']
