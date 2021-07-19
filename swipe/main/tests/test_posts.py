@@ -541,6 +541,14 @@ class TestPost(APITestCase):
         self.assertEqual(response_post_list_by_ordering.data[1]['weight'], 75)
         self.assertEqual(response_post_list_by_ordering.data[2]['weight'], 50)
 
+        # Test public views
+        url_post_public = reverse('main:posts_public-list')
+        response_post_public = self.client.get(url_post_public)
+        self.assertEqual(response_post_public.status_code, 200)
+        self.assertEqual(response_post_public.data[0]['weight'], 100)
+        self.assertEqual(response_post_public.data[1]['weight'], 75)
+        self.assertEqual(response_post_public.data[2]['weight'], 50)
+
         # Assert that price has been changed
         self.assertGreater(Promotion.objects.get(post=post).price, 0)
         self.assertGreater(Promotion.objects.get(post=post2).price, 0)
@@ -564,6 +572,12 @@ class TestPost(APITestCase):
         self.assertEqual(response_posts_list_with_new_ordering.data[0]['weight'], 75)
         self.assertEqual(response_posts_list_with_new_ordering.data[1]['weight'], 50)
         self.assertEqual(response_posts_list_with_new_ordering.data[2]['weight'], 0)
+
+        response_post_public = self.client.get(url_post_public)
+        self.assertEqual(response_post_public.status_code, 200)
+        self.assertEqual(response_post_public.data[0]['weight'], 75)
+        self.assertEqual(response_post_public.data[1]['weight'], 50)
+        self.assertEqual(response_post_public.data[2]['weight'], 0)
 
     def test_promotion_info_in_post_serializer(self):
         """ Ensure we will get info about current promotion for post """
