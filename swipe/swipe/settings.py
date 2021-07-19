@@ -147,3 +147,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAdminUser'
     ),
 }
+
+SWAGGER_SETTINGS = {'DEFAULT_AUTO_SCHEMA_CLASS': 'swipe.yasg.CustomAutoSchema'}

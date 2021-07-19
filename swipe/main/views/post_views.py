@@ -23,6 +23,7 @@ class PostViewSet(ModelViewSet):
     serializer_class = post_serializers.PostSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PostFilter
+    view_tags = ['Post']
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
@@ -55,6 +56,7 @@ class PostViewSetPublic(mixins.ListModelMixin,
     serializer_class = post_serializers.PostSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PostFilter
+    view_tags = ['Post', 'Public']
 
     def retrieve(self, request, *args, **kwargs):
         """ Increment view counter """
@@ -68,12 +70,14 @@ class PostImageViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = PostImage.objects.all()
     serializer_class = post_serializers.PostImageSerializer
+    view_tags = ['Post']
 
 
 class UserFavoritesViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
     queryset = UserFavorites.objects.all()
     serializer_class = post_serializers.UserFavoritesWritableSerializer
+    view_tags = ['Post', 'User']
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user, post__rejected=False)
@@ -99,6 +103,7 @@ class ComplaintViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
     queryset = Complaint.objects.all()
     serializer_class = post_serializers.ComplaintSerializer
+    view_tags = ['Post', 'User']
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
@@ -118,6 +123,7 @@ class ComplaintsAdmin(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated, IsAdminUser)
     queryset = Complaint.objects.all()
     serializer_class = post_serializers.ComplaintSerializer
+    view_tags = ['Post', 'Admin']
 
     def get_queryset(self):
         if self.request.data.get('user'):
@@ -138,6 +144,7 @@ class PostModerationAdmin(mixins.RetrieveModelMixin,
     queryset = Post.objects.annotate(comp_count=Count('complaints')).filter(comp_count__gt=0)
     # Filter only posts with complaints
     serializer_class = post_serializers.PostSerializer
+    view_tags = ['Post', 'Admin']
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -149,6 +156,7 @@ class PostModerationAdmin(mixins.RetrieveModelMixin,
 
 class LikeAndDislikePost(APIView):
     permission_classes = (IsAuthenticated, )
+    view_tags = ['Post']
 
     def get(self, request, pk, format=None):
         post = get_object_or_404(Post, pk=pk)
@@ -211,6 +219,7 @@ class PromotionViewSet(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated, )
     queryset = Promotion.objects.all()
     serializer_class = post_serializers.PromotionSerializer
+    view_tags = ['Post']
 
     def perform_destroy(self, instance):
         post = instance.post
