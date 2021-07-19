@@ -19,7 +19,7 @@ from _db.models.models import Post, PostImage, UserFavorites, Complaint, Promoti
 class PostViewSet(ModelViewSet):
     """ CRUD operation for user`s posts """
     permission_classes = (IsAuthenticated, IsOwner)
-    queryset = Post.objects.all().order_by('-created', 'weight')
+    queryset = Post.objects.all().order_by('-weight', '-created')
     serializer_class = post_serializers.PostSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PostFilter
@@ -51,7 +51,7 @@ class PostViewSetPublic(mixins.ListModelMixin,
     """ Allow all users to see publications"""
     permission_classes = (AllowAny, )
     authentication_classes = []
-    queryset = Post.objects.filter(rejected=False).order_by('-created', '-weight')
+    queryset = Post.objects.filter(rejected=False).order_by('-weight', '-created')
     serializer_class = post_serializers.PostSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PostFilter
