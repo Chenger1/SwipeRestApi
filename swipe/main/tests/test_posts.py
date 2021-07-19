@@ -545,3 +545,10 @@ class TestPost(APITestCase):
         self.assertGreater(Promotion.objects.get(post=post).price, 0)
         self.assertGreater(Promotion.objects.get(post=post2).price, 0)
         self.assertGreater(Promotion.objects.get(post=post3).price, 0)
+
+        # Ensure we cant add more that one promotion for post
+        response_add4 = self.client.post(url_promotion, data={'post': post.pk,
+                                                              'phrase': 'TRADE',
+                                                              'color': 'GREEN',
+                                                              'type': low.pk})
+        self.assertEqual(response_add4.status_code, 400)

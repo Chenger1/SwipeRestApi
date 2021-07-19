@@ -219,10 +219,12 @@ class PromotionType(models.Model):
 
 
 class Promotion(models.Model):
-    post = models.ForeignKey(Post, related_name='promotions', on_delete=models.CASCADE)
+    # One Post can only have one promotion
+    post = models.OneToOneField(Post, related_name='promotion', on_delete=models.CASCADE)
     phrase = models.CharField(choices=phrase_choices, max_length=10, blank=True, null=True)
     color = models.CharField(choices=color_choices, max_length=10, blank=True, null=True)
     price = models.IntegerField(blank=True)  # Price calculates automatically
     paid = models.BooleanField(default=True)
     type = models.ForeignKey(PromotionType, related_name='promotions', on_delete=models.SET_NULL,
                              blank=True, null=True)
+    end_date = models.DateTimeField(auto_now_add=True)
