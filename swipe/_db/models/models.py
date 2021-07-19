@@ -176,6 +176,8 @@ class Post(models.Model):
     likers = models.ManyToManyField(User, related_name='liked')
     dislikers = models.ManyToManyField(User, related_name='disliked')
 
+    weight = models.IntegerField(default=0)  # User for order post
+
     def get_files(self):
         return [self.main_image]
 
@@ -218,9 +220,9 @@ class PromotionType(models.Model):
 
 class Promotion(models.Model):
     post = models.ForeignKey(Post, related_name='promotions', on_delete=models.CASCADE)
-    phrase = models.CharField(choices=phrase_choices, max_length=10)
-    color = models.CharField(choices=color_choices, max_length=10)
-    price = models.IntegerField()
+    phrase = models.CharField(choices=phrase_choices, max_length=10, blank=True, null=True)
+    color = models.CharField(choices=color_choices, max_length=10, blank=True, null=True)
+    price = models.IntegerField(blank=True)  # Price calculates automatically
     paid = models.BooleanField(default=True)
     type = models.ForeignKey(PromotionType, related_name='promotions', on_delete=models.SET_NULL,
                              blank=True, null=True)

@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
+from rest_framework import mixins
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -13,13 +13,13 @@ from main.permissions import IsOwner, IsOwnerOrReadOnly
 from main.serializers import post_serializers
 from main.filters import PostFilter
 
-from _db.models.models import Post, PostImage, UserFavorites, Complaint
+from _db.models.models import Post, PostImage, UserFavorites, Complaint, Promotion
 
 
 class PostViewSet(ModelViewSet):
     """ CRUD operation for user`s posts """
     permission_classes = (IsAuthenticated, IsOwner)
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('-created', 'weight')
     serializer_class = post_serializers.PostSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PostFilter
@@ -45,13 +45,13 @@ class PostViewSet(ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-class PostViewSetPublic(ListModelMixin,
-                        RetrieveModelMixin,
+class PostViewSetPublic(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
                         GenericViewSet):
     """ Allow all users to see publications"""
     permission_classes = (AllowAny, )
     authentication_classes = []
-    queryset = Post.objects.filter(rejected=False)
+    queryset = Post.objects.filter(rejected=False).order_by('-created', '-weight')
     serializer_class = post_serializers.PostSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = PostFilter
@@ -107,9 +107,9 @@ class ComplaintViewSet(ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class ComplaintsAdmin(ListModelMixin,
-                      RetrieveModelMixin,
-                      DestroyModelMixin,
+class ComplaintsAdmin(mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.DestroyModelMixin,
                       GenericViewSet):
     """
     Admin can get list of all complaints. Filter them by user and post.
@@ -127,9 +127,9 @@ class ComplaintsAdmin(ListModelMixin,
         return self.queryset
 
 
-class PostModerationAdmin(RetrieveModelMixin,
-                          UpdateModelMixin,
-                          ListModelMixin,
+class PostModerationAdmin(mixins.RetrieveModelMixin,
+                          mixins.UpdateModelMixin,
+                          mixins.ListModelMixin,
                           GenericViewSet):
     """
     Admin can get list of posts with complains
@@ -169,28 +169,51 @@ class LikeAndDislikePost(APIView):
             if request.user in post.dislikers.all():
                 post.dislikers.remove(request.user)
                 post.likes += 1
+                post.weight += 1
             # If user liked post before, but now he wants to remove like - we have to remove him from likers list
             if request.user in post.likers.all():
                 post.likers.remove(request.user)
                 post.likes -= 1
+                post.weight -= 1
             else:
                 # Add user to likers list and increment post likes counter
                 post.likers.add(request.user)
                 post.likes += 1
+                post.weight += 1
         else:
             # If user liked post before, but now he disliked it - we have to remove him from likers list
             if request.user in post.likers.all():
                 post.likers.remove(request.user)
                 post.likes -= 1
+                post.weight -= 1
             # If user disliked post before, but now he wants to remove dislike - we have to remove from dislikers list
             if request.user in post.dislikers.all():
                 post.dislikers.remove(request.user)
                 post.likes += 1
+                post.weight += 1
             else:
                 # if user dislike post - add him to dislikers list and decrement likes counter
                 post.dislikers.add(request.user)
                 post.likes -= 1
+                post.weight -= 1
         post.save()
         return Response({'post': post.pk,
                          'user': request.user.pk,
                          'action': action}, status=status.HTTP_200_OK)
+
+
+class PromotionViewSet(mixins.ListModelMixin,
+                       mixins.CreateModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin,
+                       GenericViewSet):
+    permission_classes = (IsAuthenticated, )
+    queryset = Promotion.objects.all()
+    serializer_class = post_serializers.PromotionSerializer
+
+    def perform_destroy(self, instance):
+        post = instance.post
+        weight = instance.type.efficiency
+        super().perform_destroy(instance)
+        post.weight -= weight
+        post.save()

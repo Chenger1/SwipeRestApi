@@ -70,9 +70,11 @@ class TestPost(APITestCase):
         file = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         post = Post.objects.create(flat=flat, house=house, price=10000, payment_options='PAYMENT',
                                    main_image=file, user=user)
-        Post.objects.create(flat=flat, house=house, price=1000, payment_options='MORTGAGE',
-                            main_image=file, user=user)
-        return post
+        post2 = Post.objects.create(flat=flat, house=house, price=1000, payment_options='MORTGAGE',
+                                    main_image=file, user=user)
+        post3 = Post.objects.create(flat=flat, house=house, price=5000, payment_options='MORTGAGE',
+                                    main_image=file, user=user)
+        return post, post2, post3
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_crud_operations_for_post(self):
@@ -105,7 +107,7 @@ class TestPost(APITestCase):
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_crud_for_post_images(self):
         house, *_, flat = self.init_house_structure()
-        post = self.init_post(house, flat)
+        post, *_ = self.init_post(house, flat)
 
         url_create_image = reverse('main:post_images-list')
         with open(self.temp_media_image_path, 'rb') as file:
@@ -164,7 +166,7 @@ class TestPost(APITestCase):
     def test_post_favorites(self):
         """Ensure we can make CRUD operations with user`s favorites list"""
         house, *_, flat = self.init_house_structure()
-        post = self.init_post(house, flat)
+        post, *_= self.init_post(house, flat)
 
         url_add = reverse('main:favorites_posts-list')
         response_add = self.client.post(url_add, data={'post': post.pk})
@@ -189,7 +191,7 @@ class TestPost(APITestCase):
     def test_post_increment_views_and_likes(self):
         """Ensure views counter is incremented for post"""
         house, *_, flat = self.init_house_structure()
-        post = self.init_post(house, flat)
+        post, *_ = self.init_post(house, flat)
         user = User.objects.get(uid=self._test_user_uid)
 
         url_get = reverse('main:posts_public-detail', args=[post.pk])
@@ -221,7 +223,7 @@ class TestPost(APITestCase):
     def test_post_confirm_relevance(self):
         """Ensure we can update post 'created' field """
         house, *_, flat = self.init_house_structure()
-        post = self.init_post(house, flat)
+        post, *_ = self.init_post(house, flat)
 
         post = Post.objects.first()
         post.created = datetime.datetime(2021, 6, 10, tzinfo=pytz.UTC)
@@ -238,7 +240,7 @@ class TestPost(APITestCase):
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_complaints(self):
         house, *_, flat = self.init_house_structure()
-        post = self.init_post(house, flat)
+        post, *_ = self.init_post(house, flat)
 
         url_add = reverse('main:complaints-list')
         response_create = self.client.post(url_add, data={'post': post.pk,
@@ -259,7 +261,7 @@ class TestPost(APITestCase):
     def test_post_complaints_by_admin(self):
         """Ensure admin can get complaints"""
         house, *_, flat = self.init_house_structure()
-        post = self.init_post(house, flat)
+        post, *_ = self.init_post(house, flat)
 
         user = User.objects.get(uid=self._test_user_uid)
         user.is_staff = True
@@ -304,7 +306,7 @@ class TestPost(APITestCase):
     def test_post_moderation_by_admin(self):
         """Ensure admin can moderate posts"""
         house, *_, flat = self.init_house_structure()
-        post = self.init_post(house, flat)
+        post, *_ = self.init_post(house, flat)
 
         user = User.objects.get(uid=self._test_user_uid)
         user.is_staff = True
@@ -338,7 +340,7 @@ class TestPost(APITestCase):
         url_public_list = reverse('main:posts_public-list')
         response_public = self.client.get(url_public_list)
         self.assertEqual(response_public.status_code, 200)
-        self.assertEqual(len(response_public.data), 1)
+        self.assertEqual(len(response_public.data), 2)
 
         # Ensure non admin cant get access to this view
         url_list = reverse('main:posts_moderation-list')
@@ -349,7 +351,7 @@ class TestPost(APITestCase):
     def test_saving_filters(self):
         """ Ensure we can save and get user`s saved filters """
         house, *_, flat = self.init_house_structure()
-        post = self.init_post(house, flat)
+        post, *_ = self.init_post(house, flat)
 
         filter_data = {
             'price__gt': 5000,
@@ -486,3 +488,60 @@ class TestPost(APITestCase):
         response_add5 = self.client.post(url_list, data=filter_data)
         self.assertEqual(response_add5.status_code, 201)
         self.assertEqual(UserFilter.objects.count(), 2)
+
+    def test_promotion(self):
+        """ Ensure we can create\\get\\delete promotion
+            Also, test that ensure type efficiency make effect on posts order
+         """
+        house, *_, flat = self.init_house_structure()
+        post, post2, post3 = self.init_post(house, flat)
+
+        url_post_list = reverse('main:posts-list')
+        response_post_list = self.client.get(url_post_list)
+        self.assertEqual(response_post_list.status_code, 200)
+        self.assertEqual(response_post_list.data[0]['weight'], 0)
+        self.assertEqual(response_post_list.data[1]['weight'], 0)
+        self.assertEqual(response_post_list.data[2]['weight'], 0)
+
+        # Add promotion for first post
+        low = PromotionType.objects.get(efficiency=50)
+        average = PromotionType.objects.get(efficiency=75)
+        high = PromotionType.objects.get(efficiency=100)
+
+        url_promotion = reverse('main:promotions-list')
+        response_add1 = self.client.post(url_promotion, data={'post': post.pk,
+                                                              'phrase': 'TRADE',
+                                                              'color': 'GREEN',
+                                                              'type': low.pk})
+        self.assertEqual(response_add1.status_code, 201)
+        self.assertEqual(Post.objects.get(pk=post.pk).weight, 50)
+
+        # Add promotion to second post
+        response_add2 = self.client.post(url_promotion, data={'post': post2.pk,
+                                                              'phrase': 'SEA',
+                                                              'color': 'PINK',
+                                                              'type': average.pk})
+        self.assertEqual(response_add2.status_code, 201)
+        self.assertEqual(Post.objects.get(pk=post2.pk).weight, 75)
+
+        # Add promotion to third post
+        response_add3 = self.client.post(url_promotion, data={'post': post3.pk,
+                                                              'phrase': 'PRICE',
+                                                              'color': 'GREEN',
+                                                              'type': high.pk})
+        self.assertEqual(response_add3.status_code, 201)
+        self.assertEqual(Post.objects.get(pk=post3.pk).weight, 100)
+
+        # Test ordering
+        # It should be next: post3, post2, post1
+        # Because their weight right now are: 100, 75, 50
+        response_post_list_by_ordering = self.client.get(url_post_list)
+        self.assertEqual(response_post_list_by_ordering.status_code, 200)
+        self.assertEqual(response_post_list_by_ordering.data[0]['weight'], 100)
+        self.assertEqual(response_post_list_by_ordering.data[1]['weight'], 75)
+        self.assertEqual(response_post_list_by_ordering.data[2]['weight'], 50)
+
+        # Assert that price has been changed
+        self.assertGreater(Promotion.objects.get(post=post).price, 0)
+        self.assertGreater(Promotion.objects.get(post=post2).price, 0)
+        self.assertGreater(Promotion.objects.get(post=post3).price, 0)

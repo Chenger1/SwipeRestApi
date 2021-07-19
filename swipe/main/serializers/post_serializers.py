@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.models import Post, PostImage, UserFavorites, Complaint
+from _db.models.models import Post, PostImage, UserFavorites, Complaint, Promotion, PromotionType
 
 import datetime
 import pytz
@@ -79,3 +79,41 @@ class RejectPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ('id', 'rejected', 'reject_message')
+
+
+class PromotionTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PromotionType
+        fields = '__all__'
+
+
+class PromotionSerializer(serializers.ModelSerializer):
+    type_display = PromotionTypeSerializer(read_only=True)
+    phrase_display = serializers.CharField(source='get_phrase_display', read_only=True)
+    color_display = serializers.CharField(source='get_color_display', read_only=True)
+
+    class Meta:
+        model = Promotion
+        exclude = ('price', )
+
+    def create(self, validated_data):
+        validated_data['price'] = self.calculate_price(validated_data)
+        instance = Promotion.objects.create(**validated_data)
+        post = instance.post
+        post.weight += instance.type.efficiency
+        post.save()
+        return instance
+
+    def calculate_price(self, validated_data) -> int:
+        """
+        :param validated_data:
+        :return: total price: int
+        """
+        prices = {
+            'phrase': 200,
+            'color': 200,
+        }
+        promotion_type = validated_data.get('type')
+        total_price = (prices['phrase'] if validated_data.get('phrase') else 0) + \
+                      (prices['color'] if validated_data.get('color') else 0) + promotion_type.price
+        return total_price

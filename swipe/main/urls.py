@@ -27,6 +27,7 @@ router.register('posts', post_views.PostViewSet, basename='posts')
 router.register('post_images', post_views.PostImageViewSet, basename='post_images')
 router.register('favorites_posts', post_views.UserFavoritesViewSet, basename='favorites_posts')
 router.register('posts_moderation', post_views.PostModerationAdmin, basename='posts_moderation')
+router.register('promotion', post_views.PromotionViewSet, basename='promotions')
 
 # COMPLAINTS
 router.register('complaints', post_views.ComplaintViewSet, basename='complaints')  # only for user who created them
