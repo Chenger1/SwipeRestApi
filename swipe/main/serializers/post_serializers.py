@@ -55,6 +55,14 @@ class PostSerializer(serializers.ModelSerializer):
                 'house_class': house.get_house_class_display()}
         return data
 
+    def validate_created(self, value):
+        if self.instance:
+            time_range = datetime.datetime.now(tz=pytz.UTC) - self.instance.created
+            if time_range.days <= 30:
+                raise serializers.ValidationError('You can confirm relevance every 31 days')
+            return value
+        return value
+
     def update(self, instance, validated_data):
         if validated_data.get('created'):
             validated_data.pop('created')

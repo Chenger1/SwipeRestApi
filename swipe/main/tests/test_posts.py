@@ -65,6 +65,7 @@ class TestPost(APITestCase):
 
         return house, house2, building, section, floor, flat1, flat2
 
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def init_post(self, house, flat):
         user = User.objects.get(uid=self._test_user_uid)
         file = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
@@ -220,8 +221,8 @@ class TestPost(APITestCase):
         self.assertNotIn(user, Post.objects.first().dislikers.all())
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
-    def test_post_confirm_relevance(self):
-        """Ensure we can update post 'created' field """
+    def test_post_confirm_relevance_with_old_date(self):
+        """Ensure we can update post 'created' field if old 'created' date is more than 31 days old"""
         house, *_, flat = self.init_house_structure()
         post, *_ = self.init_post(house, flat)
 
@@ -234,8 +235,18 @@ class TestPost(APITestCase):
         response = self.client.patch(url, data={'created': True})
         self.assertEqual(response.status_code, 200)
         post = Post.objects.first()
-        self.assertEqual(post.created.month, 7)
+        self.assertEqual(post.created.month, datetime.date.today().month)
         self.assertEqual(post.created.day, datetime.date.today().day)
+
+    def test_post_confirm_relevance_with_new_date(self):
+        """ Ensure we cant update post if it`s 'created' date is not 30 days old"""
+        house, *_, flat = self.init_house_structure()
+        post, *_ = self.init_post(house, flat)
+
+        url = reverse('main:posts-detail', args=[post.pk])
+        response = self.client.patch(url, data={'created': True})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['created'][0], 'You can confirm relevance every 31 days')
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_complaints(self):
