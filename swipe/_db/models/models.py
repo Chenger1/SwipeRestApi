@@ -227,4 +227,4 @@ class Promotion(models.Model):
     paid = models.BooleanField(default=True)
     type = models.ForeignKey(PromotionType, related_name='promotions', on_delete=models.SET_NULL,
                              blank=True, null=True)
-    end_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateField(auto_now_add=True)
