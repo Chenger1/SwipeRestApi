@@ -61,6 +61,13 @@ class PostSerializer(serializers.ModelSerializer):
             instance.created = datetime.datetime.now(tz=pytz.UTC)
         return super().update(instance, validated_data)
 
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        if hasattr(instance, 'promotion') and not instance.promotion.paid:
+            #  Promotion is displaying only if it is paid
+            rep['promotion'] = None
+        return rep
+
 
 class UserFavoritesWritableSerializer(serializers.ModelSerializer):
     class Meta:

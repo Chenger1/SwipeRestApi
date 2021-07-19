@@ -665,6 +665,12 @@ class TestPost(APITestCase):
         self.assertEqual(post.weight, 0)
         self.assertFalse(promotion.paid)
 
+        # Ensure post wont contain promotion if it is not paid
+        url_post_detail = reverse('main:posts-detail', args=[post.pk])
+        response_post_detail = self.client.get(url_post_detail)
+        self.assertEqual(response_post_detail.status_code, 200)
+        self.assertIsNone(response_post_detail.data['promotion'])
+
         promotion_detail = reverse('main:promotions-detail', args=[promotion.pk])
         response_paid_promotion = self.client.patch(promotion_detail, data={'paid': True})
         self.assertEqual(response_paid_promotion.status_code, 200)
@@ -672,6 +678,10 @@ class TestPost(APITestCase):
         promotion = post.promotion
         self.assertEqual(post.weight, 100)
         self.assertTrue(promotion.paid)
+
+        response_post_detail_success = self.client.get(url_post_detail)
+        self.assertEqual(response_post_detail_success.status_code, 200)
+        self.assertIsNotNone(response_post_detail_success.data['promotion'])
 
         url_post_list = reverse('main:posts-list')
         response_list = self.client.get(url_post_list)
