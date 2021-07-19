@@ -604,3 +604,42 @@ class TestPost(APITestCase):
         response_post_detail2 = self.client.get(url_post_detail2)
         self.assertEqual(response_post_detail2.status_code, 200)
         self.assertEqual(response_post_detail2.data['promotion'], None)
+
+    def test_like_dislike_weight_effect(self):
+        """ Ensure like/dislike has effect on post weight """
+        house, *_, flat = self.init_house_structure()
+        post, post2, post3 = self.init_post(house, flat)
+
+        url_post_list = reverse('main:posts-list')
+        response_post_list = self.client.get(url_post_list)
+        self.assertEqual(response_post_list.status_code, 200)
+        self.assertEqual(response_post_list.data[0]['weight'], 0)
+        self.assertEqual(response_post_list.data[1]['weight'], 0)
+        self.assertEqual(response_post_list.data[2]['weight'], 0)
+
+        url_like = reverse('main:like_dislike', args=[post2.pk])
+        response_increment_like = self.client.patch(url_like, data={'action': 'like'})
+        self.assertEqual(response_increment_like.status_code, 200)
+        self.assertEqual(Post.objects.get(pk=post2.pk).likes, 1)
+
+        response_post_after_like = self.client.get(url_post_list)
+        self.assertEqual(response_post_after_like.status_code, 200)
+        self.assertEqual(response_post_after_like.data[0]['id'], post2.pk)
+        self.assertEqual(response_post_after_like.data[0]['weight'], 1)
+
+        response_decrement_like = self.client.patch(url_like, data={'action': 'dislike'})
+        self.assertEqual(response_decrement_like.status_code, 200)
+        self.assertEqual(Post.objects.get(pk=post2.pk).likes, -1)
+
+        response_post_after_dislike = self.client.get(url_post_list)
+        self.assertEqual(response_post_after_dislike.data[0]['id'], post3.pk)
+        self.assertEqual(response_post_after_dislike.data[-1]['weight'], -1)
+
+        # Remove dislike if user 'tap' buttons twice
+        response_remove_dislike = self.client.patch(url_like, data={'action': 'dislike'})
+        self.assertEqual(response_remove_dislike.status_code, 200)
+        self.assertEqual(Post.objects.first().likes, 0)
+
+        response_post_after_remove_dislike = self.client.get(url_post_list)
+        self.assertEqual(response_post_after_remove_dislike.data[1]['id'], post2.pk)
+        self.assertEqual(response_post_after_remove_dislike.data[1]['weight'], 0)
