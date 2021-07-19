@@ -14,6 +14,7 @@ import os
 import tempfile
 import datetime
 import pytz
+from dateutil.relativedelta import relativedelta
 
 
 class TestPost(APITestCase):
@@ -603,6 +604,10 @@ class TestPost(APITestCase):
                                                               'color': 'GREEN',
                                                               'type': high.pk})
         self.assertEqual(response_add1.status_code, 201)
+        promo = Promotion.objects.get(pk=response_add1.data['id'])
+        current_date = datetime.date.today()
+        next_month = current_date + relativedelta(month=current_date.month + 1)
+        self.assertEqual(promo.end_date, next_month)
 
         url_post_detail = reverse('main:posts-detail', args=[post.pk])
         response_post_detail = self.client.get(url_post_detail)

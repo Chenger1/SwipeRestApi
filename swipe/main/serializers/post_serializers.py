@@ -4,6 +4,7 @@ from _db.models.models import Post, PostImage, UserFavorites, Complaint, Promoti
 
 import datetime
 import pytz
+from dateutil.relativedelta import relativedelta
 
 
 class PostImageSerializer(serializers.ModelSerializer):
@@ -121,9 +122,14 @@ class PromotionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promotion
         exclude = ('price', )
+        extra_kwargs = {
+            'end_date': {'read_only': True}
+        }
 
     def create(self, validated_data):
         validated_data['price'] = self.calculate_price(validated_data)
+        current_date = datetime.date.today()
+        validated_data['end_date'] = current_date + relativedelta(month=current_date.month + 1)
         instance = Promotion.objects.create(**validated_data)
         if validated_data.get('paid'):  # if promotion is not paid - it has no effect on post
             post = instance.post
@@ -154,6 +160,8 @@ class PromotionUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         current_paid_status = instance.paid
         instance.paid = validated_data.get('paid')
+        current_date = datetime.date.today()
+        instance.end_date = current_date + relativedelta(month=current_date.month + 1)
         instance.save()
         if not current_paid_status and instance.paid:
             post = instance.post

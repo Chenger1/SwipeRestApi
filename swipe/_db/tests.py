@@ -6,6 +6,7 @@ from django.conf import settings
 
 import tempfile
 import os
+import datetime
 
 from _db.models.models import *
 from _db.models.user import User
@@ -140,7 +141,7 @@ class TestPost(TestCase):
                                    flat=flat, user=self.user, house=house)
         promotion_type = PromotionType.objects.create(name='first', price=1, efficiency=10)
         promo = Promotion.objects.create(post=post, type=promotion_type,
-                                         phrase='GIFT', color='PINK', price=10)
+                                         phrase='GIFT', color='PINK', price=10, end_date=datetime.date.today())
         self.assertEqual(promo, Post.promotion.get_queryset().first())
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
