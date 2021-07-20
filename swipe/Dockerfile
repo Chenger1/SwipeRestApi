@@ -19,7 +19,8 @@ RUN chown -R project:project $APP_HOME
 
 RUN apk add --update --no-cache tiff-dev jpeg-dev openjpeg-dev zlib-dev freetype-dev lcms2-dev \
 libwebp-dev tcl-dev tk-dev harfbuzz-dev fribidi-dev libimagequant-dev libxcb-dev libpng-dev \
-build-essential gcc build-base freetype-dev libpng-dev openblas-dev postgresql-dev python3-dev musl-dev
+gcc build-base freetype-dev libpng-dev openblas-dev \
+postgresql-dev gcc python3-dev musl-dev
 
 RUN pip install --upgrade pip
 RUN python3 -m pip install --upgrade setuptools
