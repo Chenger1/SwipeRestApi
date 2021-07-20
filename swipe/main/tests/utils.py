@@ -1,6 +1,10 @@
 from firebase_admin import auth as firebase_auth
 
-from swipe.config import WEB_API_KEY
+import os
+try:
+    from swipe.config import WEB_API_KEY
+except (ModuleNotFoundError, ImportError):
+    WEB_API_KEY = os.environ.get('FIREBASE_WEB_API_KEY')
 
 import requests
 from PIL import Image

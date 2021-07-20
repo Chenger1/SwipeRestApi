@@ -2,3 +2,4 @@
 venv
 swipe/config.py
 db.sqlite3
+generate_token_for_postman.py

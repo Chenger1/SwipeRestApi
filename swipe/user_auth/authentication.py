@@ -6,11 +6,28 @@ from rest_framework.authentication import BaseAuthentication
 import firebase_admin
 from firebase_admin import auth
 
+import os
+
 from user_auth.exceptions import NoAuthToken, InvalidAuthToken, FirebaseError
 
 cred_file = f'{settings.BASE_DIR}\\credentials.json'
 
-cred = firebase_admin.credentials.Certificate(cred_file)
+if os.path.isfile(cred_file):
+    cred = firebase_admin.credentials.Certificate(cred_file)
+else:
+    cred_data = {
+        'type': os.environ.get('FIREBASE_TYPE'),
+        'project_id': os.environ.get('FIREBASE_PROJECT_ID'),
+        'private_key_id': os.environ.get('FIREBASE_PRIVATE_KEY_ID'),
+        'private_key': os.environ.get('FIREBASE_PRIVATE_KEY'),
+        'client_email': os.environ.get('FIREBASE_CLIENT_EMAIL'),
+        'client_id': os.environ.get('FIREBASE_CLIENT_ID'),
+        'auth_uri': os.environ.get('FIREBASE_AUTH_URI'),
+        'token_uri': os.environ.get('FIREBASE_TOKEN_URI'),
+        'auth_provider_x509_cert_url': os.environ.get('FIREBASE_AUTH_PROVIDER'),
+        'client_x509_cert_url': os.environ.get('FIREBASE_CLIENT_CERT_URL')
+    }
+    cred = firebase_admin.credentials.Certificate(cred_data)
 
 firebase_app = firebase_admin.initialize_app(cred)
 
