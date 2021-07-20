@@ -11,24 +11,14 @@ from firebase_admin import auth as firebase_auth
 import requests
 import os
 
-cred_file = f'{settings.BASE_DIR}\\credentials.json'
+try:
+    from swipe.config import WEB_API_KEY
+except (ModuleNotFoundError, ImportError):
+    WEB_API_KEY = os.environ.get('FIREBASE_WEB_API_KEY')
 
-if os.path.isfile(cred_file):
-    firebase_credentials = firebase_admin.credentials.Certificate(cred_file)
-else:
-    cred_data = {
-        'type': os.environ.get('FIREBASE_TYPE'),
-        'project_id': os.environ.get('FIREBASE_PROJECT_ID'),
-        'private_key_id': os.environ.get('FIREBASE_PRIVATE_KEY_ID'),
-        'private_key': os.environ.get('FIREBASE_PRIVATE_KEY'),
-        'client_email': os.environ.get('FIREBASE_CLIENT_EMAIL'),
-        'client_id': os.environ.get('FIREBASE_CLIENT_ID'),
-        'auth_uri': os.environ.get('FIREBASE_AUTH_URI'),
-        'token_uri': os.environ.get('FIREBASE_TOKEN_URI'),
-        'auth_provider_x509_cert_url': os.environ.get('FIREBASE_AUTH_PROVIDER'),
-        'client_x509_cert_url': os.environ.get('FIREBASE_CLIENT_CERT_URL')
-    }
-    firebase_credentials = firebase_admin.credentials.Certificate(cred_data)
+cred_file = os.path.join(settings.BASE_DIR, 'credentials.json')
+
+firebase_credentials = firebase_admin.credentials.Certificate(cred_file)
 
 User = get_user_model()
 firebase_app = firebase_admin.initialize_app(credential=firebase_credentials,

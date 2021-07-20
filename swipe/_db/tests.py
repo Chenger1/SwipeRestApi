@@ -150,19 +150,20 @@ class TestPost(TestCase):
         house, *_, flat = self.init_house_structure()
         inst = Post.objects.create(payment_options='PAYMENT', price=12,
                                    flat=flat, user=self.user, house=house)
-        MEDIA_ROOT = os.path.join(settings.MEDIA_ROOT, 'media\\posts')
+        MEDIA_ROOT = os.path.join(settings.MEDIA_ROOT, os.path.join('media', 'posts'))
 
         img = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         img2 = SimpleUploadedFile('new.jpeg', b'file_content', content_type='image/jpeg')
 
         image = PostImage.objects.create(image=img, post=inst)
-        first_image = image.image.path.split('\\')[-1]
+        first_image = os.path.split(image.image.path)[-1]
         self.assertIn(first_image, os.listdir(MEDIA_ROOT))
 
         image.image = img2
         image.save()
-
-        self.assertIn(image.image.path.split('\\')[-1], os.listdir(MEDIA_ROOT))
+        
+        new_image = os.path.split(image.image.path)[-1]
+        self.assertIn(new_image, os.listdir(MEDIA_ROOT))
         self.assertNotIn(first_image, os.listdir(MEDIA_ROOT))
 
     def test_post_migrate_signal(self):
