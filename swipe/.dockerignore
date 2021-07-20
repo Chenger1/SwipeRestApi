@@ -1,0 +1,4 @@
+.idea
+venv
+swipe/config.py
+db.sqlite3
