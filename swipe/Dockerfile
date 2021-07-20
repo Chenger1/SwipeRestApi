@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED 1
 RUN addgroup -S project && adduser -S project -G project
 
 ENV HOME=/home
-ENV APP_HOME=/home/web
+ENV APP_HOME=/home/api
 RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/static
 RUN mkdir $APP_HOME/media
