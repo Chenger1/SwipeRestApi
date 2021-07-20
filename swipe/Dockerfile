@@ -2,9 +2,6 @@ FROM python:3.9.4-alpine
 
 WORKDIR /usr/src/project
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
 # Create the app user
 RUN addgroup -S project && adduser -S project -G project
 
@@ -22,9 +19,9 @@ libwebp-dev tcl-dev tk-dev harfbuzz-dev fribidi-dev libimagequant-dev libxcb-dev
 gcc build-base freetype-dev libpng-dev openblas-dev \
 postgresql-dev gcc python3-dev musl-dev
 
-RUN pip install --upgrade pip
-RUN python3 -m pip install --upgrade setuptools
+RUN pip3 install --upgrade pip
+RUN pip3 install setuptools==49.6.0
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 COPY . .
