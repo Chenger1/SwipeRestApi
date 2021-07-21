@@ -20,7 +20,6 @@ gcc build-base freetype-dev libpng-dev openblas-dev \
 postgresql-dev gcc python3-dev musl-dev
 
 RUN pip3 install --upgrade pip
-RUN export GRPC_PYTHON_DISABLE_LIBC_COMPATIBILITY=1
 COPY requirements.txt ./
 RUN pip3 install -r requirements.txt
 
