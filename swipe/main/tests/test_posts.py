@@ -168,7 +168,7 @@ class TestPost(APITestCase):
     def test_post_favorites(self):
         """Ensure we can make CRUD operations with user`s favorites list"""
         house, *_, flat = self.init_house_structure()
-        post, *_= self.init_post(house, flat)
+        post, *_ = self.init_post(house, flat)
 
         url_add = reverse('main:favorites_posts-list')
         response_add = self.client.post(url_add, data={'post': post.pk})
