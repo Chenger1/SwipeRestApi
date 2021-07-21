@@ -2,8 +2,7 @@ version: "3.8"
 
 services:
   api:
-    build:
-      context: .
+    image: chenger1/swipe-rest-api:api
     command: gunicorn swipe.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - ./:/urs/src/project
