@@ -76,7 +76,7 @@ class UpdateSubscription(APIView):
 
 class ChangeBanStatus(APIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
-    view_tags = ['User', 'Admin']
+    view_tags = ['Admin']
 
     def patch(self, request, uid, format=None):
         """
@@ -207,7 +207,7 @@ class NotaryUsersApi(ModelViewSet):
     serializer_class = user_serializers.UserSerializer
     queryset = User.objects.filter(role='NOTARY')
     lookup_field = 'uid'
-    view_tags = ['User', 'Admin']
+    view_tags = ['Admin']
 
 
 class UserFilterViewSet(ModelViewSet):

@@ -42,7 +42,7 @@ class HousePublic(ListModelMixin,
     authentication_classes = []
     queryset = House.objects.all()
     serializer_class = house_serializers.HouseSerializer
-    view_tags = ['Houses', 'Public']
+    view_tags = ['Public-Houses']
 
 
 class BuildingViewSet(ModelViewSet):
@@ -103,7 +103,7 @@ class FlatPublic(ListModelMixin,
     authentication_classes = []
     queryset = Flat.objects.all()
     serializer_class = house_serializers.FlatSerializer
-    view_tags = ['Flats', 'Public']
+    view_tags = ['Public-Flats']
 
 
 class BookingFlat(APIView):
