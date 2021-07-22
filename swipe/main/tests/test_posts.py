@@ -149,13 +149,13 @@ class TestPost(APITestCase):
         self.assertEqual(response_create.status_code, 201)
 
         url = reverse('main:posts_public-list')
-        response = self.client.get(url, data={'flat__square__gt': 100})
+        response = self.client.get(url, data={'flat__square__gte': 101})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['flat_info']['square'], 200)
 
         response2 = self.client.get(url, data={'flat__plan': 'FREE',
-                                               'price__gt': 1000})
+                                               'price__gte': 1000})
         self.assertEqual(response2.status_code, 200)
         self.assertEqual(response2.data[0]['price'], 100000)
         self.assertEqual(response2.data[0]['flat_info']['plan'], 'Свободная планировка')
@@ -412,7 +412,7 @@ class TestPost(APITestCase):
 
         # Check filter limitations
         filter_data = {
-            'price__gt': 5000,
+            'price__gte': 5000,
             'payment_options': 'PAYMENT'
         }
         url_list = reverse('main:user_filters-list')
