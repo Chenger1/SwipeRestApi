@@ -46,7 +46,8 @@ class User(CustomAbstractUser):
         ('USER', 'Клиент'),
         ('AGENT', 'Агент'),
         ('NOTARY', 'Нотариус'),
-        ('DEPART', 'Отдел продаж')
+        ('DEPART', 'Отдел продаж'),
+        ('SYSTEM', 'Администрация Swipe')
     )
 
     notifications = models.CharField(choices=notification_choices,

@@ -18,9 +18,17 @@ def create_promotion_type_instances(sender, **kwargs):
             PromotionType.objects.create(name=inst['name'], price=inst['price'], efficiency=inst['efficiency'])
 
 
+def create_system_user(sender, **kwargs):
+    from _db.models.user import User
+    created, user = User.objects.get_or_create(notifications='OFF', role='SYSTEM', is_staff=True,
+                                               uid=1, first_name='Администрация', last_name='Swipe',
+                                               email='swipe@mail.com')
+
+
 class DbConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = '_db'
 
     def ready(self):
         post_migrate.connect(create_promotion_type_instances, sender=self)
+        post_migrate.connect(create_system_user, sender=self)

@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from main.permissions import IsOwner, IsOwnerOrReadOnly
 from main.serializers import post_serializers
 from main.filters import PostFilter
+from main.tasks import check_filter_matching
 
 from _db.models.models import Post, PostImage, UserFavorites, Complaint, Promotion
 
@@ -41,7 +42,11 @@ class PostViewSet(ModelViewSet):
         :return: Response
         """
         if request.user.subscribed or request.user.posts.count() < Post.LIMIT:
-            return super().create(request, *args, **kwargs)
+            response = super().create(request, *args, **kwargs)
+
+            # Run celery task to find if any user`s filter matches new post
+            check_filter_matching(response.data['id'], request.stream.get_host())
+            return response
         return Response({'Error': 'You have reached limit. Please, delete another post or subscribe'},
                         status=status.HTTP_400_BAD_REQUEST)
 

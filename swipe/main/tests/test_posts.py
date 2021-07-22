@@ -9,7 +9,7 @@ from main.tests.utils import get_id_token
 from main.tasks import check_promotion
 
 from _db.models.models import *
-from _db.models.user import UserFilter
+from _db.models.user import UserFilter, Message
 
 import os
 import tempfile
@@ -754,3 +754,38 @@ class TestPost(APITestCase):
         self.assertEqual(response_post_list.data[0]['weight'], 0)
         self.assertEqual(response_post_list.data[1]['weight'], 0)
         self.assertEqual(response_post_list.data[2]['weight'], 0)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_celery_check_filters_matching(self):
+        """ Ensure that after we create post that matches one of the user`s filter - user will receiver
+         message notification """
+
+        # Save user filter
+        filter_data = {
+                    'price__gt': 10000,
+                    'payment_options': 'PAYMENT'
+                }
+        url_list = reverse('main:user_filters-list')
+        response_add = self.client.post(url_list, data=filter_data)
+        self.assertEqual(response_add.status_code, 201)
+        self.assertEqual(UserFilter.objects.count(), 1)
+        self.assertEqual(UserFilter.objects.first().min_price, 10000)
+
+        # Create new post
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+        )
+        house, *_, flat = self.init_house_structure()
+        url_create = reverse('main:posts-list')
+        with open(self.temp_media_image_path, 'rb') as file:
+            response_create = self.client.post(url_create, data={'flat': flat.pk,
+                                                                 'house': house.pk,
+                                                                 'price': 100000,
+                                                                 'payment_options': 'PAYMENT',
+                                                                 'main_image': file})
+        self.assertEqual(response_create.status_code, 201)
+
+        # Ensure we get notification from system
+        messages = Message.objects.filter(receiver__uid=self._test_user_uid)
+        self.assertGreater(messages.count(), 0)
+        self.assertEqual(messages.first().sender.role, 'SYSTEM')

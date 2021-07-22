@@ -35,7 +35,7 @@ class PostFilter(filters.FilterSet):
         fields = {
             'living_type': ['exact'],
             'payment_options': ['exact'],
-            'price': ['gte', 'lte', 'exact'],
+            'price': ['gte', 'lte'],
             'flat__square': ['gte', 'lte'],
             'flat__price_per_metre': ['gte', 'lte'],
             'flat__number_of_rooms': ['exact'],
