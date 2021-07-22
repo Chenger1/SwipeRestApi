@@ -19,7 +19,7 @@ class TestUser(APITestCase):
         self._test_user_uid_two = '6vO5mBRld2evvoEzDzZoMquRyIn1'
         self._test_user_email = 'user@example.com'
         self._test_user_email_two = 'test@mail.com'
-        self._url = reverse('main:user-detail', args=[self._test_user_uid])
+        self._url = reverse('main:users-detail', args=[self._test_user_uid])
         self._token = get_id_token()
         self.client.credentials(
             HTTP_AUTHORIZATION=f'JWT {self._token}'
@@ -38,7 +38,7 @@ class TestUser(APITestCase):
         self.assertEqual(response.data['uid'], self._test_user_uid)
 
     def test_get_wrong_user(self):
-        url = reverse('main:user-detail', args=['12345'])
+        url = reverse('main:users-detail', args=['12345'])
         response = self.client.get(url)
         self.assertEqual(response.data['detail'], 'Not found.')
 
@@ -79,14 +79,14 @@ class TestUser(APITestCase):
         self.assertEqual(response.data['uid'], '8ugeJOTWTMbeFYpKDpx2lHr0qfq1')
 
     def test_user_list(self):
-        url = reverse('main:user-list')
+        url = reverse('main:users-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
     def test_user_list_with_filter(self):
         """Ensure we can filter users by role"""
         User.objects.create(uid=123, email='temp@mail.com', role='NOTARY')
-        url = reverse('main:user-list')
+        url = reverse('main:users-list')
         response = self.client.get(url, data={'role': 'NOTARY'})
         self.assertEqual(response.status_code, 200)
 
@@ -248,3 +248,13 @@ class TestUser(APITestCase):
         # Ensure subscription state has been changed
         user = User.objects.get(uid=self._test_user_uid)
         self.assertFalse(user.subscribed)
+
+    def test_create_user_with_role_system(self):
+        """ User with role 'SYSTEM' is a account for sending notifications.
+         Ensure we can create only one system account """
+        url = reverse('main:users-list')
+        response = self.client.post(url, data={'uid': 1, 'role': 'SYSTEM',
+                                               'email': 'swipe@mail.com',
+                                               'is_staff': True,
+                                               'notifications': 'OFF'})
+        self.assertEqual(response.status_code, 400)

@@ -10,8 +10,10 @@ from _db.models.validators import validate_file_extension
 class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
     uid = models.CharField(max_length=50, unique=True)
 
-    first_name = models.CharField(_('first name'), max_length=150, blank=True)
-    last_name = models.CharField(_('last_name'), max_length=150, blank=True)
+    first_name = models.CharField(_('first name'), max_length=150, blank=True,
+                                  null=True)
+    last_name = models.CharField(_('last_name'), max_length=150, blank=True,
+                                 null=True)
     email = models.CharField(
         _('email'),
         max_length=150,

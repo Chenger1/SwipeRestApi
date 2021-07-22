@@ -19,7 +19,7 @@ class TestHouse(APITestCase):
         self._test_user_email = 'user@example.com'
         self._test_user_uid_two = 'ifqnanQlUiOSSVBDrHHGbRvwSiw2'
         self._test_user_email_two = 'test@mail.com'
-        self._url = reverse('main:user-detail', args=[self._test_user_uid])
+        self._url = reverse('main:users-detail', args=[self._test_user_uid])
         self._token = get_id_token()
         self.client.credentials(
             HTTP_AUTHORIZATION=f'JWT {self._token}'

@@ -22,6 +22,12 @@ class UserSerializer(serializers.ModelSerializer):
             instance.notifications = validated_data.get('get_notifications_display')
         return super().update(instance, validated_data)
 
+    def validated_role(self, value):
+        """ SYSTEM user is a user for sending notifications """
+        if value == 'SYSTEM':
+            raise serializers.ValidationError('In system in be only one user with role "SYSTEM"')
+        return value
+
 
 class UserContactSerializer(serializers.ModelSerializer):
     uid = serializers.ReadOnlyField()
