@@ -23,9 +23,22 @@ def setup_periodic_tasks(sender, **kwargs):
         check_subscription
     )
 
+    # Init task to check promotion plan date status
     sender.add_periodic_task(
         crontab(hour='1', minute=0),
         check_promotion
+    )
+
+    # Init task to send notification if subscription is almost expired
+    sender.add_periodic_task(
+        crontab(hour='1', minute=0),
+        check_and_send_notification_about_subscription_almost_ending
+    )
+
+    # Init task to send notification if promotion plan is almost expired
+    sender.add_periodic_task(
+        crontab(hour='1', minute=0),
+        check_and_send_notification_about_promotion_time_almost_ending
     )
 
 
