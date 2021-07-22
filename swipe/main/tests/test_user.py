@@ -248,6 +248,9 @@ class TestUser(APITestCase):
         # Ensure subscription state has been changed
         user = User.objects.get(uid=self._test_user_uid)
         self.assertFalse(user.subscribed)
+        message = Message.objects.filter(receiver=user)
+        self.assertTrue(message.exists())
+        self.assertEqual(message.first().text, 'Your subscription has been expired')
 
     def test_create_user_with_role_system(self):
         """ User with role 'SYSTEM' is a account for sending notifications.

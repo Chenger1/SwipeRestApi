@@ -746,6 +746,9 @@ class TestPost(APITestCase):
         post = Post.objects.get(pk=post.pk)
         self.assertFalse(hasattr(post, 'promotion'))
         self.assertEqual(post.weight, 0)
+        message = Message.objects.filter(receiver=post.user)
+        self.assertTrue(message.exists())
+        self.assertEqual(message.first().text, 'Your promotion plan has been expired')
 
         # Ensure all post`s weights are the same
         url_post_list = reverse('main:posts-list')

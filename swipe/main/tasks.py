@@ -33,20 +33,27 @@ def setup_periodic_tasks(sender, **kwargs):
 def check_subscription():
     users_with_subscription = User.objects.filter(subscribed=True,
                                                   end_date=datetime.date.today())
+    system_user = User.objects.filter(role='SYSTEM').first()
     for user in users_with_subscription:
         user.subscribed = False
+        Message.objects.create(sender=system_user, receiver=user,
+                               text='Your subscription has been expired')
         user.save()
 
 
 @app.task
 def check_promotion():
     promotions = Promotion.objects.filter(end_date=datetime.date.today())
+    system_user = User.objects.filter(role='SYSTEM').first()
     for promo in promotions:
         post = promo.post
+        user = post.user
         weight = promo.type.efficiency
         promo.delete()
         post.weight -= weight
         post.save()
+        Message.objects.create(sender=system_user, receiver=user,
+                               text='Your promotion plan has been expired')
 
 
 @app.task
