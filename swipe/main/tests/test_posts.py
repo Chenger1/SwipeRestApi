@@ -6,7 +6,7 @@ from django.test import override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from main.tests.utils import get_id_token
-from main.tasks import check_promotion
+from main.tasks import check_promotion, check_and_send_notification_about_promotion_time_almost_ending
 
 from _db.models.models import *
 from _db.models.user import UserFilter, Message
@@ -792,3 +792,29 @@ class TestPost(APITestCase):
         messages = Message.objects.filter(receiver__uid=self._test_user_uid)
         self.assertGreater(messages.count(), 0)
         self.assertEqual(messages.first().sender.role, 'SYSTEM')
+
+    def test_celery_check_notification_about_promotion_almost_ending(self):
+        """ Ensure we get notification if out promotion plan will end in next 10 days """
+        house, *_, flat = self.init_house_structure()
+        post, *_ = self.init_post(house, flat)
+
+        # Add promotion for first post
+        low = PromotionType.objects.get(efficiency=50)
+
+        url_promotion = reverse('main:promotions-list')
+        response_add1 = self.client.post(url_promotion, data={'post': post.pk,
+                                                              'phrase': 'TRADE',
+                                                              'color': 'GREEN',
+                                                              'type': low.pk})
+        self.assertEqual(response_add1.status_code, 201)
+        post = Post.objects.get(pk=post.pk)
+        promo = post.promotion
+        promo.end_date = datetime.date.today() + datetime.timedelta(days=10)
+        promo.save()
+
+        # Run celery task
+        check_and_send_notification_about_promotion_time_almost_ending.apply()
+        message = Message.objects.filter(receiver=post.user)
+        self.assertTrue(message.exists())
+        self.assertEqual(message.first().text, 'Your promotion plan is almost expired')
+

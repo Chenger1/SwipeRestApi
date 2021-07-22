@@ -5,7 +5,7 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token, get_temporary_image
-from main.tasks import check_subscription
+from main.tasks import check_subscription, check_and_send_notification_about_subscription_almost_ending
 
 from _db.models.user import Contact, User, Message
 
@@ -261,3 +261,19 @@ class TestUser(APITestCase):
                                                'is_staff': True,
                                                'notifications': 'OFF'})
         self.assertEqual(response.status_code, 400)
+
+    def test_celery_task_for_notification_about_subscription_almost_ending(self):
+        """ Ensure we get notification if out subscription will end in next 10 days """
+        user = User.objects.get(uid=self._test_user_uid)
+        user.subscribed = True
+        user.end_date = datetime.date.today() + datetime.timedelta(days=10)
+        user.save()
+
+        # Run celery task
+        check_and_send_notification_about_subscription_almost_ending.apply()
+
+        # Ensure subscription state has been changed
+        user = User.objects.get(uid=self._test_user_uid)
+        message = Message.objects.filter(receiver=user)
+        self.assertTrue(message.exists())
+        self.assertEqual(message.first().text, 'Your subscription is almost expired')

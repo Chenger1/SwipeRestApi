@@ -87,3 +87,26 @@ def check_filter_matching(post_pk, host):
             Message.objects.create(sender=system_user, receiver=user,
                                    text=text)
 
+
+@app.task
+def check_and_send_notification_about_subscription_almost_ending():
+    """ Checks if any subscription plan will end in next 10 days. If so - sends notification """
+    next_date = datetime.date.today() + datetime.timedelta(days=10)
+    users_with_subscription = User.objects.filter(subscribed=True,
+                                                  end_date=next_date)
+    system_user = User.objects.filter(role='SYSTEM').first()
+    for user in users_with_subscription:
+        Message.objects.create(sender=system_user, receiver=user,
+                               text='Your subscription is almost expired')
+
+
+@app.task
+def check_and_send_notification_about_promotion_time_almost_ending():
+    """ Checks if any promotion plans will end in next 10 days. If so - send notification """
+    next_date = datetime.date.today() + datetime.timedelta(days=10)
+    promotions = Promotion.objects.filter(end_date=next_date)
+    system_user = User.objects.filter(role='SYSTEM').first()
+    for promo in promotions:
+        user = promo.post.user
+        Message.objects.create(sender=system_user, receiver=user,
+                               text='Your promotion plan is almost expired')
