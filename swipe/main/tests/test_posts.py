@@ -6,6 +6,7 @@ from django.test import override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from main.tests.utils import get_id_token
+from main.tasks import check_promotion
 
 from _db.models.models import *
 from _db.models.user import UserFilter
@@ -704,3 +705,52 @@ class TestPost(APITestCase):
         self.assertEqual(response_list.status_code, 200)
         self.assertEqual(response_list.data[0]['id'], post.pk)
         self.assertEqual(response_list.data[0]['weight'], post.weight)
+
+    def test_celery_check_promotion_end_date(self):
+        """ Ensure celery will delete expiring promotions """
+        house, *_, flat = self.init_house_structure()
+        post, post2, post3 = self.init_post(house, flat)
+
+        # Ensure all post`s weights are the same
+        url_post_list = reverse('main:posts-list')
+        response_post_list = self.client.get(url_post_list)
+        self.assertEqual(response_post_list.status_code, 200)
+        self.assertEqual(response_post_list.data[0]['weight'], 0)
+        self.assertEqual(response_post_list.data[1]['weight'], 0)
+        self.assertEqual(response_post_list.data[2]['weight'], 0)
+
+        # Add promotion for first post
+        low = PromotionType.objects.get(efficiency=50)
+
+        url_promotion = reverse('main:promotions-list')
+        response_add1 = self.client.post(url_promotion, data={'post': post.pk,
+                                                              'phrase': 'TRADE',
+                                                              'color': 'GREEN',
+                                                              'type': low.pk})
+        self.assertEqual(response_add1.status_code, 201)
+        post = Post.objects.get(pk=post.pk)
+        self.assertEqual(post.weight, 50)
+        promo = post.promotion
+        promo.end_date = datetime.date.today()
+        promo.save()
+
+        # Ensure first post has bigger weight that others
+        response_post_list = self.client.get(url_post_list)
+        self.assertEqual(response_post_list.status_code, 200)
+        self.assertEqual(response_post_list.data[0]['weight'], 50)
+        self.assertEqual(response_post_list.data[1]['weight'], 0)
+        self.assertEqual(response_post_list.data[2]['weight'], 0)
+
+        # Run celery task
+        check_promotion.apply()
+        post = Post.objects.get(pk=post.pk)
+        self.assertFalse(hasattr(post, 'promotion'))
+        self.assertEqual(post.weight, 0)
+
+        # Ensure all post`s weights are the same
+        url_post_list = reverse('main:posts-list')
+        response_post_list = self.client.get(url_post_list)
+        self.assertEqual(response_post_list.status_code, 200)
+        self.assertEqual(response_post_list.data[0]['weight'], 0)
+        self.assertEqual(response_post_list.data[1]['weight'], 0)
+        self.assertEqual(response_post_list.data[2]['weight'], 0)

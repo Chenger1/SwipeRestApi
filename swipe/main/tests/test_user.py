@@ -5,10 +5,12 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from main.tests.utils import get_id_token, get_temporary_image
+from main.tasks import check_subscription
 
 from _db.models.user import Contact, User, Message
 
 import tempfile
+import datetime
 
 
 class TestUser(APITestCase):
@@ -232,3 +234,17 @@ class TestUser(APITestCase):
         url = reverse('main:users_notary_admin-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
+
+    def test_celery_check_subscription_end_date(self):
+        """ Ensure celery periodic task checks subscription status """
+        user = User.objects.get(uid=self._test_user_uid)
+        user.subscribed = True
+        user.end_date = datetime.date.today()
+        user.save()
+
+        # Run celery task
+        check_subscription.apply()
+
+        # Ensure subscription state has been changed
+        user = User.objects.get(uid=self._test_user_uid)
+        self.assertFalse(user.subscribed)
