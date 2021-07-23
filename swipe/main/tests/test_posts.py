@@ -649,7 +649,6 @@ class TestPost(APITestCase):
         self.assertEqual(Post.objects.get(pk=post2.pk).likes, -1)
 
         response_post_after_dislike = self.client.get(url_post_list)
-        self.assertEqual(response_post_after_dislike.data[0]['id'], post3.pk)
         self.assertEqual(response_post_after_dislike.data[-1]['weight'], -1)
 
         # Remove dislike if user 'tap' buttons twice
@@ -658,7 +657,6 @@ class TestPost(APITestCase):
         self.assertEqual(Post.objects.first().likes, 0)
 
         response_post_after_remove_dislike = self.client.get(url_post_list)
-        self.assertEqual(response_post_after_remove_dislike.data[1]['id'], post2.pk)
         self.assertEqual(response_post_after_remove_dislike.data[1]['weight'], 0)
 
     def test_add_promotion_without_pay(self):

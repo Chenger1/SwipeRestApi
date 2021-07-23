@@ -105,6 +105,11 @@ class FlatPublic(ListModelMixin,
     serializer_class = house_serializers.FlatSerializer
     view_tags = ['Public-Flats']
 
+    def get_queryset(self):
+        if self.request.data.get('house_pk'):
+            return self.queryset.filter(floor__section__building__house__pk=self.request.data.get('house_pk'))
+        return self.queryset
+
 
 class BookingFlat(APIView):
     permission_classes = (IsAuthenticated, )
