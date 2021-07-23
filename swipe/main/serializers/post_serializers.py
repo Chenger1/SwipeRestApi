@@ -29,6 +29,12 @@ class PostSerializer(serializers.ModelSerializer):
     created_display = serializers.DateTimeField(source='created', read_only=True)
     created = serializers.BooleanField(write_only=True, required=False)
 
+    living_type_display = serializers.CharField(source='get_living_type_display', read_only=True)
+    payment_options_display = serializers.CharField(source='get_payment_options_display', read_only=True)
+    agent_coms_display = serializers.CharField(source='get_agent_coms_display', read_only=True)
+    communications_display = serializers.CharField(source='get_communications_display', read_only=True)
+    reject_message_display = serializers.CharField(source='get_reject_message_display', read_only=True)
+
     class Meta:
         model = Post
         fields = '__all__'
@@ -53,7 +59,8 @@ class PostSerializer(serializers.ModelSerializer):
                 'city': house.city,
                 'status': house.get_status_display(),
                 'territory': house.get_territory_display(),
-                'house_class': house.get_house_class_display()}
+                'house_class': house.get_house_class_display(),
+                'number': flat.number}
         return data
 
     def validate_created(self, value):
