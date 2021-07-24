@@ -106,8 +106,8 @@ class FlatPublic(ListModelMixin,
     view_tags = ['Public-Flats']
 
     def get_queryset(self):
-        if self.request.data.get('house_pk'):
-            return self.queryset.filter(floor__section__building__house__pk=self.request.data.get('house_pk'))
+        if self.request.query_params.get('house__pk'):
+            return self.queryset.filter(floor__section__building__house__pk=self.request.query_params.get('house__pk'))
         return self.queryset
 
 
