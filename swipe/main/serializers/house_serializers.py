@@ -128,6 +128,8 @@ class FlatSerializer(serializers.ModelSerializer):
     plan_display = serializers.CharField(source='get_plan_display', read_only=True)
     balcony_display = serializers.CharField(source='get_balcony_display', read_only=True)
 
+    floor_display = serializers.SerializerMethodField()
+
     class Meta:
         model = Flat
         fields = '__all__'
@@ -138,6 +140,12 @@ class FlatSerializer(serializers.ModelSerializer):
             'plan': {'write_only': True},
             'balcony': {'write_only': True}
         }
+
+    def get_floor_display(self, obj):
+        floor = obj.floor
+        section = floor.section
+        building = section.building
+        return f'Корпус {building.name}, Секция {section.name}, Этаж {floor.name}'
 
 
 class HouseInRequestSerializer(serializers.ModelSerializer):
