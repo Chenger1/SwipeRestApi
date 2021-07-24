@@ -120,7 +120,7 @@ class TestPost(TestCase):
     def test_create_post(self):
         house, *_, flat = self.init_house_structure()
         inst = Post.objects.create(payment_options='PAYMENT', price=12,
-                                   flat=flat, user=self.user, house=house)
+                                   flat=flat, user=self.user, house=house, number=1)
         self.assertIn(inst, Post.objects.all())
         self.assertEqual(inst.price, 12)
 
@@ -138,7 +138,7 @@ class TestPost(TestCase):
     def test_create_promotion(self):
         house, *_, flat = self.init_house_structure()
         post = Post.objects.create(payment_options='PAYMENT', price=12,
-                                   flat=flat, user=self.user, house=house)
+                                   flat=flat, user=self.user, house=house, number=1)
         promotion_type = PromotionType.objects.create(name='first', price=1, efficiency=10)
         promo = Promotion.objects.create(post=post, type=promotion_type,
                                          phrase='GIFT', color='PINK', price=10, end_date=datetime.date.today())
@@ -149,7 +149,7 @@ class TestPost(TestCase):
         """ Ensure that after we delete instance or update file - old version will be deleted """
         house, *_, flat = self.init_house_structure()
         inst = Post.objects.create(payment_options='PAYMENT', price=12,
-                                   flat=flat, user=self.user, house=house)
+                                   flat=flat, user=self.user, house=house, number=1)
         MEDIA_ROOT = os.path.join(settings.MEDIA_ROOT, os.path.join('media', 'posts'))
 
         img = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')

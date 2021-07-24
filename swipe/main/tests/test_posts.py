@@ -72,11 +72,11 @@ class TestPost(APITestCase):
         user = User.objects.get(uid=self._test_user_uid)
         file = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         post = Post.objects.create(flat=flat, house=house, price=10000, payment_options='PAYMENT',
-                                   main_image=file, user=user)
+                                   main_image=file, user=user, number=1)
         post2 = Post.objects.create(flat=flat, house=house, price=1000, payment_options='MORTGAGE',
-                                    main_image=file, user=user)
+                                    main_image=file, user=user, number=2)
         post3 = Post.objects.create(flat=flat, house=house, price=5000, payment_options='MORTGAGE',
-                                    main_image=file, user=user)
+                                    main_image=file, user=user, number=3)
         return post, post2, post3
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
@@ -91,7 +91,9 @@ class TestPost(APITestCase):
                                                                  'payment_options': 'PAYMENT',
                                                                  'main_image': file})
         self.assertEqual(response_create.status_code, 201)
-        self.assertEqual(Post.objects.first().flat, flat)
+        post = Post.objects.first()
+        self.assertEqual(post.flat, flat)
+        self.assertEqual(post.number, 1)
 
         url_detail = reverse('main:posts-detail', args=[response_create.data['id']])
         response_edit = self.client.patch(url_detail, data={'price': 15000})

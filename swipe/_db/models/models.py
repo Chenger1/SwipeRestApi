@@ -156,6 +156,7 @@ class RequestToChest(models.Model):
 class Post(models.Model):
     LIMIT = 5  # Max posts for unsubscribed users
 
+    number = models.IntegerField(unique=True, blank=True)
     living_type = models.CharField(choices=type_choices, default='MANY', max_length=9, blank=True, null=True)
     payment_options = models.CharField(choices=payment_options_choices, max_length=8)
     agent_coms = models.CharField(choices=agent_coms_choices, max_length=7, blank=True, null=True)
@@ -184,6 +185,13 @@ class Post(models.Model):
     @classmethod
     def set_limit(cls, value):
         cls.LIMIT = value
+
+    @classmethod
+    def get_next_number(cls):
+        last = cls.objects.last()
+        if last:
+            return last.number + 1
+        return 1
 
 
 class PostImage(models.Model):

@@ -41,7 +41,8 @@ class PostSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'user': {'read_only': True},
             'likers': {'read_only': True},
-            'dislikers': {'read_only': True}
+            'dislikers': {'read_only': True},
+            'number': {'read_only': True}
         }
 
     def get_flat_info(self, obj):
@@ -70,6 +71,10 @@ class PostSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('You can confirm relevance every 31 days')
             return value
         return value
+
+    def create(self, validated_data):
+        validated_data['number'] = Post.get_next_number()
+        return super().create(validated_data)
 
     def update(self, instance, validated_data):
         if validated_data.get('created'):
