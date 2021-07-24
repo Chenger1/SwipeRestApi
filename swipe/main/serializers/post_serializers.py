@@ -61,7 +61,8 @@ class PostSerializer(serializers.ModelSerializer):
                 'status': house.get_status_display(),
                 'territory': house.get_territory_display(),
                 'house_class': house.get_house_class_display(),
-                'number': flat.number}
+                'number': flat.number,
+                'id': flat.pk}
         return data
 
     def validate_created(self, value):
