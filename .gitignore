@@ -133,3 +133,4 @@ swipe/web_api.json
 swipe/generate_token_for_postman.py
 swipe/media/
 swipe/static/
+swipe/.env
