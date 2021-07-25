@@ -21,7 +21,7 @@ def create_promotion_type_instances(sender, **kwargs):
 def create_system_user(sender, **kwargs):
     from _db.models.user import User
     created, user = User.objects.get_or_create(notifications='OFF', role='SYSTEM', is_staff=True,
-                                               uid=1, first_name='Администрация', last_name='Swipe',
+                                               phone_number='1', first_name='Администрация', last_name='Swipe',
                                                email='swipe@mail.com')
 
 

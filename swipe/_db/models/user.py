@@ -8,8 +8,6 @@ from _db.models.validators import validate_file_extension
 
 
 class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
-    uid = models.CharField(max_length=50, unique=True)
-
     first_name = models.CharField(_('first name'), max_length=150, blank=True,
                                   null=True)
     last_name = models.CharField(_('last_name'), max_length=150, blank=True,
@@ -20,7 +18,7 @@ class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
         unique=True,
         help_text=_('150 characters max. Available symbols: aA-wW, [0-9], @ . _')
     )
-    phone_number = models.CharField(max_length=30, unique=True, blank=True, null=True)
+    phone_number = models.CharField(max_length=30, unique=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -30,8 +28,8 @@ class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     EMAIL_FIELD = 'email'
-    USERNAME_FIELD = 'uid'
-    REQUIRED_FIELDS = ['phone_number', 'email']
+    USERNAME_FIELD = 'phone_number'
+    REQUIRED_FIELDS = ['email']
 
     def full_name(self):
         return f'{self.first_name} {self.last_name}'

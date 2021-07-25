@@ -14,7 +14,7 @@ from _db.models.user import User
 
 class TestHouse(TestCase):
     def setUp(self) -> None:
-        self.user = User.objects.create(uid='123', email='user@mail.com')
+        self.user = User.objects.create(email='user@mail.com', phone_number='1')
         self.inst = House.objects.create(name='test_house', address='address', tech='MONO1',
                                          payment_options='PAYMENT', role='FLAT', sales_department=self.user,
                                          city='Odessa')

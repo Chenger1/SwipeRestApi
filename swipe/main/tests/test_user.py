@@ -3,8 +3,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 
 from rest_framework.test import APITestCase
+from rest_framework.authtoken.models import Token
 
-from main.tests.utils import get_id_token, get_temporary_image
+from main.tests.utils import get_temporary_image
 from main.tasks import check_subscription, check_and_send_notification_about_subscription_almost_ending
 
 from _db.models.user import Contact, User, Message
@@ -15,27 +16,25 @@ import datetime
 
 class TestUser(APITestCase):
     def setUp(self):
-        self._test_user_uid = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
-        self._test_user_uid_two = '6vO5mBRld2evvoEzDzZoMquRyIn1'
         self._test_user_email = 'user@example.com'
         self._test_user_email_two = 'test@mail.com'
-        self._url = reverse('main:users-detail', args=[self._test_user_uid])
-        self._token = get_id_token()
+        self._token = Token.objects.get(user__email=self._test_user_email)
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {self._token}'
+            HTTP_AUTHORIZATION=f'Token {self._token.key}'
         )
+        self._user1 = User.objects.get(email=self._test_user_email)
+        self._user2 = User.objects.get(email=self._test_user_email_two)
+        self._url = reverse('main:users-detail', args=[self._user1.pk])
 
     @classmethod
     def setUpTestData(cls):
-        cls._test_user_uid = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
-        cls._test_user_uid_two = '6vO5mBRld2evvoEzDzZoMquRyIn1'
-        User.objects.create(uid=cls._test_user_uid, email='user@example.com')
-        User.objects.create(uid=cls._test_user_uid_two, email='test@mail.com')
+        User.objects.create(email='user@example.com', phone_number='+380638271139')
+        User.objects.create(email='test@mail.com', phone_number='+380638271140')
 
     def test_get_user_info(self):
-        """ensure we can get user info"""
+        """Ensure we can get user info"""
         response = self.client.get(self._url)
-        self.assertEqual(response.data['uid'], self._test_user_uid)
+        self.assertEqual(response.data['pk'], self._user1.pk)
 
     def test_get_wrong_user(self):
         url = reverse('main:users-detail', args=['12345'])
@@ -45,8 +44,7 @@ class TestUser(APITestCase):
     def test_change_user_info(self):
         """ensure we can change user info"""
         response = self.client.patch(self._url, data={'first_name': 'User first name',
-                                                      'last_name': 'User last name',
-                                                      'uid': self._test_user_uid})
+                                                      'last_name': 'User last name'})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['first_name'], 'User first name')
 
@@ -61,22 +59,18 @@ class TestUser(APITestCase):
     def test_switch_notifications_to_agent(self):
         """ test that we can change notifications """
         response = self.client.patch(self._url, data={'notifications': 'AGENT'})
-        user = User.objects.get(uid=self._test_user_uid)
         self.assertEqual(response.status_code, 200)
+        user = User.objects.get(email=self._test_user_email)
         self.assertEqual(user.notifications, 'AGENT')
 
-    def test_change_user_info_with_another_user_uid(self):
+    def test_change_user_info_with_another_user(self):
+        self._token2 = Token.objects.get(user__email=self._test_user_email_two)
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'  # test email
+            HTTP_AUTHORIZATION=f'Token {self._token2.key}'
         )
         response = self.client.patch(self._url, data={'first_name': 'User first name',
                                                       'last_name': 'User last name'})
         self.assertEqual(response.status_code, 403)
-
-    def test_uid_is_read_only_field(self):
-        """ ensure we cant change uid. Because this is key field with firebase integration """
-        response = self.client.patch(self._url, data={'uid': '123'})
-        self.assertEqual(response.data['uid'], '8ugeJOTWTMbeFYpKDpx2lHr0qfq1')
 
     def test_user_list(self):
         url = reverse('main:users-list')
@@ -85,7 +79,7 @@ class TestUser(APITestCase):
 
     def test_user_list_with_filter(self):
         """Ensure we can filter users by role"""
-        User.objects.create(uid=123, email='temp@mail.com', role='NOTARY')
+        User.objects.create(email='temp@mail.com', role='NOTARY', phone_number='+8452884781')
         url = reverse('main:users-list')
         response = self.client.get(url, data={'role': 'NOTARY'})
         self.assertEqual(response.status_code, 200)
@@ -95,21 +89,21 @@ class TestUser(APITestCase):
         self.assertNotEqual(response.data['role_display'], 'USER')
 
     def test_renew_subscription(self):
-        url = reverse('main:update_subscription', args=[self._test_user_uid])
+        url = reverse('main:update_subscription', args=[self._user1.pk])
         response = self.client.patch(url, data={'subscribed': '1'})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.data['subscribed'])
 
     def test_cancel_subscription(self):
-        url = reverse('main:update_subscription', args=[self._test_user_uid])
+        url = reverse('main:update_subscription', args=[self._user1.pk])
         response = self.client.patch(url, data={'subscribed': '0'})  # if '0' - subscription has to be canceled
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.data['subscribed'])
 
     def test_contacts(self):
         """ensure we can add contact and delete it"""
-        url = reverse('main:add_contact', args=[self._test_user_uid])
-        response = self.client.post(url, data={'contact_id': '6vO5mBRld2evvoEzDzZoMquRyIn1'})
+        url = reverse('main:add_contact', args=[self._user1.pk])
+        response = self.client.post(url, data={'contact_id': '2'})
         self.assertEqual(response.status_code, 200)
         self.assertIn('contact_obj_id', response.data)
 
@@ -131,18 +125,15 @@ class TestUser(APITestCase):
         response_delete = self.client.delete(url_delete, data={'contact_obj_id': response.data['contact_obj_id']})
         self.assertEqual(response_delete.status_code, 200)
 
-        contacts = Contact.objects.filter(user__uid=self._test_user_uid)
+        contacts = Contact.objects.filter(user__pk=1)
         self.assertEqual(contacts.count(), 0)
 
     def test_add_message(self):
         """Ensure we can add message, edit it, get it and delete it"""
-        self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {self._token}'
-        )
 
-        url = reverse('main:user_messages', args=[self._test_user_uid])
-        response = self.client.post(url, data={'sender': self._test_user_uid,
-                                               'receiver': self._test_user_uid_two,
+        url = reverse('main:user_messages', args=[self._user1.pk])
+        response = self.client.post(url, data={'sender': self._user1.pk,
+                                               'receiver': self._user2.pk,
                                                'text': 'First message'})
         self.assertEqual(response.status_code, 200)
 
@@ -163,14 +154,11 @@ class TestUser(APITestCase):
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_add_message_with_attachment(self):
         """Ensure we can create message with media file"""
-        self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {self._token}'
-        )
 
-        url = reverse('main:user_messages', args=[self._test_user_uid])
+        url = reverse('main:user_messages', args=[self._user1.pk])
         file = SimpleUploadedFile('photo.jpeg', b'file_content', content_type='image/jpeg')
-        response = self.client.post(url, data={'sender': self._test_user_uid,
-                                               'receiver': self._test_user_uid_two,
+        response = self.client.post(url, data={'sender': self._user1.pk,
+                                               'receiver': User.objects.last().pk,
                                                'text': 'Message with image'})
         self.assertEqual(response.status_code, 200)
 
@@ -195,28 +183,28 @@ class TestUser(APITestCase):
 
     def test_changing_ban_status(self):
         """Ensure we can change user ban status"""
-        admin_user = User.objects.get(uid=self._test_user_uid)
+        admin_user = User.objects.get(email=self._test_user_email)
         admin_user.is_staff = True
         admin_user.save()
-        banned_user = User.objects.get(uid=self._test_user_uid_two)
-        url = reverse('main:change_ban_status', args=[self._test_user_uid_two])
+        banned_user = User.objects.get(email=self._test_user_email_two)
+        url = reverse('main:change_ban_status', args=[banned_user.pk])
         response = self.client.patch(url)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(banned_user, User.objects.filter(ban=False))
 
     def test_change_ban_status_by_not_admin(self):
         """Ensure non admin cant change users ban status"""
-        url = reverse('main:change_ban_status', args=[self._test_user_uid])
+        url = reverse('main:change_ban_status', args=[self._user1.pk])
         response = self.client.patch(url)
         self.assertEqual(response.status_code, 403)
 
     def test_admin_access_to_notary(self):
         """Ensure we can get, change, delete notary info from admin profile"""
-        admin_user = User.objects.get(uid=self._test_user_uid)
+        admin_user = User.objects.get(email=self._test_user_email)
         admin_user.is_staff = True
         admin_user.save()
 
-        notary = User.objects.get(uid=self._test_user_uid_two)
+        notary = User.objects.get(email=self._test_user_email_two)
         notary.role = 'NOTARY'
         notary.save()
 
@@ -224,10 +212,10 @@ class TestUser(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        url_change = reverse('main:users_notary_admin-detail', args=[notary.uid])
+        url_change = reverse('main:users_notary_admin-detail', args=[notary.pk])
         response = self.client.patch(url_change, data={'first_name': 'Changed notary name'})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(User.objects.get(uid=self._test_user_uid_two).first_name, 'Changed notary name')
+        self.assertEqual(User.objects.last().first_name, 'Changed notary name')
 
     def test_not_admin_access_to_notary(self):
         """Ensure we cant get access to notaries info without admin account"""
@@ -237,7 +225,7 @@ class TestUser(APITestCase):
 
     def test_celery_check_subscription_end_date(self):
         """ Ensure celery periodic task checks subscription status """
-        user = User.objects.get(uid=self._test_user_uid)
+        user = User.objects.get(email=self._test_user_email)
         user.subscribed = True
         user.end_date = datetime.date.today()
         user.save()
@@ -246,7 +234,7 @@ class TestUser(APITestCase):
         check_subscription.apply()
 
         # Ensure subscription state has been changed
-        user = User.objects.get(uid=self._test_user_uid)
+        user = User.objects.get(email=self._test_user_email)
         self.assertFalse(user.subscribed)
         message = Message.objects.filter(receiver=user)
         self.assertTrue(message.exists())
@@ -256,7 +244,7 @@ class TestUser(APITestCase):
         """ User with role 'SYSTEM' is a account for sending notifications.
          Ensure we can create only one system account """
         url = reverse('main:users-list')
-        response = self.client.post(url, data={'uid': 1, 'role': 'SYSTEM',
+        response = self.client.post(url, data={'pk': self._user1.pk, 'role': 'SYSTEM',
                                                'email': 'swipe@mail.com',
                                                'is_staff': True,
                                                'notifications': 'OFF'})
@@ -264,7 +252,7 @@ class TestUser(APITestCase):
 
     def test_celery_task_for_notification_about_subscription_almost_ending(self):
         """ Ensure we get notification if out subscription will end in next 10 days """
-        user = User.objects.get(uid=self._test_user_uid)
+        user = User.objects.get(email=self._test_user_email)
         user.subscribed = True
         user.end_date = datetime.date.today() + datetime.timedelta(days=10)
         user.save()
@@ -273,7 +261,7 @@ class TestUser(APITestCase):
         check_and_send_notification_about_subscription_almost_ending.apply()
 
         # Ensure subscription state has been changed
-        user = User.objects.get(uid=self._test_user_uid)
+        user = User.objects.get(email=self._test_user_email)
         message = Message.objects.filter(receiver=user)
         self.assertTrue(message.exists())
         self.assertEqual(message.first().text, 'Your subscription is almost expired')

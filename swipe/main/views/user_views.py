@@ -16,7 +16,6 @@ from _db.models.user import Contact, Message, UserFilter, Attachment
 import datetime
 from dateutil.relativedelta import relativedelta
 
-
 User = get_user_model()
 
 
@@ -27,7 +26,7 @@ class UserViewSet(ModelViewSet):
     view_tags = ['User']
 
     def get_object(self):
-        obj = get_object_or_404(User, uid=self.kwargs.get('pk'))
+        obj = get_object_or_404(User, pk=self.kwargs.get('pk'))
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -60,8 +59,8 @@ class UpdateSubscription(APIView):
     permission_classes = (IsAuthenticated, IsProfileOwner)
     view_tags = ['User']
 
-    def patch(self, request, uid, format=None):
-        user = get_object_or_404(User, uid=uid)
+    def patch(self, request, pk, format=None):
+        user = get_object_or_404(User, pk=pk)
         if bool(int(request.data['subscribed'])):
             current_date = datetime.date.today()  # set new subscription end date in next month
             user.end_date = current_date + relativedelta(month=current_date.month+1)
@@ -70,7 +69,7 @@ class UpdateSubscription(APIView):
             user.end_date = datetime.date.today()
             user.subscribed = False
         user.save()
-        return Response({'uid': user.uid, 'subscribed': user.subscribed,
+        return Response({'pk': user.pk, 'subscribed': user.subscribed,
                          'end_date': user.end_date.strftime('%Y-%m-%d')})
 
 
@@ -78,18 +77,18 @@ class ChangeBanStatus(APIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
     view_tags = ['Admin']
 
-    def patch(self, request, uid, format=None):
+    def patch(self, request, pk, format=None):
         """
         Change user ban status to opposite
         :param request:
-        :param uid:
+        :param pk:
         :param format:
         :return: Response
         """
-        user = get_object_or_404(User, uid=uid)
+        user = get_object_or_404(User, pk=pk)
         user.ban = not user.ban
         user.save()
-        return Response({'uid': user.uid,
+        return Response({'pk': user.pk,
                          'ban': user.ban}, status=status.HTTP_200_OK)
 
 
@@ -112,12 +111,12 @@ class ContactAPI(APIView):
         serializer = user_serializers.ContactSerializer(contacts, many=True)
         return Response({'contacts': serializer.data})
 
-    def post(self, request, uid, format=None):
-        user = get_object_or_404(User, uid=uid)
-        contact = get_object_or_404(User, uid=request.data['contact_id'])
+    def post(self, request, pk, format=None):
+        user = get_object_or_404(User, pk=pk)
+        contact = get_object_or_404(User, pk=request.data['contact_id'])
         contact_obj, _ = Contact.objects.get_or_create(user=user, contact=contact)
         return Response({'contact_obj_id': contact_obj.pk,
-                         'contact_user_id': contact.uid})
+                         'contact_user_id': contact.pk})
 
     def patch(self, request, pk, format=None):
         """
@@ -142,21 +141,21 @@ class MessageApi(APIView):
     permission_classes = (IsAuthenticated, IsMessageSenderOrReceiver)
     view_tags = ['User']
 
-    def get(self, request, uid=None, format=None):
-        if request.user.uid != uid:
+    def get(self, request, pk=None, format=None):
+        if request.user.pk != pk:
             return Response({'Error': 'You can`t access this messages'})
-        messages = Message.objects.filter(sender__uid=uid) | Message.objects.filter(receiver__uid=uid)
+        messages = Message.objects.filter(sender__pk=pk) | Message.objects.filter(receiver__pk=pk)
         messages = messages.order_by()
         serializer = user_serializers.ReadableMessageSerializer(messages, many=True)
         return Response(serializer.data)
 
-    def post(self, request, uid=None, format=None):
-        if request.user.uid != request.data.get('sender'):
+    def post(self, request, pk=None, format=None):
+        if request.user.pk != int(request.data.get('sender')):
             #  User can send message only from himself
-            return Response({'Error': 'You try send message from another person'})
+            return Response({'Error': 'You try send message from another person'}, status=status.HTTP_400_BAD_REQUEST)
         data = {
-            'sender': get_object_or_404(User, uid=request.data['sender']),
-            'receiver': get_object_or_404(User, uid=request.data['receiver']),
+            'sender': get_object_or_404(User, pk=request.data['sender']),
+            'receiver': get_object_or_404(User, pk=request.data['receiver']),
             'text': request.data['text']
         }
         serializer = user_serializers.WritableMessageSerializer(data=data)
@@ -206,7 +205,6 @@ class NotaryUsersApi(ModelViewSet):
     permission_classes = (IsAuthenticated, IsAdminUser)
     serializer_class = user_serializers.UserSerializer
     queryset = User.objects.filter(role='NOTARY')
-    lookup_field = 'uid'
     view_tags = ['Admin']
 
 
