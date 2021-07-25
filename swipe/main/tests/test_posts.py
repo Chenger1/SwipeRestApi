@@ -1,11 +1,11 @@
 from rest_framework.test import APITestCase
+from rest_framework.authtoken.models import Token
 
 from django.urls import reverse
 from django.conf import settings
 from django.test import override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from main.tests.utils import get_id_token
 from main.tasks import check_promotion, check_and_send_notification_about_promotion_time_almost_ending
 
 from _db.models.models import *
@@ -20,16 +20,16 @@ from dateutil.relativedelta import relativedelta
 
 class TestPost(APITestCase):
     def setUp(self):
-        self._test_user_uid = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
         self._test_user_email = 'user@example.com'
-        self._test_user_uid_two = 'ifqnanQlUiOSSVBDrHHGbRvwSiw2'
         self._test_user_email_two = 'test@mail.com'
-        self._url = reverse('main:users-detail', args=[self._test_user_uid])
-        self._token = get_id_token()
+        self._user1 = User.objects.create(email='user@example.com', phone_number='+380638271139')
+        self._user2 = User.objects.create(email='test@mail.com', phone_number='+380638271140')
+        self._token = Token.objects.get(user__email=self._test_user_email)
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {self._token}'
+            HTTP_AUTHORIZATION=f'Bearer {self._token}'
         )
         self.temp_media_image_path = os.path.join(settings.BASE_DIR, 'main/tests/test_media/test_image.png')
+        self._url = reverse('main:users-detail', args=[self._user1.pk])
 
     def init_house_structure(self):
         url = reverse('main:houses-list')
@@ -69,7 +69,7 @@ class TestPost(APITestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def init_post(self, house, flat):
-        user = User.objects.get(uid=self._test_user_uid)
+        user = User.objects.get(email=self._test_user_email)
         file = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         post = Post.objects.create(flat=flat, house=house, price=10000, payment_options='PAYMENT',
                                    main_image=file, user=user, number=1)
@@ -197,7 +197,7 @@ class TestPost(APITestCase):
         """Ensure views counter is incremented for post"""
         house, *_, flat = self.init_house_structure()
         post, *_ = self.init_post(house, flat)
-        user = User.objects.get(uid=self._test_user_uid)
+        user = User.objects.get(email=self._test_user_email)
 
         url_get = reverse('main:posts_public-detail', args=[post.pk])
         self.client.get(url_get)
@@ -278,7 +278,7 @@ class TestPost(APITestCase):
         house, *_, flat = self.init_house_structure()
         post, *_ = self.init_post(house, flat)
 
-        user = User.objects.get(uid=self._test_user_uid)
+        user = User.objects.get(email=self._test_user_email)
         user.is_staff = True
         user.save()  # Ensure test user has required permissions
 
@@ -323,7 +323,7 @@ class TestPost(APITestCase):
         house, *_, flat = self.init_house_structure()
         post, *_ = self.init_post(house, flat)
 
-        user = User.objects.get(uid=self._test_user_uid)
+        user = User.objects.get(email=self._test_user_email)
         user.is_staff = True
         user.save()  # Ensure test user has required permissions
 
@@ -409,7 +409,7 @@ class TestPost(APITestCase):
         UserFilter.set_limit(2)
         Post.set_limit(2)
 
-        user = User.objects.get(uid=self._test_user_uid)
+        user = User.objects.get(email=self._test_user_email)
         self.assertFalse(user.subscribed)  # Ensure user is not subscribed
 
         # Check filter limitations
@@ -489,8 +489,8 @@ class TestPost(APITestCase):
         self.assertEqual(UserFilter.objects.count(), 3)
 
         # Delete two filters
-        filter_one = UserFilter.objects.filter(user__uid=self._test_user_uid).first()
-        filter_two = UserFilter.objects.filter(user__uid=self._test_user_uid).last()
+        filter_one = UserFilter.objects.filter(user__email=self._test_user_email).first()
+        filter_two = UserFilter.objects.filter(user__email=self._test_user_email).last()
         url_filter_detail_one = reverse('main:user_filters-detail', args=[filter_one.pk])
         response_delete_one = self.client.delete(url_filter_detail_one)
         url_filter_detail_two = reverse('main:user_filters-detail', args=[filter_two.pk])
@@ -776,7 +776,7 @@ class TestPost(APITestCase):
 
         # Create new post
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+            HTTP_AUTHORIZATION=f'Bearer {Token.objects.get(user__email=self._test_user_email_two)}'
         )
         house, *_, flat = self.init_house_structure()
         url_create = reverse('main:posts-list')
@@ -789,7 +789,7 @@ class TestPost(APITestCase):
         self.assertEqual(response_create.status_code, 201)
 
         # Ensure we get notification from system
-        messages = Message.objects.filter(receiver__uid=self._test_user_uid)
+        messages = Message.objects.filter(receiver__email=self._test_user_email)
         self.assertGreater(messages.count(), 0)
         self.assertEqual(messages.first().sender.role, 'SYSTEM')
 
