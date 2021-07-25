@@ -153,7 +153,7 @@ class BookingFlat(APIView):
             return Response({'Error': 'You cant book this flat'}, status=status.HTTP_400_BAD_REQUEST)
         flat.save()
         return Response({'pk': flat.pk,
-                         'user_uid': request.user.uid,
+                         'user_pk': request.user.pk,
                          'status': flat.booking_status}, status=status.HTTP_200_OK,)
 
 

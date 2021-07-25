@@ -20,7 +20,7 @@ class TestUser(APITestCase):
         self._test_user_email_two = 'test@mail.com'
         self._token = Token.objects.get(user__email=self._test_user_email)
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'Token {self._token.key}'
+            HTTP_AUTHORIZATION=f'Bearer {self._token.key}'
         )
         self._user1 = User.objects.get(email=self._test_user_email)
         self._user2 = User.objects.get(email=self._test_user_email_two)
@@ -66,7 +66,7 @@ class TestUser(APITestCase):
     def test_change_user_info_with_another_user(self):
         self._token2 = Token.objects.get(user__email=self._test_user_email_two)
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'Token {self._token2.key}'
+            HTTP_AUTHORIZATION=f'Bearer {self._token2.key}'
         )
         response = self.client.patch(self._url, data={'first_name': 'User first name',
                                                       'last_name': 'User last name'})

@@ -2,10 +2,10 @@ from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 from rest_framework.test import APITestCase
-
-from main.tests.utils import get_id_token
+from rest_framework.authtoken.models import Token
 
 from _db.models.models import House, NewsItem, Flat, Building, Section, Floor, RequestToChest, Standpipe
 
@@ -13,18 +13,21 @@ import tempfile
 import os
 
 
+User = get_user_model()
+
+
 class TestHouse(APITestCase):
     def setUp(self):
-        self._test_user_uid = '8ugeJOTWTMbeFYpKDpx2lHr0qfq1'
         self._test_user_email = 'user@example.com'
-        self._test_user_uid_two = 'ifqnanQlUiOSSVBDrHHGbRvwSiw2'
         self._test_user_email_two = 'test@mail.com'
-        self._url = reverse('main:users-detail', args=[self._test_user_uid])
-        self._token = get_id_token()
+        self._user1 = User.objects.create(email='user@example.com', phone_number='+380638271139')
+        self._user2 = User.objects.create(email='test@mail.com', phone_number='+380638271140')
+        self._token = Token.objects.get(user__email=self._test_user_email)
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {self._token}'
+            HTTP_AUTHORIZATION=f'Bearer {self._token}'
         )
         self.temp_media_image_path = os.path.join(settings.BASE_DIR, 'main/tests/test_media/test_image.png')
+        self._url = reverse('main:users-detail', args=[self._user1.pk])
 
     def init_house_structure(self):
         url = reverse('main:houses-list')
@@ -74,7 +77,7 @@ class TestHouse(APITestCase):
     def test_house_get_list(self):
         """Ensure we can get list of houses non-creator"""
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+            HTTP_AUTHORIZATION=f'Bearer {Token.objects.get(user__email=self._test_user_email_two)}'
         )
         url_list = reverse('main:houses-list')
         response_list = self.client.get(url_list)
@@ -256,9 +259,9 @@ class TestHouse(APITestCase):
         updated_flat = Flat.objects.get(pk=flat.pk)
         self.assertEqual(updated_flat.client.email, self._test_user_email)
 
-        # Ensure we can change booking status from another person (If this person is not a house owner)
+        # Ensure we cant change booking status from another person (If this person is not a house owner)
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+            HTTP_AUTHORIZATION=f'Bearer {Token.objects.get(user__email=self._test_user_email_two)}'
         )
         response_errors = self.client.patch(url, data={'booking': '0'})
         self.assertEqual(response_errors.status_code, 400)
@@ -268,7 +271,7 @@ class TestHouse(APITestCase):
 
         # Ensure we can set flat client as None if we either house owner or current client
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {self._token}'
+            HTTP_AUTHORIZATION=f'Bearer {Token.objects.get(user__email=self._test_user_email)}'
         )
         response_success = self.client.patch(url, data={'booking': '0'})
         self.assertEqual(response_success.status_code, 200)
@@ -368,7 +371,7 @@ class TestHouse(APITestCase):
 
         # Ensure we cant booked flat that has already been booked by another user
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+            HTTP_AUTHORIZATION=f'Bearer {Token.objects.get(user__email=self._test_user_email_two)}'
         )
         url = reverse('main:booking_flat', args=[flat.pk])
         response = self.client.patch(url, data={'booking': '1'})
@@ -376,7 +379,7 @@ class TestHouse(APITestCase):
 
         # Test disapprove request
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {self._token}'
+            HTTP_AUTHORIZATION=f'Bearer {Token.objects.get(user__email=self._test_user_email)}'
         )
         response_disapprove = self.client.patch(url_request_approve, data={'approved': False})
         self.assertEqual(response_disapprove.status_code, 200)
@@ -386,7 +389,7 @@ class TestHouse(APITestCase):
 
         # Ensure we can book flat if it is free
         self.client.credentials(
-            HTTP_AUTHORIZATION=f'JWT {get_id_token(self._test_user_email_two)}'
+            HTTP_AUTHORIZATION=f'Bearer {Token.objects.get(user__email=self._test_user_email_two)}'
         )
         url_two = reverse('main:booking_flat', args=[flat.pk])
         response_two = self.client.patch(url_two, data={'booking': '1'})
