@@ -29,7 +29,6 @@ class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['email']
 
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
