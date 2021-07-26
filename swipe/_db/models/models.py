@@ -216,6 +216,7 @@ class Complaint(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, related_name='complaints', on_delete=models.CASCADE)
     type = models.CharField(choices=reject_message_choices, max_length=5)
+    description = models.TextField(blank=True, null=True)
 
 
 class PromotionType(models.Model):

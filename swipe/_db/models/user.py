@@ -16,7 +16,8 @@ class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
         _('email'),
         max_length=150,
         unique=True,
-        help_text=_('150 characters max. Available symbols: aA-wW, [0-9], @ . _')
+        help_text=_('150 characters max. Available symbols: aA-wW, [0-9], @ . _'),
+        blank=True, null=True
     )
     phone_number = models.CharField(max_length=30, unique=True)
     is_staff = models.BooleanField(default=False)

@@ -114,6 +114,7 @@ reject_message_choices = (
     ('PRICE', 'Некорректная цена'),
     ('PHOTO', 'Некорректное фото'),
     ('DESC', 'Некорректное описание'),
+    ('ANY', 'Другое...')
 )
 
 # Promotion only
