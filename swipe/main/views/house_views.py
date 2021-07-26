@@ -72,6 +72,17 @@ class NewsItemViewSet(ModelViewSet):
     serializer_class = house_serializers.NewsItemSerializer
     view_tags = ['NewsItems']
 
+    def list(self, request, *args, **kwargs):
+        """ Filter news by house """
+        queryset = self.queryset.filter(house__pk=request.query_params.get('house'))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class DocumentViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
