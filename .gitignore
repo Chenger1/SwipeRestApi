@@ -128,7 +128,6 @@ dmypy.json
 .pyre/
 .idea
 swipe/swipe/config.py
-swipe/_db/migrations
 swipe/web_api.json
 swipe/generate_token_for_postman.py
 swipe/media/
