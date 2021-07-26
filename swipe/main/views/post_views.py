@@ -87,6 +87,11 @@ class UserFavoritesViewSet(ModelViewSet):
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user, post__rejected=False)
 
+    def create(self, request, *args, **kwargs):
+        if self.queryset.filter(post__pk=request.data.get('post'), user=request.user).exists():
+            return Response({'Error': 'This post is already in your favorites list'}, status=status.HTTP_409_CONFLICT)
+        return super().create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
