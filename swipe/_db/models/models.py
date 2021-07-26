@@ -217,6 +217,8 @@ class Complaint(models.Model):
     user = models.ForeignKey(User, related_name='complaints', on_delete=models.CASCADE)
     type = models.CharField(choices=reject_message_choices, max_length=5)
     description = models.TextField(blank=True, null=True)
+    rejected = models.BooleanField(default=False)
+    # Administrator decides if complaint is fair
 
 
 class PromotionType(models.Model):

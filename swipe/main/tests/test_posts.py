@@ -276,7 +276,7 @@ class TestPost(APITestCase):
     def test_post_complaints_by_admin(self):
         """Ensure admin can get complaints"""
         house, *_, flat = self.init_house_structure()
-        post, *_ = self.init_post(house, flat)
+        post, post1, *_ = self.init_post(house, flat)
 
         user = User.objects.get(email=self._test_user_email)
         user.is_staff = True
@@ -285,7 +285,7 @@ class TestPost(APITestCase):
         url_add = reverse('main:complaints-list')
         self.client.post(url_add, data={'post': post.pk,
                                         'type': 'PRICE'})
-        self.client.post(url_add, data={'post': post.pk,
+        self.client.post(url_add, data={'post': post1.pk,
                                         'type': 'DESC'})
         self.assertEqual(Complaint.objects.count(), 2)
 

@@ -110,7 +110,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Complaint
-        fields = ('id', 'post', 'type', 'type_display')
+        fields = ('id', 'post', 'type', 'type_display', 'description')
 
 
 class RejectPostSerializer(serializers.ModelSerializer):
