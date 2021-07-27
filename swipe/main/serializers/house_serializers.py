@@ -108,11 +108,14 @@ class FloorSerializer(serializers.ModelSerializer):
 
 
 class NewsItemSerializer(serializers.ModelSerializer):
-    created = serializers.ReadOnlyField()
+    created = serializers.SerializerMethodField()
 
     class Meta:
         model = NewsItem
         fields = '__all__'
+
+    def get_created(self, obj):
+        return f'{obj.created.year}-{obj.created.month}-{obj.created.day}'
 
 
 class DocumentSerializer(serializers.ModelSerializer):
