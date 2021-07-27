@@ -102,7 +102,7 @@ class UserFavoritesReadableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserFavorites
-        fields = ('post', )
+        fields = ('id', 'post', )
 
 
 class ComplaintSerializer(serializers.ModelSerializer):
