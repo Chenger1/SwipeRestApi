@@ -21,7 +21,7 @@ User = get_user_model()
 
 class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsProfileOwner)
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('-id')
     serializer_class = user_serializers.UserSerializer
     view_tags = ['User']
 
@@ -31,7 +31,7 @@ class UserViewSet(ModelViewSet):
         return obj
 
     def get_queryset(self):
-        return User.objects.filter(ban=False)  # banned users not passed
+        return User.objects.filter(ban=False).order_by('-id')  # banned users not passed
 
     def list(self, request, *args, **kwargs):
         """
@@ -204,7 +204,7 @@ class NotaryUsersApi(ModelViewSet):
     """
     permission_classes = (IsAuthenticated, IsAdminUser)
     serializer_class = user_serializers.UserSerializer
-    queryset = User.objects.filter(role='NOTARY')
+    queryset = User.objects.filter(role='NOTARY').order_by('-id')
     view_tags = ['Admin']
 
 
@@ -214,7 +214,7 @@ class UserFilterViewSet(ModelViewSet):
      """
     permission_classes = (IsAuthenticated, IsOwner)
     serializer_class = user_serializers.UserFilterSerializer
-    queryset = UserFilter.objects.all()
+    queryset = UserFilter.objects.all().order_by('-id')
     view_tags = ['User']
 
     def get_queryset(self):

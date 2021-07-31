@@ -19,14 +19,14 @@ from _db.models.models import House, Building, Section, Floor, NewsItem, Documen
 
 class HouseViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
-    queryset = House.objects.all()
+    queryset = House.objects.all().order_by('-id')
     serializer_class = house_serializers.HouseSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = HouseFilter
     view_tags = ['Houses']
 
     def get_queryset(self):
-        return House.objects.filter(sales_department=self.request.user)
+        return House.objects.filter(sales_department=self.request.user).order_by('-id')
 
     def perform_create(self, serializer):
         serializer.save(sales_department=self.request.user)
@@ -40,35 +40,35 @@ class HousePublic(ListModelMixin,
     """
     permission_classes = (AllowAny, )
     authentication_classes = []
-    queryset = House.objects.all()
+    queryset = House.objects.all().order_by('-id')
     serializer_class = house_serializers.HouseSerializer
     view_tags = ['Public-Houses']
 
 
 class BuildingViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
-    queryset = Building.objects.all()
+    queryset = Building.objects.all().order_by('-id')
     serializer_class = house_serializers.BuildingSerializer
     view_tags = ['Buildings']
 
 
 class SectionViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
-    queryset = Section.objects.all()
+    queryset = Section.objects.all().order_by('-id')
     serializer_class = house_serializers.SectionSerializer
     view_tags = ['Sections']
 
 
 class FloorViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
-    queryset = Floor.objects.all()
+    queryset = Floor.objects.all().order_by('-id')
     serializer_class = house_serializers.FloorSerializer
     view_tags = ['Floors']
 
 
 class NewsItemViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
-    queryset = NewsItem.objects.all()
+    queryset = NewsItem.objects.all().order_by('-id')
     serializer_class = house_serializers.NewsItemSerializer
     view_tags = ['NewsItems']
 
@@ -86,7 +86,7 @@ class NewsItemViewSet(ModelViewSet):
 
 class DocumentViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
-    queryset = Document.objects.all()
+    queryset = Document.objects.all().order_by('-id')
     serializer_class = house_serializers.DocumentSerializer
     view_tags = ['Documents']
 
@@ -108,7 +108,7 @@ class DocumentViewSet(ModelViewSet):
 
 class FlatViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
-    queryset = Flat.objects.all()
+    queryset = Flat.objects.all().order_by('-id')
     serializer_class = house_serializers.FlatSerializer
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = FlatFilter
@@ -123,7 +123,7 @@ class FlatPublic(ListModelMixin,
     """
     permission_classes = (AllowAny, )
     authentication_classes = []
-    queryset = Flat.objects.all()
+    queryset = Flat.objects.all().order_by('-id')
     serializer_class = house_serializers.FlatSerializer
     view_tags = ['Public-Flats']
 
@@ -185,7 +185,7 @@ class RequestToChestApi(ListModelMixin,
                         GenericViewSet):
     """ Manage requests to chest. Only house`s sales department can get its requests """
     permission_classes = (IsAuthenticated, IsOwner)
-    queryset = RequestToChest.objects.all()
+    queryset = RequestToChest.objects.all().order_by('-id')
     serializer_class = house_serializers.RequestToChestSerializer
     view_tags = ['Flats']
 
@@ -199,6 +199,6 @@ class DeleteStandpipe(DestroyModelMixin,
         For 'edit' action - user section view set and nested serializer
      """
     permission_classes = (IsAuthenticated, IsOwner)
-    queryset = Standpipe.objects.all()
+    queryset = Standpipe.objects.all().order_by('-id')
     serializer_class = house_serializers.StandpipeSerializer
     view_tags = ['Sections']

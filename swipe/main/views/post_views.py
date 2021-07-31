@@ -73,14 +73,14 @@ class PostViewSetPublic(mixins.ListModelMixin,
 
 class PostImageViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
-    queryset = PostImage.objects.all()
+    queryset = PostImage.objects.all().order_by('-id')
     serializer_class = post_serializers.PostImageSerializer
     view_tags = ['Post']
 
 
 class UserFavoritesViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
-    queryset = UserFavorites.objects.all()
+    queryset = UserFavorites.objects.all().order_by('-id')
     serializer_class = post_serializers.UserFavoritesWritableSerializer
     view_tags = ['Post']
 
@@ -111,7 +111,7 @@ class UserFavoritesViewSet(ModelViewSet):
 class ComplaintViewSet(ModelViewSet):
     """ CRUD operations for user`s complaints """
     permission_classes = (IsAuthenticated, IsOwner)
-    queryset = Complaint.objects.all()
+    queryset = Complaint.objects.all().order_by('-id')
     serializer_class = post_serializers.ComplaintSerializer
     view_tags = ['Post']
 
@@ -137,7 +137,7 @@ class ComplaintsAdmin(mixins.ListModelMixin,
     Admin can only perform this actions: 'list', 'retrieve', 'destroy'
     """
     permission_classes = (IsAuthenticated, IsAdminUser)
-    queryset = Complaint.objects.all()
+    queryset = Complaint.objects.all().order_by('-id')
     serializer_class = post_serializers.ComplaintSerializer
     view_tags = ['Admin']
 
@@ -157,7 +157,7 @@ class PostModerationAdmin(mixins.RetrieveModelMixin,
     Admin can get list of posts with complains
     """
     permission_classes = (IsAuthenticated, IsAdminUser)
-    queryset = Post.objects.annotate(comp_count=Count('complaints')).filter(comp_count__gt=0)
+    queryset = Post.objects.annotate(comp_count=Count('complaints')).filter(comp_count__gt=0).order_by('-id')
     # Filter only posts with complaints
     serializer_class = post_serializers.PostSerializer
     view_tags = ['Admin']
@@ -233,7 +233,7 @@ class PromotionViewSet(mixins.ListModelMixin,
                        mixins.DestroyModelMixin,
                        GenericViewSet):
     permission_classes = (IsAuthenticated, )
-    queryset = Promotion.objects.all()
+    queryset = Promotion.objects.all().order_by('-id')
     serializer_class = post_serializers.PromotionSerializer
     view_tags = ['Post']
 

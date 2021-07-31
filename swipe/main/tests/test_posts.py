@@ -153,19 +153,19 @@ class TestPost(APITestCase):
         url = reverse('main:posts_public-list')
         response = self.client.get(url, data={'flat__square__gte': 101})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['flat_info']['square'], 200)
+        self.assertGreater(len(response.data), 0)
+        self.assertEqual(response.data.get('results')[0]['flat_info']['square'], 200)
 
         response2 = self.client.get(url, data={'flat__plan': 'FREE',
                                                'price__gte': 1000})
         self.assertEqual(response2.status_code, 200)
-        self.assertEqual(response2.data[0]['price'], 100000)
-        self.assertEqual(response2.data[0]['flat_info']['plan'], 'Свободная планировка')
+        self.assertEqual(response2.data.get('results')[0]['price'], 100000)
+        self.assertEqual(response2.data.get('results')[0]['flat_info']['plan'], 'Свободная планировка')
 
         response3 = self.client.get(url, data={'house__city': 'Kiev',
                                                'payment_options': 'PAYMENT'})
         self.assertEqual(response3.status_code, 200)
-        self.assertEqual(response3.data[0]['flat_info']['city'], 'Kiev')
+        self.assertEqual(response3.data.get('results')[0]['flat_info']['city'], 'Kiev')
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_favorites(self):
@@ -181,7 +181,7 @@ class TestPost(APITestCase):
         url_list = reverse('main:favorites_posts-list')
         response_list = self.client.get(url_list)
         self.assertEqual(response_list.status_code, 200)
-        self.assertIn('post', response_list.data[0].keys())
+        self.assertIn('post', response_list.data.get('results')[0].keys())
 
         url_retrieve = reverse('main:favorites_posts-detail', args=[response_add.data['id']])
         response_retrieve = self.client.get(url_retrieve)
@@ -293,7 +293,7 @@ class TestPost(APITestCase):
         response_list = self.client.get(url_list)
         self.assertEqual(response_list.status_code, 200)
         self.assertGreater(len(response_list.data), 0)
-        self.assertEqual(response_list.data[0]['post'], 1)
+        self.assertEqual(response_list.data.get('results')[0]['post'], 2)
 
         url_detail = reverse('main:complaints_admin-detail', args=[Complaint.objects.first().pk])
         response_detail = self.client.get(url_detail)
@@ -303,7 +303,7 @@ class TestPost(APITestCase):
         response_filter_by_post = self.client.get(url_list, data={'post': 1})
         self.assertEqual(response_filter_by_post.status_code, 200)
         self.assertGreater(len(response_filter_by_post.data), 0)
-        self.assertEqual(response_filter_by_post.data[0]['post'], 1)
+        self.assertEqual(response_filter_by_post.data.get('results')[0]['post'], 2)
 
         response_delete = self.client.delete(url_detail)
         self.assertEqual(response_delete.status_code, 204)
@@ -330,7 +330,7 @@ class TestPost(APITestCase):
         url_list = reverse('main:posts_moderation-list')
         response_list_empty = self.client.get(url_list)
         self.assertEqual(response_list_empty.status_code, 200)
-        self.assertEqual(len(response_list_empty.data), 0)
+        self.assertEqual(len(response_list_empty.data.get('results')), 0)
 
         # Add complaint
         url_add = reverse('main:complaints-list')
@@ -355,7 +355,7 @@ class TestPost(APITestCase):
         url_public_list = reverse('main:posts_public-list')
         response_public = self.client.get(url_public_list)
         self.assertEqual(response_public.status_code, 200)
-        self.assertEqual(len(response_public.data), 2)
+        self.assertEqual(len(response_public.data.get('results')), 2)
 
         # Ensure non admin cant get access to this view
         url_list = reverse('main:posts_moderation-list')
@@ -377,7 +377,7 @@ class TestPost(APITestCase):
         response_filter = self.client.get(url_filter, data=filter_data)
         self.assertEqual(response_filter.status_code, 200)
         self.assertGreater(len(response_filter.data), 0)
-        self.assertEqual(response_filter.data[0]['price'], 10000)
+        self.assertEqual(response_filter.data.get('results')[0]['price'], 10000)
 
         # Save current filter set
         url_list = reverse('main:user_filters-list')
@@ -396,7 +396,7 @@ class TestPost(APITestCase):
         response_filter_by_saved_filter = self.client.get(url_filter, data=response_detail.data)
         self.assertEqual(response_filter_by_saved_filter.status_code, 200)
         self.assertGreater(len(response_filter_by_saved_filter.data), 0)
-        self.assertEqual(response_filter_by_saved_filter.data[0]['price'], 10000)
+        self.assertEqual(response_filter_by_saved_filter.data.get('results')[0]['price'], 10000)
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_subscription_limitations(self):
@@ -514,9 +514,9 @@ class TestPost(APITestCase):
         url_post_list = reverse('main:posts-list')
         response_post_list = self.client.get(url_post_list)
         self.assertEqual(response_post_list.status_code, 200)
-        self.assertEqual(response_post_list.data[0]['weight'], 0)
-        self.assertEqual(response_post_list.data[1]['weight'], 0)
-        self.assertEqual(response_post_list.data[2]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[0]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[1]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[2]['weight'], 0)
 
         # Add promotion for first post
         low = PromotionType.objects.get(efficiency=50)
@@ -552,17 +552,17 @@ class TestPost(APITestCase):
         # Because their weight right now are: 100, 75, 50
         response_post_list_by_ordering = self.client.get(url_post_list)
         self.assertEqual(response_post_list_by_ordering.status_code, 200)
-        self.assertEqual(response_post_list_by_ordering.data[0]['weight'], 100)
-        self.assertEqual(response_post_list_by_ordering.data[1]['weight'], 75)
-        self.assertEqual(response_post_list_by_ordering.data[2]['weight'], 50)
+        self.assertEqual(response_post_list_by_ordering.data.get('results')[0]['weight'], 100)
+        self.assertEqual(response_post_list_by_ordering.data.get('results')[1]['weight'], 75)
+        self.assertEqual(response_post_list_by_ordering.data.get('results')[2]['weight'], 50)
 
         # Test public views
         url_post_public = reverse('main:posts_public-list')
         response_post_public = self.client.get(url_post_public)
         self.assertEqual(response_post_public.status_code, 200)
-        self.assertEqual(response_post_public.data[0]['weight'], 100)
-        self.assertEqual(response_post_public.data[1]['weight'], 75)
-        self.assertEqual(response_post_public.data[2]['weight'], 50)
+        self.assertEqual(response_post_public.data.get('results')[0]['weight'], 100)
+        self.assertEqual(response_post_public.data.get('results')[1]['weight'], 75)
+        self.assertEqual(response_post_public.data.get('results')[2]['weight'], 50)
 
         # Assert that price has been changed
         self.assertGreater(Promotion.objects.get(post=post).price, 0)
@@ -584,15 +584,15 @@ class TestPost(APITestCase):
         # Ensure post ordering has been changed. It should be now: post2, post1, post3
         response_posts_list_with_new_ordering = self.client.get(url_post_list)
         self.assertEqual(response_posts_list_with_new_ordering.status_code, 200)
-        self.assertEqual(response_posts_list_with_new_ordering.data[0]['weight'], 75)
-        self.assertEqual(response_posts_list_with_new_ordering.data[1]['weight'], 50)
-        self.assertEqual(response_posts_list_with_new_ordering.data[2]['weight'], 0)
+        self.assertEqual(response_posts_list_with_new_ordering.data.get('results')[0]['weight'], 75)
+        self.assertEqual(response_posts_list_with_new_ordering.data.get('results')[1]['weight'], 50)
+        self.assertEqual(response_posts_list_with_new_ordering.data.get('results')[2]['weight'], 0)
 
         response_post_public = self.client.get(url_post_public)
         self.assertEqual(response_post_public.status_code, 200)
-        self.assertEqual(response_post_public.data[0]['weight'], 75)
-        self.assertEqual(response_post_public.data[1]['weight'], 50)
-        self.assertEqual(response_post_public.data[2]['weight'], 0)
+        self.assertEqual(response_post_public.data.get('results')[0]['weight'], 75)
+        self.assertEqual(response_post_public.data.get('results')[1]['weight'], 50)
+        self.assertEqual(response_post_public.data.get('results')[2]['weight'], 0)
 
     def test_promotion_info_in_post_serializer(self):
         """ Ensure we will get info about current promotion for post """
@@ -632,9 +632,9 @@ class TestPost(APITestCase):
         url_post_list = reverse('main:posts-list')
         response_post_list = self.client.get(url_post_list)
         self.assertEqual(response_post_list.status_code, 200)
-        self.assertEqual(response_post_list.data[0]['weight'], 0)
-        self.assertEqual(response_post_list.data[1]['weight'], 0)
-        self.assertEqual(response_post_list.data[2]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[0]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[1]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[2]['weight'], 0)
 
         url_like = reverse('main:like_dislike', args=[post2.pk])
         response_increment_like = self.client.patch(url_like, data={'action': 'like'})
@@ -643,15 +643,15 @@ class TestPost(APITestCase):
 
         response_post_after_like = self.client.get(url_post_list)
         self.assertEqual(response_post_after_like.status_code, 200)
-        self.assertEqual(response_post_after_like.data[0]['id'], post2.pk)
-        self.assertEqual(response_post_after_like.data[0]['weight'], 1)
+        self.assertEqual(response_post_after_like.data.get('results')[0]['id'], post2.pk)
+        self.assertEqual(response_post_after_like.data.get('results')[0]['weight'], 1)
 
         response_decrement_like = self.client.patch(url_like, data={'action': 'dislike'})
         self.assertEqual(response_decrement_like.status_code, 200)
         self.assertEqual(Post.objects.get(pk=post2.pk).likes, -1)
 
         response_post_after_dislike = self.client.get(url_post_list)
-        self.assertEqual(response_post_after_dislike.data[-1]['weight'], -1)
+        self.assertEqual(response_post_after_dislike.data.get('results')[-1]['weight'], -1)
 
         # Remove dislike if user 'tap' buttons twice
         response_remove_dislike = self.client.patch(url_like, data={'action': 'dislike'})
@@ -659,7 +659,7 @@ class TestPost(APITestCase):
         self.assertEqual(Post.objects.first().likes, 0)
 
         response_post_after_remove_dislike = self.client.get(url_post_list)
-        self.assertEqual(response_post_after_remove_dislike.data[1]['weight'], 0)
+        self.assertEqual(response_post_after_remove_dislike.data.get('results')[1]['weight'], 0)
 
     def test_add_promotion_without_pay(self):
         """ Ensure unpaid promotion will have no effect on post
@@ -703,8 +703,8 @@ class TestPost(APITestCase):
         url_post_list = reverse('main:posts-list')
         response_list = self.client.get(url_post_list)
         self.assertEqual(response_list.status_code, 200)
-        self.assertEqual(response_list.data[0]['id'], post.pk)
-        self.assertEqual(response_list.data[0]['weight'], post.weight)
+        self.assertEqual(response_list.data.get('results')[0]['id'], post.pk)
+        self.assertEqual(response_list.data.get('results')[0]['weight'], post.weight)
 
     def test_celery_check_promotion_end_date(self):
         """ Ensure celery will delete expiring promotions """
@@ -715,9 +715,9 @@ class TestPost(APITestCase):
         url_post_list = reverse('main:posts-list')
         response_post_list = self.client.get(url_post_list)
         self.assertEqual(response_post_list.status_code, 200)
-        self.assertEqual(response_post_list.data[0]['weight'], 0)
-        self.assertEqual(response_post_list.data[1]['weight'], 0)
-        self.assertEqual(response_post_list.data[2]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[0]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[1]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[2]['weight'], 0)
 
         # Add promotion for first post
         low = PromotionType.objects.get(efficiency=50)
@@ -737,9 +737,9 @@ class TestPost(APITestCase):
         # Ensure first post has bigger weight that others
         response_post_list = self.client.get(url_post_list)
         self.assertEqual(response_post_list.status_code, 200)
-        self.assertEqual(response_post_list.data[0]['weight'], 50)
-        self.assertEqual(response_post_list.data[1]['weight'], 0)
-        self.assertEqual(response_post_list.data[2]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[0]['weight'], 50)
+        self.assertEqual(response_post_list.data.get('results')[1]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[2]['weight'], 0)
 
         # Run celery task
         check_promotion.apply()
@@ -754,9 +754,9 @@ class TestPost(APITestCase):
         url_post_list = reverse('main:posts-list')
         response_post_list = self.client.get(url_post_list)
         self.assertEqual(response_post_list.status_code, 200)
-        self.assertEqual(response_post_list.data[0]['weight'], 0)
-        self.assertEqual(response_post_list.data[1]['weight'], 0)
-        self.assertEqual(response_post_list.data[2]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[0]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[1]['weight'], 0)
+        self.assertEqual(response_post_list.data.get('results')[2]['weight'], 0)
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_celery_check_filters_matching(self):
