@@ -89,8 +89,6 @@ class PostSerializer(serializers.ModelSerializer):
         if hasattr(instance, 'promotion') and not instance.promotion.paid:
             #  Promotion is displaying only if it is paid
             rep['promotion'] = None
-        if rep.get('in_favorites'):
-            rep['in_favorites'] = None
         return rep
 
 

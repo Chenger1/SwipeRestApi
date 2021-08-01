@@ -17,6 +17,7 @@ class LoginView(APIView):
         token = Token.objects.get(user=user)
         content = {
             'user': str(user),
-            'auth': str(token)
+            'auth': str(token),
+            'id': user.pk
         }
         return Response(content)
