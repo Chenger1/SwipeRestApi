@@ -176,21 +176,22 @@ class TestPost(APITestCase):
         url_add = reverse('main:favorites_posts-list')
         response_add = self.client.post(url_add, data={'post': post.pk})
         self.assertEqual(response_add.status_code, 201)
-        self.assertEqual(UserFavorites.objects.count(), 1)
+        post = Post.objects.get(pk=post.pk)
+        self.assertGreater(post.in_favorites.count(), 0)
 
         url_list = reverse('main:favorites_posts-list')
         response_list = self.client.get(url_list)
         self.assertEqual(response_list.status_code, 200)
-        self.assertIn('post', response_list.data.get('results')[0].keys())
 
         url_retrieve = reverse('main:favorites_posts-detail', args=[response_add.data['id']])
         response_retrieve = self.client.get(url_retrieve)
         self.assertEqual(response_retrieve.status_code, 200)
-        self.assertEqual(response_retrieve.data['post']['id'], 1)
+        self.assertEqual(response_retrieve.data['id'], 1)
 
         response_delete = self.client.delete(url_retrieve)
         self.assertEqual(response_delete.status_code, 204)
-        self.assertEqual(UserFavorites.objects.count(), 0)
+        post = Post.objects.get(pk=post.pk)
+        self.assertEqual(post.in_favorites.count(), 0)
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_increment_views_and_likes(self):

@@ -176,6 +176,7 @@ class Post(models.Model):
 
     likers = models.ManyToManyField(User, related_name='liked')
     dislikers = models.ManyToManyField(User, related_name='disliked')
+    in_favorites = models.ManyToManyField(User, related_name='favorites')
 
     weight = models.IntegerField(default=0)  # User for order post
 
@@ -204,11 +205,6 @@ class PostImage(models.Model):
 
     def get_files(self):
         return [self.image]
-
-
-class UserFavorites(models.Model):
-    user = models.ForeignKey(User, related_name='favorites', on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, related_name='users_favorite', on_delete=models.CASCADE)
 
 
 class Complaint(models.Model):

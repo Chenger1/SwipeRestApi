@@ -9,12 +9,12 @@ from django.db.models import Count
 from django_filters import rest_framework as filters
 from django.shortcuts import get_object_or_404
 
-from main.permissions import IsOwner, IsOwnerOrReadOnly
+from main.permissions import IsOwner, IsOwnerOrReadOnly, IsFavoritesOwner
 from main.serializers import post_serializers
 from main.filters import PostFilter
 from main.tasks import check_filter_matching
 
-from _db.models.models import Post, PostImage, UserFavorites, Complaint, Promotion
+from _db.models.models import Post, PostImage, Complaint, Promotion
 
 
 class PostViewSet(ModelViewSet):
@@ -79,33 +79,29 @@ class PostImageViewSet(ModelViewSet):
 
 
 class UserFavoritesViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated, IsOwner)
-    queryset = UserFavorites.objects.all().order_by('-id')
-    serializer_class = post_serializers.UserFavoritesWritableSerializer
+    permission_classes = (IsAuthenticated, IsFavoritesOwner)
+    queryset = Post.objects.all().order_by('-id')
+    serializer_class = post_serializers.PostSerializer
     view_tags = ['Post']
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user, post__rejected=False)
+        return self.queryset.filter(in_favorites=self.request.user, rejected=False)
 
     def create(self, request, *args, **kwargs):
-        if self.queryset.filter(post__pk=request.data.get('post'), user=request.user).exists():
-            return Response({'Error': 'This post is already in your favorites list'}, status=status.HTTP_409_CONFLICT)
-        return super().create(request, *args, **kwargs)
+        post = get_object_or_404(Post, pk=request.data.get('post'))
+        serializer = self.serializer_class(post)
+        if request.user in post.in_favorites.all():
+            return Response(serializer.data, status=status.HTTP_409_CONFLICT)
+        post.in_favorites.add(request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-    def get_serializer_class(self):
-        """
-        UserFavoritesReadableSerializer contains nested serializer 'PostSerializer' to extend info about post
-        UserFavoritesWritable Serializer just a regular serializer to work with object
-        :return:
-        """
-        if self.action in ('list', 'retrieve'):
-            return post_serializers.UserFavoritesReadableSerializer
-        if self.action in ('create', 'update', 'destroy'):
-            return post_serializers.UserFavoritesWritableSerializer
-        return post_serializers.UserFavoritesReadableSerializer
+    def destroy(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs.get('pk'))
+        serializer = self.serializer_class(post)
+        if request.user in post.in_favorites.all():
+            post.in_favorites.remove(request.user)
+            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.data, status=status.HTTP_409_CONFLICT)
 
 
 class ComplaintViewSet(ModelViewSet):

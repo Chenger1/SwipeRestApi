@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from _db.models.models import Post, PostImage, UserFavorites, Complaint, Promotion, PromotionType
+from _db.models.models import Post, PostImage, Complaint, Promotion, PromotionType
 
 import datetime
 import pytz
@@ -42,7 +42,8 @@ class PostSerializer(serializers.ModelSerializer):
             'user': {'read_only': True},
             'likers': {'read_only': True},
             'dislikers': {'read_only': True},
-            'number': {'read_only': True}
+            'number': {'read_only': True},
+            'in_favorites': {'read_only': True}
         }
 
     def get_flat_info(self, obj):
@@ -71,7 +72,7 @@ class PostSerializer(serializers.ModelSerializer):
             if time_range.days <= 30:
                 raise serializers.ValidationError('You can confirm relevance every 31 days')
             return value
-        return value
+        return
 
     def create(self, validated_data):
         validated_data['number'] = Post.get_next_number()
@@ -88,21 +89,9 @@ class PostSerializer(serializers.ModelSerializer):
         if hasattr(instance, 'promotion') and not instance.promotion.paid:
             #  Promotion is displaying only if it is paid
             rep['promotion'] = None
+        if rep.get('in_favorites'):
+            rep['in_favorites'] = None
         return rep
-
-
-class UserFavoritesWritableSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserFavorites
-        fields = ('id', 'post', )
-
-
-class UserFavoritesReadableSerializer(serializers.ModelSerializer):
-    post = PostSerializer(read_only=True)
-
-    class Meta:
-        model = UserFavorites
-        fields = ('id', 'post', )
 
 
 class ComplaintSerializer(serializers.ModelSerializer):
