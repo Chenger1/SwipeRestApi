@@ -79,10 +79,10 @@ class ReadableMessageSerializer(serializers.ModelSerializer):
 class UserFilterSerializer(serializers.Serializer):
     living_type = serializers.ChoiceField(choices=choices.type_choices, required=False)
     payment_options = serializers.ChoiceField(choices=choices.payment_options_choices, required=False)
-    price__gt = serializers.IntegerField(required=False)
-    price__lt = serializers.IntegerField(required=False)
-    flat__square__gt = serializers.IntegerField(required=False)
-    flat__square__lt = serializers.IntegerField(required=False)
+    price__gte = serializers.IntegerField(required=False)
+    price__lte = serializers.IntegerField(required=False)
+    flat__square__gte = serializers.IntegerField(required=False)
+    flat__square__lte = serializers.IntegerField(required=False)
     flat__state = serializers.ChoiceField(choices=choices.state_choices, required=False)
     house__status = serializers.ChoiceField(choices=choices.status_choices, required=False)
     house__city = serializers.CharField(required=False)
@@ -91,10 +91,10 @@ class UserFilterSerializer(serializers.Serializer):
     def create(self, validated_data):
         user_filter = UserFilter.objects.create(market=validated_data.get('living_type'),
                                                 payment_cond=validated_data.get('payment_options'),
-                                                min_price=validated_data.get('price__gt'),
-                                                max_price=validated_data.get('price__lt'),
-                                                min_square=validated_data.get('flat__square__gt'),
-                                                max_square=validated_data.get('flat__square__lt'),
+                                                min_price=validated_data.get('price__gte'),
+                                                max_price=validated_data.get('price__lte'),
+                                                min_square=validated_data.get('flat__square__gte'),
+                                                max_square=validated_data.get('flat__square__lte'),
                                                 status=validated_data.get('house__status'),
                                                 city=validated_data.get('house__city'),
                                                 address=validated_data.get('house__address'),
@@ -106,10 +106,10 @@ class UserFilterSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         instance.market = validated_data.get('living_type', instance.market)
         instance.payment_cond = validated_data.get('payment_options', instance.payment_cond)
-        instance.min_price = validated_data.get('price__gt', instance.min_price)
-        instance.max_price = validated_data.get('price__lt', instance.max_price)
-        instance.min_square = validated_data.get('flat__square__gt', instance.min_square)
-        instance.max_square = validated_data.get('flat__square__lt', instance.max_square)
+        instance.min_price = validated_data.get('price__gte', instance.min_price)
+        instance.max_price = validated_data.get('price__lte', instance.max_price)
+        instance.min_square = validated_data.get('flat__square__gte', instance.min_square)
+        instance.max_square = validated_data.get('flat__square__lte', instance.max_square)
         instance.status = validated_data.get('house__status', instance.status)
         instance.city = validated_data.get('house__city', instance.city)
         instance.address = validated_data.get('house__address', instance.address)
@@ -131,13 +131,13 @@ class UserFilterSerializer(serializers.Serializer):
         if instance.payment_cond:
             data['payment_options'] = instance.payment_cond
         if instance.min_price:
-            data['price__gt'] = instance.min_price
+            data['price__gte'] = instance.min_price
         if instance.max_price:
-            data['price__lt'] = instance.max_price
+            data['price__lte'] = instance.max_price
         if instance.min_square:
-            data['flat__square__gt'] = instance.min_square
+            data['flat__square__gte'] = instance.min_square
         if instance.max_square:
-            data['flat__square__lt'] = instance.max_square
+            data['flat__square__lte'] = instance.max_square
         if instance.status:
             data['house__status'] = instance.status
         if instance.city:

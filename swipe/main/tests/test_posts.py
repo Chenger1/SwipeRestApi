@@ -370,7 +370,7 @@ class TestPost(APITestCase):
         post, *_ = self.init_post(house, flat)
 
         filter_data = {
-            'price__gt': 5000,
+            'price__gte': 5000,
             'payment_options': 'PAYMENT'
         }
         # Ensure we can filter posts
@@ -391,7 +391,7 @@ class TestPost(APITestCase):
         url_detail = reverse('main:user_filters-detail', args=[response_add.data['saved_filter_pk']])
         response_detail = self.client.get(url_detail)
         self.assertEqual(response_detail.status_code, 200)
-        self.assertEqual(response_detail.data['price__gt'], 5000)
+        self.assertEqual(response_detail.data['price__gte'], 5000)
 
         # Ensure we can filter by saved filters
         response_filter_by_saved_filter = self.client.get(url_filter, data=response_detail.data)
@@ -766,7 +766,7 @@ class TestPost(APITestCase):
 
         # Save user filter
         filter_data = {
-                    'price__gt': 10000,
+                    'price__gte': 10000,
                     'payment_options': 'PAYMENT'
                 }
         url_list = reverse('main:user_filters-list')
