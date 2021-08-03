@@ -3,6 +3,8 @@ from rest_framework import serializers
 from _db.models.user import User, Contact, Message, Attachment, UserFilter
 from _db.models import choices
 
+import datetime
+
 
 class UserSerializer(serializers.ModelSerializer):
     notifications_display = serializers.CharField(source='get_notifications_display', read_only=True)  # to display beauty name instead of const
@@ -87,6 +89,7 @@ class UserFilterSerializer(serializers.Serializer):
     house__status = serializers.ChoiceField(choices=choices.status_choices, required=False)
     house__city = serializers.CharField(required=False)
     house__address = serializers.CharField(required=False)
+    name = serializers.CharField(required=False)
 
     def create(self, validated_data):
         user_filter = UserFilter.objects.create(market=validated_data.get('living_type'),
@@ -100,7 +103,9 @@ class UserFilterSerializer(serializers.Serializer):
                                                 address=validated_data.get('house__address'),
                                                 number_of_rooms=validated_data.get('flat__number_of_rooms'),
                                                 state=validated_data.get('flat__state'),
-                                                user=validated_data.get('user'))
+                                                user=validated_data.get('user'),
+                                                name=validated_data.get('name',
+                                                                        datetime.date.today().strftime('%Y-%m-%d')))
         return user_filter
 
     def update(self, instance, validated_data):
@@ -115,6 +120,7 @@ class UserFilterSerializer(serializers.Serializer):
         instance.address = validated_data.get('house__address', instance.address)
         instance.number_of_rooms = validated_data.get('flat__number_of_rooms', instance.number_of_rooms)
         instance.state = validated_data.get('flat__state', instance.state)
+        instance.name = validated_data.get('name', instance.name)
         return instance
 
     def to_representation(self, instance):
@@ -148,5 +154,7 @@ class UserFilterSerializer(serializers.Serializer):
             data['flatt__number_of_rooms'] = instance.number_of_rooms
         if instance.state:
             data['flat__state'] = instance.state
+        if instance.name:
+            data['name'] = instance.name
 
         return data

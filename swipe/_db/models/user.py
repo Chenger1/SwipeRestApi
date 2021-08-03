@@ -115,6 +115,7 @@ class UserFilter(models.Model):
     )
     LIMIT = 3  # Max filters for unsubscribed users
 
+    name = models.CharField(max_length=100, blank=True, null=True)
     user = models.ForeignKey(User, related_name='filters', on_delete=models.CASCADE)
     market = models.CharField(choices=market_choices, default='ALL', max_length=9, blank=True, null=True)
     type = models.CharField(max_length=10, blank=True, null=True)
