@@ -132,6 +132,7 @@ class FlatSerializer(serializers.ModelSerializer):
     balcony_display = serializers.CharField(source='get_balcony_display', read_only=True)
 
     floor_display = serializers.SerializerMethodField()
+    house_pk = serializers.SerializerMethodField()
 
     class Meta:
         model = Flat
@@ -149,6 +150,9 @@ class FlatSerializer(serializers.ModelSerializer):
         section = floor.section
         building = section.building
         return f'Корпус {building.name}, Секция {section.name}, Этаж {floor.name}'
+
+    def get_house_pk(self, obj):
+        return obj.floor.section.building.house.pk
 
 
 class HouseInRequestSerializer(serializers.ModelSerializer):
