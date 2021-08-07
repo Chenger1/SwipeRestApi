@@ -125,12 +125,17 @@ class FlatPublic(ListModelMixin,
     authentication_classes = []
     queryset = Flat.objects.all().order_by('-id')
     serializer_class = house_serializers.FlatSerializer
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = FlatFilter
     view_tags = ['Public-Flats']
 
     def get_queryset(self):
         if self.request.query_params.get('house__pk'):
             return self.queryset.filter(floor__section__building__house__pk=self.request.query_params.get('house__pk'))
-        return self.queryset
+        elif self.request.query_params.get('client_pk'):
+            return self.queryset.filter(client__pk=self.request.query_params.get('client_pk'))
+        else:
+            return self.queryset
 
 
 class BookingFlat(APIView):

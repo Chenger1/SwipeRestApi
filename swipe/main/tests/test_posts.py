@@ -240,8 +240,9 @@ class TestPost(APITestCase):
         response = self.client.patch(url, data={'created': True})
         self.assertEqual(response.status_code, 200)
         post = Post.objects.first()
-        self.assertEqual(post.created.month, datetime.date.today().month)
-        self.assertEqual(post.created.day, datetime.date.today().day)
+        today = datetime.datetime.now(tz=pytz.UTC)
+        self.assertEqual(post.created.month, today.month)
+        self.assertEqual(post.created.day, today.day)
 
     def test_post_confirm_relevance_with_new_date(self):
         """ Ensure we cant update post if it`s 'created' date is not 30 days old"""
