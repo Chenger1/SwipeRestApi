@@ -173,6 +173,8 @@ class BookingFlat(APIView):
                 flat.client = None
                 flat.booked = False
                 flat.owned = False
+                request_to_chest = get_object_or_404(RequestToChest, flat=flat)
+                request_to_chest.delete()
             else:
                 return Response({'Error': 'You cannot remove current client from this flat'},
                                 status=status.HTTP_400_BAD_REQUEST)
