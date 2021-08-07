@@ -132,8 +132,8 @@ class FlatPublic(ListModelMixin,
     def get_queryset(self):
         if self.request.query_params.get('house__pk'):
             return self.queryset.filter(floor__section__building__house__pk=self.request.query_params.get('house__pk'))
-        elif self.request.query_params.get('client_pk'):
-            return self.queryset.filter(client__pk=self.request.query_params.get('client_pk'))
+        elif self.request.query_params.get('client'):
+            return self.queryset.filter(client=self.request.user)
         else:
             return self.queryset
 
