@@ -51,6 +51,11 @@ class BuildingViewSet(ModelViewSet):
     serializer_class = house_serializers.BuildingSerializer
     view_tags = ['Buildings']
 
+    def list(self, request, *args, **kwargs):
+        if self.request.query_params.get('house'):
+            return self.queryset.filter(house__pk=self.request.query_params.get('house'))
+        return self.queryset
+
 
 class SectionViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
@@ -58,12 +63,22 @@ class SectionViewSet(ModelViewSet):
     serializer_class = house_serializers.SectionSerializer
     view_tags = ['Sections']
 
+    def list(self, request, *args, **kwargs):
+        if self.request.query_params.get('building'):
+            return self.queryset.filter(building__pk=self.request.query_params.get('building'))
+        return self.queryset
+
 
 class FloorViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     queryset = Floor.objects.all().order_by('-id')
     serializer_class = house_serializers.FloorSerializer
     view_tags = ['Floors']
+
+    def list(self, request, *args, **kwargs):
+        if self.request.query_params.get('section'):
+            return self.queryset.filter(section__pk=self.request.query_params.get('section'))
+        return self.queryset
 
 
 class NewsItemViewSet(ModelViewSet):
