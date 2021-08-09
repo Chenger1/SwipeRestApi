@@ -41,9 +41,14 @@ class HouseSerializer(serializers.ModelSerializer):
 
 
 class BuildingSerializer(serializers.ModelSerializer):
+    building_full_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Building
         fields = '__all__'
+
+    def get_building_full_name(self, obj):
+        return f'Корпус №{obj.number}'
 
 
 class StandpipeSerializer(serializers.ModelSerializer):
@@ -56,10 +61,14 @@ class StandpipeSerializer(serializers.ModelSerializer):
 
 class SectionSerializer(serializers.ModelSerializer):
     pipes = StandpipeSerializer(many=True, required=False)
+    section_full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Section
-        fields = ('id', 'number', 'building', 'pipes')
+        fields = ('id', 'number', 'building', 'pipes', 'section_full_name')
+
+    def get_section_full_name(self, obj):
+        return f'Секция №{obj.number}. Корпус №{obj.building.number}'
 
     def create(self, validated_data):
         if validated_data.get('pipes'):
@@ -85,9 +94,15 @@ class SectionSerializer(serializers.ModelSerializer):
 
 
 class FloorSerializer(serializers.ModelSerializer):
+    floor_full_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Floor
         fields = '__all__'
+
+    def get_floor_full_name(self, obj):
+        building = obj.section.building
+        return f'Этаж №{obj.number}. Секция №{obj.section.number}. Корпус №{building.number}'
 
 
 class NewsItemSerializer(serializers.ModelSerializer):
