@@ -83,10 +83,14 @@ class StandpipeSerializer(serializers.ModelSerializer):
 class SectionSerializer(serializers.ModelSerializer):
     pipes = StandpipeSerializer(many=True, required=False)
     section_full_name = serializers.SerializerMethodField()
+    house = serializers.SerializerMethodField()
 
     class Meta:
         model = Section
         fields = ('id', 'number', 'building', 'pipes', 'section_full_name')
+
+    def get_house(self, obj):
+        return obj.building.house.pk
 
     def get_section_full_name(self, obj):
         return f'Секция №{obj.number}. Корпус №{obj.building.number}'
@@ -118,10 +122,14 @@ class SectionSerializer(serializers.ModelSerializer):
 
 class FloorSerializer(serializers.ModelSerializer):
     floor_full_name = serializers.SerializerMethodField()
+    house = serializers.SerializerMethodField()
 
     class Meta:
         model = Floor
         fields = '__all__'
+
+    def get_house(self, obj):
+        return obj.section.building.house.pk
 
     def get_floor_full_name(self, obj):
         building = obj.section.building
