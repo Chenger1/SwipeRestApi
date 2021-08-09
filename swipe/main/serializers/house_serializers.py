@@ -167,10 +167,14 @@ class FlatSerializer(serializers.ModelSerializer):
 
     floor_display = serializers.SerializerMethodField()
     house_pk = serializers.SerializerMethodField()
+    sales_department_pk = serializers.SerializerMethodField()
 
     class Meta:
         model = Flat
         fields = '__all__'
+
+    def get_sales_department_pk(self, obj):
+        return obj.user.pk
 
     def get_floor_display(self, obj):
         floor = obj.floor
