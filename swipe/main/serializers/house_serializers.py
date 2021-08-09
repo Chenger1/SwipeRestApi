@@ -38,23 +38,6 @@ class HouseSerializer(serializers.ModelSerializer):
     class Meta:
         model = House
         fields = '__all__'
-        extra_kwargs = {
-            'status': {'write_only': True},
-            'type': {'write_only': True},
-            'house_class': {'write_only': True},
-            'tech': {'write_only': True},
-            'territory': {'write_only': True},
-            'gas': {'write_only': True},
-            'heating': {'write_only': True},
-            'electricity': {'write_only': True},
-            'sewerage': {'write_only': True},
-            'water_supply': {'write_only': True},
-            'communal_payments': {'write_only': True},
-            'completion': {'write_only': True},
-            'payment_options': {'write_only': True},
-            'role': {'write_only': True},
-            'sum_in_contract': {'write_only': True}
-        }
 
 
 class BuildingSerializer(serializers.ModelSerializer):
@@ -137,13 +120,6 @@ class FlatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flat
         fields = '__all__'
-        extra_kwargs = {
-            'state': {'write_only': True},
-            'foundation_doc': {'write_only': True},
-            'type': {'write_only': True},
-            'plan': {'write_only': True},
-            'balcony': {'write_only': True}
-        }
 
     def get_floor_display(self, obj):
         floor = obj.floor
