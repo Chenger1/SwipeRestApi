@@ -34,10 +34,26 @@ class HouseSerializer(serializers.ModelSerializer):
     sum_in_contract_display = serializers.CharField(source='get_sum_in_contract_display', read_only=True)
 
     flats = HouseDetailFlatSerializer(read_only=True, many=True)
+    building_count = serializers.SerializerMethodField()
+    section_count = serializers.SerializerMethodField()
+    floor_count = serializers.SerializerMethodField()
+    flat_count = serializers.SerializerMethodField()
 
     class Meta:
         model = House
         fields = '__all__'
+
+    def get_building_count(self, obj):
+        return obj.buildings.count()
+
+    def get_section_count(self, obj):
+        return Section.objects.filter(building__house=obj).count()
+
+    def get_floor_count(self, obj):
+        return Floor.objects.filter(section__building__house=obj).count()
+
+    def get_flat_count(self, obj):
+        return Flat.objects.filter(floor__section__building__house=obj).count()
 
 
 class BuildingSerializer(serializers.ModelSerializer):
