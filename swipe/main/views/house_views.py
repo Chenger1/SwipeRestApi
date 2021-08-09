@@ -66,6 +66,8 @@ class SectionViewSet(ModelViewSet):
     def get_queryset(self):
         if self.request.query_params.get('building'):
             return self.queryset.filter(building__pk=self.request.query_params.get('building'))
+        if self.request.query_params.get('house'):
+            return self.queryset.filter(building__house__pk=self.request.query_params.get('house'))
         return self.queryset
 
 
@@ -78,6 +80,8 @@ class FloorViewSet(ModelViewSet):
     def get_queryset(self):
         if self.request.query_params.get('section'):
             return self.queryset.filter(section__pk=self.request.query_params.get('section'))
+        if self.request.query_params.get('house'):
+            return self.queryset.filter(section__building__house__pk=self.request.query_params.get('house'))
         return self.queryset
 
 
