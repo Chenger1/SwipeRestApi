@@ -50,6 +50,11 @@ class BuildingSerializer(serializers.ModelSerializer):
     def get_building_full_name(self, obj):
         return f'Корпус №{obj.number}'
 
+    def create(self, validated_data):
+        next_number = Building.get_next(validated_data.get('house'))
+        inst = Building.objects.create(number=next_number, house=validated_data.get('house'))
+        return inst
+
 
 class StandpipeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
@@ -71,6 +76,8 @@ class SectionSerializer(serializers.ModelSerializer):
         return f'Секция №{obj.number}. Корпус №{obj.building.number}'
 
     def create(self, validated_data):
+        next_number = Section.get_next(validated_data.get('building'))
+        validated_data['number'] = next_number
         if validated_data.get('pipes'):
             pipes_data = validated_data.pop('pipes')
             section = Section.objects.create(**validated_data)
@@ -103,6 +110,11 @@ class FloorSerializer(serializers.ModelSerializer):
     def get_floor_full_name(self, obj):
         building = obj.section.building
         return f'Этаж №{obj.number}. Секция №{obj.section.number}. Корпус №{building.number}'
+
+    def create(self, validated_data):
+        next_number = Floor.get_next(validated_data.get('building'))
+        inst = Floor.objects.create(number=next_number, section=validated_data.get('section'))
+        return inst
 
 
 class NewsItemSerializer(serializers.ModelSerializer):

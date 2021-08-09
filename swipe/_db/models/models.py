@@ -74,12 +74,12 @@ class Document(models.Model):
 
 
 class Building(models.Model):
-    number = models.IntegerField()
+    number = models.IntegerField(null=True)
     house = models.ForeignKey(House, related_name='buildings', on_delete=models.CASCADE)
 
     @classmethod
-    def get_last(cls, house_pk: int):
-        objects = cls.objects.fitler(house__pk=house_pk)
+    def get_next(cls, house: House):
+        objects = cls.objects.filter(house=house)
         if objects:
             last = objects.last().number
             return last + 1
@@ -91,12 +91,12 @@ class Building(models.Model):
 
 
 class Section(models.Model):
-    number = models.IntegerField()
+    number = models.IntegerField(null=True)
     building = models.ForeignKey(Building, related_name='sections', on_delete=models.CASCADE)
 
     @classmethod
-    def get_last(cls, building_pk: int):
-        objects = cls.objects.fitler(building__pk=building_pk)
+    def get_next(cls, building: Building):
+        objects = cls.objects.filter(building=building)
         if objects:
             last = objects.last().number
             return last + 1
@@ -108,12 +108,12 @@ class Section(models.Model):
 
 
 class Floor(models.Model):
-    number = models.IntegerField()
+    number = models.IntegerField(null=True)
     section = models.ForeignKey(Section, related_name='floors', on_delete=models.CASCADE)
 
     @classmethod
-    def get_last(cls, section_pk: int):
-        objects = cls.objects.fitler(section__pk=section_pk)
+    def get_next(cls, section: Section):
+        objects = cls.objects.filter(section=section)
         if objects:
             last = objects.last().number
             return last + 1
