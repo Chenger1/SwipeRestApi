@@ -87,7 +87,7 @@ class SectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Section
-        fields = ('id', 'number', 'building', 'pipes', 'section_full_name')
+        fields = ('id', 'number', 'building', 'pipes', 'section_full_name', 'house')
 
     def get_house(self, obj):
         return obj.building.house.pk
