@@ -51,13 +51,13 @@ class TestHouse(TestCase):
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_building_section_floor_standpipe_flat(self):
-        building = Building.objects.create(name='1', house=self.inst)
+        building = Building.objects.create(number=1, house=self.inst)
         self.assertIn(building, self.inst.buildings.all())
 
-        section = Section.objects.create(name='first', building=building)
+        section = Section.objects.create(number=1, building=building)
         self.assertIn(section, building.sections.all())
 
-        floor = Floor.objects.create(name='first-floor', section=section)
+        floor = Floor.objects.create(number=1, section=section)
         self.assertIn(floor, section.floors.all())
 
         standpipe = Standpipe.objects.create(name='1', section=section)
@@ -75,19 +75,19 @@ class TestHouse(TestCase):
 
     def test_building_raising_error(self):
         with self.assertRaises(IntegrityError):
-            Building.objects.create(name='1')
+            Building.objects.create(number=1)
 
     def test_section_raising_error(self):
         with self.assertRaises(IntegrityError):
-            Section.objects.create(name='1')
+            Section.objects.create(number=1)
 
     def test_floor_raising_error(self):
         with self.assertRaises(IntegrityError):
-            Floor.objects.create(name='1')
+            Floor.objects.create(number=1)
 
     def test_standpipe_raising_error(self):
         with self.assertRaises(IntegrityError):
-            Standpipe.objects.create(name='1')
+            Standpipe.objects.create(name=1)
 
 
 class TestPost(TestCase):
@@ -102,9 +102,9 @@ class TestPost(TestCase):
                                          city='Odessa')
         house = House.objects.first()
 
-        building = Building.objects.create(name='One', house=house)
-        section = Section.objects.create(name='One', building=building)
-        floor = Floor.objects.create(name='One', section=section)
+        building = Building.objects.create(number=1, house=house)
+        section = Section.objects.create(number=1, building=building)
+        floor = Floor.objects.create(number=1, section=section)
         file1 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         file2 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         flat1 = Flat.objects.create(number=1, square=100, kitchen_square=1, price_per_metre=100, price=100,

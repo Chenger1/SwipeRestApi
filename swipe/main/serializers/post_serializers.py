@@ -52,7 +52,7 @@ class PostSerializer(serializers.ModelSerializer):
         section = floor.section
         building = section.building
         house = building.house
-        floor = f'Корпус {building.name}, Секция {section.name}, Этаж {floor.name}'
+        floor = f'Корпус {building.number}, Секция {section.number}, Этаж {floor.number}'
         data = {'square': flat.square, 'kitchen_square': flat.kitchen_square, 'state': flat.get_state_display(),
                 'foundation_doc': flat.get_foundation_doc_display(), 'type': flat.get_type_display(),
                 'balcony': flat.get_balcony_display(), 'heating': flat.get_heating_display(),

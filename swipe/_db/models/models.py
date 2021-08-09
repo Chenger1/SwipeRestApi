@@ -74,8 +74,16 @@ class Document(models.Model):
 
 
 class Building(models.Model):
-    name = models.CharField(max_length=50)
+    number = models.IntegerField()
     house = models.ForeignKey(House, related_name='buildings', on_delete=models.CASCADE)
+
+    @classmethod
+    def get_last(cls, house_pk: int):
+        objects = cls.objects.fitler(house__pk=house_pk)
+        if objects:
+            last = objects.last().number
+            return last + 1
+        return 1
 
     @property
     def user(self):
@@ -83,8 +91,16 @@ class Building(models.Model):
 
 
 class Section(models.Model):
-    name = models.CharField(max_length=50)
+    number = models.IntegerField()
     building = models.ForeignKey(Building, related_name='sections', on_delete=models.CASCADE)
+
+    @classmethod
+    def get_last(cls, building_pk: int):
+        objects = cls.objects.fitler(building__pk=building_pk)
+        if objects:
+            last = objects.last().number
+            return last + 1
+        return 1
 
     @property
     def user(self):
@@ -92,8 +108,16 @@ class Section(models.Model):
 
 
 class Floor(models.Model):
-    name = models.CharField(max_length=50)
+    number = models.IntegerField()
     section = models.ForeignKey(Section, related_name='floors', on_delete=models.CASCADE)
+
+    @classmethod
+    def get_last(cls, section_pk: int):
+        objects = cls.objects.fitler(section__pk=section_pk)
+        if objects:
+            last = objects.last().number
+            return last + 1
+        return 1
 
     @property
     def user(self):

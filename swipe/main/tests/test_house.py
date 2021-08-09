@@ -38,9 +38,9 @@ class TestHouse(APITestCase):
         self.assertEqual(response.status_code, 201)
         house = House.objects.first()
 
-        building = Building.objects.create(name='One', house=house)
-        section = Section.objects.create(name='One', building=building)
-        floor = Floor.objects.create(name='One', section=section)
+        building = Building.objects.create(number=1, house=house)
+        section = Section.objects.create(number=1, building=building)
+        floor = Floor.objects.create(number=1, section=section)
         file1 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         file2 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         flat1 = Flat.objects.create(number=1, square=100, kitchen_square=1, price_per_metre=100, price=100,
@@ -101,18 +101,18 @@ class TestHouse(APITestCase):
 
         # Test creating building
         url_building = reverse('main:buildings-list')
-        response_building = self.client.post(url_building, data={'name': 'One',
+        response_building = self.client.post(url_building, data={'number': 1,
                                                                  'house': response.data['id']})
         self.assertEqual(response_building.status_code, 201)
 
         url_building_edit = reverse('main:buildings-detail', args=[response_building.data['id']])
-        response_building_edit = self.client.patch(url_building_edit, data={'name': 'Two'})
+        response_building_edit = self.client.patch(url_building_edit, data={'number': 2})
         self.assertEqual(response_building_edit.status_code, 200)
 
         # Test create section
         url_section = reverse('main:sections-list')
         #  Test that we can add section and standpipes to it
-        response_section = self.client.post(url_section, data={'name': 'One',
+        response_section = self.client.post(url_section, data={'number': 1,
                                                                'building': response_building.data['id'],
                                                                'pipes': [
                                                                    {'name': 'PipeOne'},
@@ -124,20 +124,20 @@ class TestHouse(APITestCase):
 
         # Ensure we can edit info about section
         url_section_edit = reverse('main:sections-detail', args=[response_section.data['id']])
-        response_section_edit = self.client.patch(url_section_edit, data={'name': 'Two',
+        response_section_edit = self.client.patch(url_section_edit, data={'number': 2,
                                                                           'pipes': [
                                                                              {'id': 1, 'name': 'PipeThree'}
                                                                           ]}, format='json')
         self.assertEqual(response_section_edit.status_code, 200)
 
         # Ensure we can, also edit info about standpipes
-        response_section_edit_standpipe = self.client.patch(url_section_edit, data={'name': 'Three',
+        response_section_edit_standpipe = self.client.patch(url_section_edit, data={'number': 3,
                                                                                     'pipes': [
                                                                                        {'id': 1, 'name': 'PipeThree'}
                                                                                      ]}, format='json')
         self.assertEqual(response_section_edit_standpipe.status_code, 200)
         self.assertEqual(response_section_edit_standpipe.data['pipes'][0]['name'], 'PipeThree')
-        self.assertEqual(response_section_edit_standpipe.data['name'], 'Three')
+        self.assertEqual(response_section_edit_standpipe.data['number'], 3)
 
         # Ensure we can delete standpipe
         url_delete_standpipe = reverse('main:delete_standpipes-detail', args=[response_section_edit_standpipe.data['pipes'][0]['id']])
@@ -147,12 +147,12 @@ class TestHouse(APITestCase):
 
         # Test creating floors
         url_floor = reverse('main:floors-list')
-        response_floor = self.client.post(url_floor, data={'name': 'One',
+        response_floor = self.client.post(url_floor, data={'number': 1,
                                                            'section': response_section.data['id']})
         self.assertEqual(response_floor.status_code, 201)
 
         url_floor_edit = reverse('main:floors-detail', args=[response_floor.data['id']])
-        response_floor_edit = self.client.patch(url_floor_edit, data={'name': 'Two'})
+        response_floor_edit = self.client.patch(url_floor_edit, data={'number': 2})
         self.assertEqual(response_floor_edit.status_code, 200)
 
         # Test creating flats

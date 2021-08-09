@@ -59,7 +59,7 @@ class SectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Section
-        fields = ('id', 'name', 'building', 'pipes')
+        fields = ('id', 'number', 'building', 'pipes')
 
     def create(self, validated_data):
         if validated_data.get('pipes'):
@@ -125,7 +125,7 @@ class FlatSerializer(serializers.ModelSerializer):
         floor = obj.floor
         section = floor.section
         building = section.building
-        return f'Корпус {building.name}, Секция {section.name}, Этаж {floor.name}'
+        return f'Корпус {building.number}, Секция {section.number}, Этаж {floor.number}'
 
     def get_house_pk(self, obj):
         return obj.floor.section.building.house.pk

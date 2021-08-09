@@ -47,14 +47,14 @@ class TestPost(APITestCase):
         house2 = House.objects.last()
         house = House.objects.first()
 
-        building = Building.objects.create(name='One', house=house)
-        building2 = Building.objects.create(name='Two', house=house2)
+        building = Building.objects.create(number=1, house=house)
+        building2 = Building.objects.create(number=2, house=house2)
 
-        section = Section.objects.create(name='One', building=building)
-        section2 = Section.objects.create(name='Two', building=building2)
+        section = Section.objects.create(number=1, building=building)
+        section2 = Section.objects.create(number=2, building=building2)
 
-        floor = Floor.objects.create(name='One', section=section)
-        floor2 = Floor.objects.create(name='Twi', section=section2)
+        floor = Floor.objects.create(number=1, section=section)
+        floor2 = Floor.objects.create(number=2, section=section2)
 
         file1 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
         file2 = SimpleUploadedFile('image.jpeg', b'file_content', content_type='image/jpeg')
