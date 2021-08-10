@@ -219,6 +219,16 @@ class RequestToChestApi(ListModelMixin,
     def get_queryset(self):
         return self.queryset.filter(house__sales_department=self.request.user)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        flat = instance.flat
+        flat.booked = False
+        flat.owned = False
+        flat.client = None
+        flat.save()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class DeleteStandpipe(DestroyModelMixin,
                       GenericViewSet):
