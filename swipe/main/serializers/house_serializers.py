@@ -58,10 +58,14 @@ class HouseSerializer(serializers.ModelSerializer):
 
 class BuildingSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
+    has_related = serializers.SerializerMethodField()
 
     class Meta:
         model = Building
         fields = '__all__'
+
+    def get_has_related(self, obj):
+        return obj.sections.exists()
 
     def get_full_name(self, obj):
         return f'Корпус №{obj.number}'
@@ -84,10 +88,14 @@ class SectionSerializer(serializers.ModelSerializer):
     pipes = StandpipeSerializer(many=True, required=False)
     full_name = serializers.SerializerMethodField()
     house = serializers.SerializerMethodField()
+    has_related = serializers.SerializerMethodField()
 
     class Meta:
         model = Section
-        fields = ('id', 'number', 'building', 'pipes', 'full_name', 'house')
+        fields = ('id', 'number', 'building', 'pipes', 'full_name', 'house', 'has_related')
+
+    def get_has_related(self, obj):
+        return obj.floors.exists()
 
     def get_house(self, obj):
         return obj.building.house.pk
@@ -123,10 +131,14 @@ class SectionSerializer(serializers.ModelSerializer):
 class FloorSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     house = serializers.SerializerMethodField()
+    has_related = serializers.SerializerMethodField()
 
     class Meta:
         model = Floor
         fields = '__all__'
+
+    def get_has_related(self, obj):
+        return obj.flats.exists()
 
     def get_house(self, obj):
         return obj.section.building.house.pk
