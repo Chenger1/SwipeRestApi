@@ -208,6 +208,7 @@ class BookingFlat(APIView):
 class RequestToChestApi(ListModelMixin,
                         RetrieveModelMixin,
                         UpdateModelMixin,
+                        DestroyModelMixin,
                         GenericViewSet):
     """ Manage requests to chest. Only house`s sales department can get its requests """
     permission_classes = (IsAuthenticated, IsOwner)
