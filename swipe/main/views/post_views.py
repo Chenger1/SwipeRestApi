@@ -14,7 +14,7 @@ from main.serializers import post_serializers
 from main.filters import PostFilter
 from main.tasks import check_filter_matching
 
-from _db.models.models import Post, PostImage, Complaint, Promotion
+from _db.models.models import Post, PostImage, Complaint, Promotion, PromotionType
 
 
 class PostViewSet(ModelViewSet):
@@ -245,3 +245,12 @@ class PromotionViewSet(mixins.ListModelMixin,
             return post_serializers.PromotionUpdateSerializer
         else:
             return self.serializer_class
+
+
+class PromotionTypeViewSet(mixins.ListModelMixin,
+                           mixins.RetrieveModelMixin,
+                           GenericViewSet):
+    permission_classes = (IsAuthenticated, )
+    queryset = PromotionType.objects.all().order_by('-id')
+    serializer_class = post_serializers.PromotionTypeSerializer
+    views_tags = ['PromotionType']
