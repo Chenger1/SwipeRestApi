@@ -1,3 +1,6 @@
+import datetime
+
+import pytz
 from rest_framework import serializers
 
 from django.shortcuts import get_object_or_404
@@ -209,16 +212,37 @@ class HouseInRequestSerializer(serializers.ModelSerializer):
 class FlatInRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Flat
-        fields = ('number', 'floor', 'booked', 'client')
+        fields = ('pk', 'number', 'floor', 'booked', 'client')
 
 
 class RequestToChestSerializer(serializers.ModelSerializer):
-    house_display = HouseInRequestSerializer(read_only=True)
-    flat_display = FlatInRequestSerializer(read_only=True)
+    flat_display = serializers.SerializerMethodField()
 
     class Meta:
         model = RequestToChest
         fields = '__all__'
+
+    def create(self, validated_data):
+        validated_data['created'] = datetime.datetime.now(tz=pytz.UTC)
+        return super().create(validated_data)
+
+    def get_flat_display(self, obj):
+        flat = obj.flat
+        if flat.client:
+            client = obj.flat.client
+            return {
+                'id': flat.pk,
+                'number': flat.number,
+                'floor': f'Корпус {flat.floor.section.building.number}, Секция {flat.floor.section.number}, ' +
+                         f'Этаж {flat.floor.number}',
+                'house': flat.floor.section.building.house.name,
+                'house_pk': flat.floor.section.building.house.pk,
+                'client_pk': client.pk,
+                'client_full_name': client.full_name(),
+                'client_phone_number': client.phone_number,
+                'client_email': client.email
+            }
+        return {}
 
     def update(self, instance, validated_data):
         flat = instance.flat

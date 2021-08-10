@@ -32,7 +32,9 @@ class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'phone_number'
 
     def full_name(self):
-        return f'{self.first_name} {self.last_name}'
+        if self.first_name and self.last_name:
+            return f'{self.first_name} {self.last_name}'
+        return None
 
 
 class User(CustomAbstractUser):
