@@ -254,3 +254,8 @@ class PromotionTypeViewSet(mixins.ListModelMixin,
     queryset = PromotionType.objects.all().order_by('-id')
     serializer_class = post_serializers.PromotionTypeSerializer
     views_tags = ['PromotionType']
+
+    def get_queryset(self):
+        if self.request.query_params.get('post'):
+            return self.queryset.filter(post__pk=self.request.query_params.get('post'))
+        return self.queryset
