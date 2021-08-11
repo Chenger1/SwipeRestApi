@@ -27,7 +27,11 @@ class PostViewSet(ModelViewSet):
     view_tags = ['Post']
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        """ Admin can filter by specific user """
+        if self.request.query_params.get('for_user') and (self.request.user.is_staff or self.request.user.is_superuser):
+            return self.queryset.filter(user__pk=self.request.query_params.get('for_user'))
+        else:
+            return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
