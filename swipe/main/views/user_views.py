@@ -62,7 +62,7 @@ class UserViewSet(ModelViewSet):
         if request.data.get('is_staff') or request.data.get('is_superuser'):
             if not request.data.get('admin_token'):
                 return Response({'Token': 'No admin token is provided'}, status=status.HTTP_400_BAD_REQUEST)
-            token = request.data.pop('admin_token')
+            token = request.data.get('admin_token')
             if AdminToken.objects.filter(token=token).exists():
                 return super().update(request, *args, **kwargs)
             else:
