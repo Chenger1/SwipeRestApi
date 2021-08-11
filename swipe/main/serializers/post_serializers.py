@@ -94,10 +94,25 @@ class PostSerializer(serializers.ModelSerializer):
 
 class ComplaintSerializer(serializers.ModelSerializer):
     type_display = serializers.CharField(source='get_type_display', read_only=True)
+    post_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Complaint
-        fields = ('id', 'post', 'type', 'type_display', 'description')
+        fields = ('id', 'post', 'type', 'type_display', 'description', 'post_display')
+
+    def get_post_display(self, obj):
+        post = obj.post
+        flat = post.flat
+        return {
+            'house': flat.floor.section.building.house.name,
+            'flat_floor': f'Корпус {flat.floor.section.building.number}, Секция {flat.floor.section.number}, ' +
+                          f'Этаж {flat.floor.number}',
+            'flat': flat.number,
+            'price': post.price,
+            'views': post.views,
+            'rejected': post.rejected,
+            'rejected_message': post.reject_message
+        }
 
 
 class RejectPostSerializer(serializers.ModelSerializer):
