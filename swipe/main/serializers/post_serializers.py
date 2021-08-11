@@ -96,13 +96,18 @@ class PostSerializer(serializers.ModelSerializer):
 class ComplaintSerializer(serializers.ModelSerializer):
     type_display = serializers.CharField(source='get_type_display', read_only=True)
     post_display = serializers.SerializerMethodField()
+    post_author = serializers.SerializerMethodField()
 
     class Meta:
         model = Complaint
-        fields = ('id', 'post', 'type', 'type_display', 'description', 'post_display', 'user')
+        fields = ('id', 'post', 'type', 'type_display', 'description', 'post_display', 'user',
+                  'post_author')
         extra_kwargs = {
             'user': {'read_only': True}
         }
+
+    def get_post_author(self, obj):
+        return obj.post.user.pk
 
     def get_post_display(self, obj):
         post = obj.post
