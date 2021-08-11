@@ -11,7 +11,7 @@ from main.serializers import user_serializers
 from main.permissions import IsProfileOwner, IsMessageSenderOrReceiver, IsOwnerOrReadOnly, IsOwner
 from main.services import generate_http_response_to_download
 
-from _db.models.user import Contact, Message, UserFilter, Attachment
+from _db.models.user import Contact, Message, UserFilter, Attachment, AdminToken
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -53,6 +53,22 @@ class UserViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        """
+        If user wants to change his admin status, he has to provide special admin token
+        """
+
+        if request.data.get('is_staff') or request.data.get('is_superuser'):
+            if not request.data.get('admin_token'):
+                return Response({'Token': 'No admin token is provided'}, status=status.HTTP_400_BAD_REQUEST)
+            token = request.data.pop('admin_token')
+            if AdminToken.objects.filter(token=token).exists():
+                return super().update(request, *args, **kwargs)
+            else:
+                return Response({'Token': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return super().update(request, *args, **kwargs)
 
 
 class UpdateSubscription(APIView):

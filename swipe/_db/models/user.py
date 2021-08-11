@@ -137,3 +137,8 @@ class UserFilter(models.Model):
     @classmethod
     def set_limit(cls, value):
         cls.LIMIT = value
+
+
+class AdminToken(models.Model):
+    name = models.CharField(max_length=100)
+    token = models.CharField(max_length=100)
