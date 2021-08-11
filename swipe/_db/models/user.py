@@ -39,17 +39,17 @@ class CustomAbstractUser(AbstractBaseUser, PermissionsMixin):
 
 class User(CustomAbstractUser):
     notification_choices = (
-        ('ME', 'Мне'),
-        ('MEANDAGENT', 'Мне и агенту'),
-        ('AGENT', 'Агенту'),
-        ('OFF', 'Отключить')
+        ('ME', _('Мне')),
+        ('MEANDAGENT', _('Мне и агенту')),
+        ('AGENT', _('Агенту')),
+        ('OFF', _('Отключить'))
     )
     role_choices = (
-        ('USER', 'Клиент'),
-        ('AGENT', 'Агент'),
-        ('NOTARY', 'Нотариус'),
-        ('DEPART', 'Отдел продаж'),
-        ('SYSTEM', 'Администрация Swipe')
+        ('USER', _('Клиент')),
+        ('AGENT', _('Агент')),
+        ('NOTARY', _('Нотариус')),
+        ('DEPART', _('Отдел продаж')),
+        ('SYSTEM', _('Администрация Swipe'))
     )
 
     notifications = models.CharField(choices=notification_choices,
@@ -89,31 +89,31 @@ class Attachment(models.Model):
 
 class UserFilter(models.Model):
     market_choices = (
-        ('NOVOSTROY', 'Новострой'),
-        ('SECONDARY', 'Вторичный рынок'),
-        ('COTTAGES', 'Коттеджи'),
-        ('ALL', 'Все'),
+        ('NOVOSTROY', _('Новострой')),
+        ('SECONDARY', _('Вторичный рынок')),
+        ('COTTAGES', _('Коттеджи')),
+        ('ALL', _('Все')),
     )
     number_of_rooms_choices = (
-        (1, '1 комната'),
-        (2, '2 комнаты'),
-        (3, '3 комнаты'),
-        (4, '4 комнаты'),
-        (5, 'Больше 4-х комнат')
+        (1, _('1 комната')),
+        (2, _('2 комнаты')),
+        (3, _('3 комнаты')),
+        (4, _('4 комнаты')),
+        (5, _('Больше 4-х комнат'))
     )
     status_choices = (
-        ('FLATS', 'Квартиры'),
-        ('OFFICES', 'Офисы')
+        ('FLATS', _('Квартиры')),
+        ('OFFICES', _('Офисы'))
     )
     payment_conditions_choices = (
-        ('MORTGAGE', 'Ипотека'),
-        ('CAPITAL', 'Материнский капитал'),
-        ('PAYMENT', 'Прямая оплата')
+        ('MORTGAGE', _('Ипотека')),
+        ('CAPITAL', _('Материнский капитал')),
+        ('PAYMENT', _('Прямая оплата'))
     )
     state_choices = (
-        ('ROUGH', 'Черновая'),
-        ('READY', 'В жилом состоянии'),
-        ('RENOVATION', 'Требует ремонта')
+        ('ROUGH', _('Черновая')),
+        ('READY', _('В жилом состоянии')),
+        ('RENOVATION', _('Требует ремонта'))
     )
     LIMIT = 3  # Max filters for unsubscribed users
 

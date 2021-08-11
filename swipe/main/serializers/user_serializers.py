@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.translation import gettext as _
 
 from _db.models.user import User, Contact, Message, Attachment, UserFilter
 from _db.models import choices
@@ -26,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
     def validated_role(self, value):
         """ SYSTEM user is a user for sending notifications """
         if value == 'SYSTEM':
-            raise serializers.ValidationError('In system in be only one user with role "SYSTEM"')
+            raise serializers.ValidationError(_('In system in be only one user with role "SYSTEM"'))
         return value
 
 

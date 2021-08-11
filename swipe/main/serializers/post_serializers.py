@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.translation import gettext as _
 
 from _db.models.models import Post, PostImage, Complaint, Promotion, PromotionType
 
@@ -52,7 +53,9 @@ class PostSerializer(serializers.ModelSerializer):
         section = floor.section
         building = section.building
         house = building.house
-        floor = f'Корпус {building.number}, Секция {section.number}, Этаж {floor.number}'
+        floor = _('Корпус {building}, Секция {section}, Этаж {floor}').format(building=building.number,
+                                                                              section=section.number,
+                                                                              floor=floor.number)
         data = {'square': flat.square, 'kitchen_square': flat.kitchen_square, 'state': flat.get_state_display(),
                 'foundation_doc': flat.get_foundation_doc_display(), 'type': flat.get_type_display(),
                 'balcony': flat.get_balcony_display(), 'heating': flat.get_heating_display(),
@@ -71,7 +74,7 @@ class PostSerializer(serializers.ModelSerializer):
         if self.instance:
             time_range = datetime.datetime.now(tz=pytz.UTC) - self.instance.created
             if time_range.days <= 30:
-                raise serializers.ValidationError('You can confirm relevance every 31 days')
+                raise serializers.ValidationError(_('You can confirm relevance every 31 days'))
             return value
         return
 
@@ -114,8 +117,9 @@ class ComplaintSerializer(serializers.ModelSerializer):
         flat = post.flat
         return {
             'house': flat.floor.section.building.house.name,
-            'flat_floor': f'Корпус {flat.floor.section.building.number}, Секция {flat.floor.section.number}, ' +
-                          f'Этаж {flat.floor.number}',
+            'flat_floor': _('Корпус {building}, Секция {section}, Этаж {floor}').format(building=flat.floor.section.building.number,
+                                                                                        section=flat.floor.section.number,
+                                                                                        floor=flat.floor.number),
             'flat': flat.number,
             'price': post.price,
             'views': post.views,

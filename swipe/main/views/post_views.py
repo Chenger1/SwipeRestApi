@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from django.db.models import Count
 from django_filters import rest_framework as filters
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 
 from main.permissions import IsOwner, IsOwnerOrReadOnly, IsFavoritesOwner
 from main.serializers import post_serializers
@@ -51,7 +52,7 @@ class PostViewSet(ModelViewSet):
             # Run celery task to find if any user`s filter matches new post
             check_filter_matching(response.data['id'], request.stream.get_host())
             return response
-        return Response({'Error': 'You have reached limit. Please, delete another post or subscribe'},
+        return Response({'Error': _('You have reached limit. Please, delete another post or subscribe')},
                         status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -121,7 +122,7 @@ class ComplaintViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         if self.queryset.filter(post__pk=request.data.get('post'), user=request.user,
                                 rejected=False).exists():
-            return Response({'Error': 'This complaint already exists'}, status=status.HTTP_409_CONFLICT)
+            return Response({'Error': _('This complaint already exists')}, status=status.HTTP_409_CONFLICT)
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):

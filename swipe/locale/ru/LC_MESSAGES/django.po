@@ -1,0 +1,434 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-08-11 23:00+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: .\_db\models\choices.py:5 .\_db\models\user.py:105
+msgid "Квартиры"
+msgstr ""
+
+#: .\_db\models\choices.py:6 .\_db\models\user.py:106
+msgid "Офисы"
+msgstr ""
+
+#: .\_db\models\choices.py:9
+msgid "Многоквартирный"
+msgstr ""
+
+#: .\_db\models\choices.py:10
+msgid "Частный"
+msgstr ""
+
+#: .\_db\models\choices.py:11 .\_db\models\user.py:92
+msgid "Новострой"
+msgstr ""
+
+#: .\_db\models\choices.py:12 .\_db\models\user.py:93
+msgid "Вторичный рынок"
+msgstr ""
+
+#: .\_db\models\choices.py:13 .\_db\models\user.py:94
+msgid "Коттеджи"
+msgstr ""
+
+#: .\_db\models\choices.py:16
+msgid "Обычный"
+msgstr ""
+
+#: .\_db\models\choices.py:17
+msgid "Элитный"
+msgstr ""
+
+#: .\_db\models\choices.py:20
+msgid "Монолитный каркас с керамзитно-блочным заполнением"
+msgstr ""
+
+#: .\_db\models\choices.py:21
+msgid "Монолитно-кирпичный"
+msgstr ""
+
+#: .\_db\models\choices.py:22
+msgid "Монолитно-каркасный"
+msgstr ""
+
+#: .\_db\models\choices.py:23
+msgid "Панельный"
+msgstr ""
+
+#: .\_db\models\choices.py:24
+msgid "Пеноблок"
+msgstr ""
+
+#: .\_db\models\choices.py:25
+msgid "Газобетон"
+msgstr ""
+
+#: .\_db\models\choices.py:28
+msgid "Открытая территория"
+msgstr ""
+
+#: .\_db\models\choices.py:29
+msgid "Закрытая территория"
+msgstr ""
+
+#: .\_db\models\choices.py:32 .\_db\models\choices.py:36
+#: .\_db\models\choices.py:41 .\_db\models\choices.py:45
+#: .\_db\models\choices.py:50 .\_db\models\choices.py:100
+msgid "Нет"
+msgstr ""
+
+#: .\_db\models\choices.py:33
+msgid "Центрилизированный"
+msgstr ""
+
+#: .\_db\models\choices.py:37
+msgid "Центральное"
+msgstr ""
+
+#: .\_db\models\choices.py:38
+msgid "Индивидуальное"
+msgstr ""
+
+#: .\_db\models\choices.py:42
+msgid "Подключено"
+msgstr ""
+
+#: .\_db\models\choices.py:46 .\_db\models\choices.py:51
+msgid "Центральная"
+msgstr ""
+
+#: .\_db\models\choices.py:47 .\_db\models\choices.py:52
+msgid "Индивидуальная"
+msgstr ""
+
+#: .\_db\models\choices.py:55
+msgid "Платежи"
+msgstr ""
+
+#: .\_db\models\choices.py:58
+msgid "ЮСТИЦИЯ"
+msgstr ""
+
+#: .\_db\models\choices.py:59
+msgid "НЕ ЮСТИЦИЯ"
+msgstr ""
+
+#: .\_db\models\choices.py:62 .\_db\models\user.py:109
+msgid "Ипотека"
+msgstr ""
+
+#: .\_db\models\choices.py:63 .\_db\models\user.py:110
+msgid "Материнский капитал"
+msgstr ""
+
+#: .\_db\models\choices.py:64 .\_db\models\user.py:111
+msgid "Прямая оплата"
+msgstr ""
+
+#: .\_db\models\choices.py:67
+msgid "Жилое помещение"
+msgstr ""
+
+#: .\_db\models\choices.py:68
+msgid "Офисное помещение"
+msgstr ""
+
+#: .\_db\models\choices.py:71
+msgid "Полная"
+msgstr ""
+
+#: .\_db\models\choices.py:72
+msgid "Неполная"
+msgstr ""
+
+#: .\_db\models\choices.py:76
+msgid "После ремонта"
+msgstr ""
+
+#: .\_db\models\choices.py:77 .\_db\models\user.py:114
+msgid "Черновая"
+msgstr ""
+
+#: .\_db\models\choices.py:78
+msgid "Евроремонт"
+msgstr ""
+
+#: .\_db\models\choices.py:79 .\_db\models\user.py:116
+msgid "Требует ремонта"
+msgstr ""
+
+#: .\_db\models\choices.py:82
+msgid "Собственность"
+msgstr ""
+
+#: .\_db\models\choices.py:83
+msgid "Аренда"
+msgstr ""
+
+#: .\_db\models\choices.py:86
+msgid "Апартаменты"
+msgstr ""
+
+#: .\_db\models\choices.py:87
+msgid "Офис"
+msgstr ""
+
+#: .\_db\models\choices.py:88 .\_db\models\choices.py:92
+msgid "Студия"
+msgstr ""
+
+#: .\_db\models\choices.py:91
+msgid "Свободная планировка"
+msgstr ""
+
+#: .\_db\models\choices.py:93
+msgid "Смежные комнаты"
+msgstr ""
+
+#: .\_db\models\choices.py:94
+msgid "Изолированные комнаты"
+msgstr ""
+
+#: .\_db\models\choices.py:95
+msgid "Малосемейка"
+msgstr ""
+
+#: .\_db\models\choices.py:96
+msgid "Гостинка"
+msgstr ""
+
+#: .\_db\models\choices.py:99
+msgid "Да"
+msgstr ""
+
+#: .\_db\models\choices.py:105
+msgid "10 000 грн."
+msgstr ""
+
+#: .\_db\models\choices.py:106
+msgid "50 000 грн."
+msgstr ""
+
+#: .\_db\models\choices.py:107
+msgid "100 000 грн."
+msgstr ""
+
+#: .\_db\models\choices.py:111
+msgid "Звонок"
+msgstr ""
+
+#: .\_db\models\choices.py:112
+msgid "Сообщение"
+msgstr ""
+
+#: .\_db\models\choices.py:113
+msgid "Звонок + сообщение"
+msgstr ""
+
+#: .\_db\models\choices.py:117
+msgid "Некорректная цена"
+msgstr ""
+
+#: .\_db\models\choices.py:118
+msgid "Некорректное фото"
+msgstr ""
+
+#: .\_db\models\choices.py:119
+msgid "Некорректное описание"
+msgstr ""
+
+#: .\_db\models\choices.py:120
+msgid "Другое..."
+msgstr ""
+
+#: .\_db\models\choices.py:125
+msgid "Подарок при покупке"
+msgstr ""
+
+#: .\_db\models\choices.py:126
+msgid "Возможен торг"
+msgstr ""
+
+#: .\_db\models\choices.py:127
+msgid "Квартира у моря"
+msgstr ""
+
+#: .\_db\models\choices.py:128
+msgid "В спальном районе"
+msgstr ""
+
+#: .\_db\models\choices.py:129
+msgid "Вам повезло с ценой"
+msgstr ""
+
+#: .\_db\models\choices.py:130
+msgid "Для большой семьи"
+msgstr ""
+
+#: .\_db\models\choices.py:131
+msgid "Семейное гнездышко"
+msgstr ""
+
+#: .\_db\models\choices.py:132
+msgid "Отдельная парковка"
+msgstr ""
+
+#: .\_db\models\choices.py:136
+msgid "Розовый"
+msgstr ""
+
+#: .\_db\models\choices.py:137
+msgid "Зеленый"
+msgstr ""
+
+#: .\_db\models\user.py:11
+msgid "first name"
+msgstr ""
+
+#: .\_db\models\user.py:13
+msgid "last_name"
+msgstr ""
+
+#: .\_db\models\user.py:16
+msgid "email"
+msgstr ""
+
+#: .\_db\models\user.py:19
+msgid "150 characters max. Available symbols: aA-wW, [0-9], @ . _"
+msgstr ""
+
+#: .\_db\models\user.py:42
+msgid "Мне"
+msgstr ""
+
+#: .\_db\models\user.py:43
+msgid "Мне и агенту"
+msgstr ""
+
+#: .\_db\models\user.py:44
+msgid "Агенту"
+msgstr ""
+
+#: .\_db\models\user.py:45
+msgid "Отключить"
+msgstr ""
+
+#: .\_db\models\user.py:48
+msgid "Клиент"
+msgstr ""
+
+#: .\_db\models\user.py:49
+msgid "Агент"
+msgstr ""
+
+#: .\_db\models\user.py:50
+msgid "Нотариус"
+msgstr ""
+
+#: .\_db\models\user.py:51
+msgid "Отдел продаж"
+msgstr ""
+
+#: .\_db\models\user.py:52
+msgid "Администрация Swipe"
+msgstr ""
+
+#: .\_db\models\user.py:95
+msgid "Все"
+msgstr ""
+
+#: .\_db\models\user.py:98
+msgid "1 комната"
+msgstr ""
+
+#: .\_db\models\user.py:99
+msgid "2 комнаты"
+msgstr ""
+
+#: .\_db\models\user.py:100
+msgid "3 комнаты"
+msgstr ""
+
+#: .\_db\models\user.py:101
+msgid "4 комнаты"
+msgstr ""
+
+#: .\_db\models\user.py:102
+msgid "Больше 4-х комнат"
+msgstr ""
+
+#: .\_db\models\user.py:115
+msgid "В жилом состоянии"
+msgstr ""
+
+#: .\main\serializers\house_serializers.py:237
+#: .\main\serializers\post_serializers.py:56
+#: .\main\serializers\post_serializers.py:120
+#, python-brace-format
+msgid "Корпус {building}, Секция {section}, Этаж {floor}"
+msgstr ""
+
+#: .\main\serializers\post_serializers.py:77
+msgid "You can confirm relevance every 31 days"
+msgstr "Вы можете подтвердить актуальность раз в месяц"
+
+#: .\main\serializers\user_serializers.py:30
+msgid "In system in be only one user with role \"SYSTEM\""
+msgstr "В системе может быть только один пользователь с ролью \"SYSTEM\""
+
+#: .\main\views\house_views.py:190
+msgid "Error while creating request to chest. Connect to administration"
+msgstr "Ошибка в процессе создания запроса в шахматку. Свяжитесь с администратором"
+
+#: .\main\views\house_views.py:199
+msgid "You cannot remove current client from this flat"
+msgstr "Вы не можете удалить текущего клиента из квартиры"
+
+#: .\main\views\house_views.py:202
+msgid "You cant book this flat"
+msgstr "Вы не можете арендовать эту квартиру"
+
+#: .\main\views\post_views.py:55
+msgid "You have reached limit. Please, delete another post or subscribe"
+msgstr "Вы достигли лимита. Пожалуйста, удалить другое объявление или оформите подписку"
+
+#: .\main\views\post_views.py:125
+msgid "This complaint already exists"
+msgstr "Такая жалоба уже существует"
+
+#: .\main\views\user_views.py:65
+msgid "No admin token is provided"
+msgstr "Нет токена администратора"
+
+#: .\main\views\user_views.py:70
+msgid "Invalid Token"
+msgstr "Неправильный токен"
+
+#: .\main\views\user_views.py:163
+msgid "You can`t access this messages"
+msgstr "Вы не можете получить доступ к этому сообщению"
+
+#: .\main\views\user_views.py:172
+msgid "You try send message from another person"
+msgstr "Вы пытаетесь отправить сообщение от другого пользователя"
+
+#: .\main\views\user_views.py:254
+msgid "You have reached limit. Please, delete another filter or subscribe"
+msgstr "Вы достигли лимита. Пожалуйста, удалить другоей фильтр или подпишитесь"

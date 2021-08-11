@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
@@ -61,12 +62,12 @@ class UserViewSet(ModelViewSet):
 
         if request.data.get('is_staff') or request.data.get('is_superuser'):
             if not request.data.get('admin_token'):
-                return Response({'Token': 'No admin token is provided'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'Token': _('No admin token is provided')}, status=status.HTTP_400_BAD_REQUEST)
             token = request.data.get('admin_token')
             if AdminToken.objects.filter(token=token).exists():
                 return super().update(request, *args, **kwargs)
             else:
-                return Response({'Token': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'Token': _('Invalid Token')}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return super().update(request, *args, **kwargs)
 
@@ -159,7 +160,7 @@ class MessageApi(APIView):
 
     def get(self, request, pk=None, format=None):
         if request.user.pk != pk:
-            return Response({'Error': 'You can`t access this messages'})
+            return Response({'Error': _('You can`t access this messages')})
         messages = Message.objects.filter(sender__pk=pk) | Message.objects.filter(receiver__pk=pk)
         messages = messages.order_by()
         serializer = user_serializers.ReadableMessageSerializer(messages, many=True)
@@ -168,7 +169,7 @@ class MessageApi(APIView):
     def post(self, request, pk=None, format=None):
         if request.user.pk != int(request.data.get('sender')):
             #  User can send message only from himself
-            return Response({'Error': 'You try send message from another person'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Error': _('You try send message from another person')}, status=status.HTTP_400_BAD_REQUEST)
         data = {
             'sender': get_object_or_404(User, pk=request.data['sender']),
             'receiver': get_object_or_404(User, pk=request.data['receiver']),
@@ -250,5 +251,5 @@ class UserFilterViewSet(ModelViewSet):
         """
         if request.user.subscribed or request.user.filters.count() < UserFilter.LIMIT:
             return super().create(request, *args, **kwargs)
-        return Response({'Error': 'You have reached limit. Please, delete another filter or subscribe'},
+        return Response({'Error': _('You have reached limit. Please, delete another filter or subscribe')},
                         status=status.HTTP_400_BAD_REQUEST)

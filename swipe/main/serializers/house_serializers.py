@@ -2,6 +2,7 @@ import datetime
 
 import pytz
 from rest_framework import serializers
+from django.utils.translation import gettext as _
 
 from django.shortcuts import get_object_or_404
 
@@ -233,8 +234,9 @@ class RequestToChestSerializer(serializers.ModelSerializer):
             return {
                 'id': flat.pk,
                 'number': flat.number,
-                'floor': f'Корпус {flat.floor.section.building.number}, Секция {flat.floor.section.number}, ' +
-                         f'Этаж {flat.floor.number}',
+                'floor': _('Корпус {building}, Секция {section}, Этаж {floor}').format(building=flat.floor.section.building.number,
+                                                                                       section=flat.floor.section.number,
+                                                                                       floor=flat.floor.number),
                 'house': flat.floor.section.building.house.name,
                 'house_pk': flat.floor.section.building.house.pk,
                 'client_pk': client.pk,

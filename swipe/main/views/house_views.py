@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 
 from django_filters import rest_framework as filters
 
@@ -186,7 +187,7 @@ class BookingFlat(APIView):
             if serializer.is_valid():
                 serializer.save()
             else:
-                return Response({'Error': 'Error while creating request to chest. Connect to administration'})
+                return Response({'Error': _('Error while creating request to chest. Connect to administration')})
         elif request.data.get('booking') == '0':
             if flat.client == request.user or is_house_owner:
                 flat.client = None
@@ -195,10 +196,10 @@ class BookingFlat(APIView):
                 request_to_chest = get_object_or_404(RequestToChest, flat=flat)
                 request_to_chest.delete()
             else:
-                return Response({'Error': 'You cannot remove current client from this flat'},
+                return Response({'Error': _('You cannot remove current client from this flat')},
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'Error': 'You cant book this flat'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Error': _('You cant book this flat')}, status=status.HTTP_400_BAD_REQUEST)
         flat.save()
         return Response({'pk': flat.pk,
                          'user_pk': request.user.pk,
