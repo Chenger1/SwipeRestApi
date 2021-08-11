@@ -63,7 +63,8 @@ class PostSerializer(serializers.ModelSerializer):
                 'territory': house.get_territory_display(),
                 'house_class': house.get_house_class_display(),
                 'number': flat.number,
-                'id': flat.pk}
+                'id': flat.pk,
+                'house': flat.floor.section.building.house.name}
         return data
 
     def validate_created(self, value):
@@ -98,7 +99,10 @@ class ComplaintSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Complaint
-        fields = ('id', 'post', 'type', 'type_display', 'description', 'post_display')
+        fields = ('id', 'post', 'type', 'type_display', 'description', 'post_display', 'user')
+        extra_kwargs = {
+            'user': {'read_only': True}
+        }
 
     def get_post_display(self, obj):
         post = obj.post
