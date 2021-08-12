@@ -18,6 +18,7 @@ RUN apk add --update --no-cache tiff-dev jpeg-dev openjpeg-dev zlib-dev freetype
 libwebp-dev tcl-dev tk-dev harfbuzz-dev fribidi-dev libimagequant-dev libxcb-dev libpng-dev \
 gcc build-base freetype-dev libpng-dev openblas-dev \
 postgresql-dev gcc python3-dev musl-dev
+RUN apk add --no-cache bash
 
 RUN pip3 install --upgrade pip
 COPY requirements.txt ./
