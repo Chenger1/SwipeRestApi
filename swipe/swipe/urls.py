@@ -20,6 +20,8 @@ from rest_framework import authentication
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+from django.conf.urls.i18n import i18n_patterns
+
 schema_view = get_schema_view(
     openapi.Info(
         title='SwipeApi',
@@ -34,11 +36,17 @@ schema_view = get_schema_view(
     authentication_classes=(authentication.SessionAuthentication, )
 )
 
-
-urlpatterns = [
-    #path('admin/', admin.site.urls),
+urlpatterns = i18n_patterns(
     path('auth/', include('user_auth.urls')),
     path('main/', include('main.urls', namespace='main')),
     path('swagger/', schema_view.with_ui(
         'swagger', cache_timeout=0), name='schema-swagger-ui'),
-]
+)
+
+# urlpatterns = [
+#     #path('admin/', admin.site.urls),
+#     path('auth/', include('user_auth.urls')),
+#     path('main/', include('main.urls', namespace='main')),
+#     path('swagger/', schema_view.with_ui(
+#         'swagger', cache_timeout=0), name='schema-swagger-ui'),
+# ]
