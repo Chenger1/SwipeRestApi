@@ -25,3 +25,5 @@ COPY requirements.txt ./
 RUN pip3 install -r requirements.txt
 
 COPY . .
+RUN django-admin compilemessages -l en
+RUN django-admin compilemessages -l run
