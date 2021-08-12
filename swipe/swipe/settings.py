@@ -158,6 +158,6 @@ REST_FRAMEWORK = {
 
 SWAGGER_SETTINGS = {'DEFAULT_AUTO_SCHEMA_CLASS': 'swipe.yasg.CustomAutoSchema'}
 
-LOCALE_PATHS = {
+LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale/'),
-}
+)
