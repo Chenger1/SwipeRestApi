@@ -17,6 +17,8 @@ from main.tasks import check_filter_matching
 
 from _db.models.models import Post, PostImage, Complaint, Promotion, PromotionType
 
+from main.full_text_search import get_queryset
+
 
 class PostViewSet(ModelViewSet):
     """ CRUD operation for user`s posts """
@@ -31,6 +33,8 @@ class PostViewSet(ModelViewSet):
         """ Admin can filter by specific user """
         if self.request.query_params.get('for_user') and (self.request.user.is_staff or self.request.user.is_superuser):
             return self.queryset.filter(user__pk=self.request.query_params.get('for_user'))
+        elif self.request.query_params.get('house__city'):
+            return get_queryset(self.queryset, self.request.query_params.get('house__city'))
         else:
             return self.queryset.filter(user=self.request.user)
 
@@ -74,6 +78,11 @@ class PostViewSetPublic(mixins.ListModelMixin,
         obj.views += 1
         obj.save(update_fields=('views', ))
         return super().retrieve(request, *args, **kwargs)
+
+    def get_queryset(self):
+        if self.request.query_params.get('house__city'):
+            return get_queryset(self.queryset, self.request.query_params.get('house__city'))
+        return self.queryset
 
 
 class PostImageViewSet(ModelViewSet):

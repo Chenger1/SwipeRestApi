@@ -45,7 +45,6 @@ class PostFilter(filters.FilterSet):
             'flat__plan': ['exact'],
             'flat__balcony': ['exact'],
             'flat__heating': ['exact'],
-            'house__city': ['exact'],
             'house__status': ['exact'],
             'house__territory': ['exact'],
             'house__house_class': ['exact'],
